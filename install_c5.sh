@@ -5,4 +5,5 @@ pip install transformers
 pip install ultralytics
 pip install albumentations
 pip install pycocotools
+pip install opencv-python
 echo "Done"
