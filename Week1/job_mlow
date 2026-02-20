@@ -1,0 +1,9 @@
+#!/bin/bash
+#SBATCH -n 8            # Number of cores
+#SBATCH --mem 16000     # 16GB asked
+#SBATCH -p mlow         # Choose mhigh to submit to master high prioriy queue
+#SBATCH -q masterlow    # Requeue other users mlow jobs
+#SBATCH --gres gpu:1    # To ask Pascales MAX 8
+#SBATCH -o logs/out.log # File to which STDOUT will be written
+#SBATCH -e logs/err.log # File to which STDERR will be written
+python sweep_launcher.py

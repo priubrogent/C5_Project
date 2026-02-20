@@ -5,7 +5,7 @@ import torchvision.transforms.functional as F
 from torchmetrics.detection.mean_ap import MeanAveragePrecision
 from pycocotools import mask as mask_util
 import os
-from kitti_coco_mapping import KITTI_TO_COCO, COCO_CLASSES
+from C5_Project.Week1.utils.kitti_coco_mapping import KITTI_TO_COCO, COCO_CLASSES
 
 DATASET_PATH = "/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS"
 IMAGES_PATH = os.path.join(DATASET_PATH, "testing/image_02")

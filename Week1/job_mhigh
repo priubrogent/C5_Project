@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH -n 8            # Number of cores
+#SBATCH --mem 20000     # 16GB asked
+#SBATCH -p mhigh        # Choose mlow to submit to master low prioriy queue
+#SBATCH -q masterhigh   # Requeue other users mlow jobs
+#SBATCH --gres gpu:1    # To ask Pascales MAX 8
+#SBATCH -o logs/out.log # File to which STDOUT will be written
+#SBATCH -e logs/err.log # File to which STDERR will be written
+
+python DeTR/task_d.py
+#python utils/GT_conversor.py
+#python utils/GT_visualization.py
