@@ -10,6 +10,10 @@ PERSON_ID = 1  # COCO ID for 'person'
 CAR_ID = 3     # COCO ID for 'car'
 COCO_CLASSES = set(KITTI_TO_COCO.values())
 
+# Split for Validation and Training done in the original KITTI-MOTS paper.
+TRAIN_SEQS = [0,1,3,4,5,9,11,12,15,17,19,20]
+VAL_SEQS = [2,6,7,8,10,13,14,16,18]
+
 def draw_bboxes(image, bboxes, labels, scores=None, label_map=None, threshold=0.5, box_type="pred"):
     """
     Universal function to draw bounding boxes for Predictions, GT, or Ignore regions.

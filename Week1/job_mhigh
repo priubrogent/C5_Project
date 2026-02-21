@@ -7,6 +7,7 @@
 #SBATCH -o logs/out.log # File to which STDOUT will be written
 #SBATCH -e logs/err.log # File to which STDERR will be written
 
-python DeTR/task_d.py
+#python DeTR/task_d.py
 #python utils/GT_conversor.py
 #python utils/GT_visualization.py
+python utils/dataset_description.py

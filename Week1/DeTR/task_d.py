@@ -11,7 +11,7 @@ from tqdm import tqdm
 from pycocotools.coco import COCO
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils.utils import coco_evaluation, draw_bboxes, filter_results, COCO_CLASSES
+from utils.utils import coco_evaluation, draw_bboxes, filter_results, COCO_CLASSES, TRAIN_SEQS, VAL_SEQS
 
 # --- Configuration ---
 DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
@@ -42,7 +42,7 @@ def visualize_first_frames():
 
     print(f"Generating visualizations for the first frame of {N_FOLDERS} sequences...")
 
-    for seq_idx in range(N_FOLDERS):
+    for seq_idx in VAL_SEQS + TRAIN_SEQS: # Process all sequences in both splits
         # 1. Pathing and Image Loading
         # In KITTI-MOTS, the first frame is always 000000.png
         img_path = Path(DATASET_PATH) / f"{seq_idx:04d}" / "000000.png"
@@ -118,7 +118,7 @@ def run_evaluation():
 
     print(f"Starting evaluation on {N_FOLDERS} sequences...")
 
-    for seq_idx in tqdm(range(N_FOLDERS), desc="Sequences", position=0):
+    for seq_idx in tqdm(VAL_SEQS, desc="Sequences", position=0):
         # Construct folder path and check existence
         folder = Path(DATASET_PATH) / f"{seq_idx:04d}"
         if not folder.exists(): continue
@@ -167,5 +167,5 @@ def run_evaluation():
     coco_evaluation(results_list, coco_gt, OUTPUT_DIR)
 
 if __name__ == "__main__":
-    #run_evaluation()
-    visualize_first_frames()
+    run_evaluation()
+    #visualize_first_frames()
