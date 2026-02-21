@@ -6,4 +6,6 @@
 #SBATCH --gres gpu:1    # To ask Pascales MAX 8
 #SBATCH -o logs/out.log # File to which STDOUT will be written
 #SBATCH -e logs/err.log # File to which STDERR will be written
-python sweep_launcher.py
+
+#python sweep_launcher.py
+python DeTR/task_d.py

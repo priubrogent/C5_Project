@@ -2,7 +2,8 @@ import os
 import json
 from pathlib import Path
 from pycocotools import mask as maskUtils
-from utils import KITTI_TO_COCO
+# Assuming KITTI_TO_COCO is {1: 1, 2: 3} (Pedestrian -> Person, Car -> Car)
+from utils import KITTI_TO_COCO 
 
 # --- Configuration ---
 ANNOTATIONS_DIR = "/ghome/mcv/datasets/C5/KITTI-MOTS/instances_txt"
@@ -20,7 +21,6 @@ def convert_kitti_mots_to_coco():
     }
 
     ann_id = 0
-    # Optimization: Use a set to track image IDs instantly
     seen_images = set()
 
     for i in range(SEQ_RANGE):
@@ -33,16 +33,13 @@ def convert_kitti_mots_to_coco():
         with open(txt_path, "r") as f:
             for line in f:
                 parts = line.strip().split(" ")
-                # Format: [frame, id, class, height, width, rle]
                 frame_idx = int(parts[0])
                 obj_id = int(parts[1])
                 h, w = int(parts[3]), int(parts[4])
                 rle_str = parts[5]
 
-                # 1. Unique Image ID logic
                 unique_img_id = (i * 100000) + frame_idx
                 
-                # Add image info only if new (O(1) lookup)
                 if unique_img_id not in seen_images:
                     coco_data['images'].append({
                         "id": unique_img_id,
@@ -52,39 +49,40 @@ def convert_kitti_mots_to_coco():
                     })
                     seen_images.add(unique_img_id)
 
-                # 2. Extract Class and Instance IDs
                 extracted_class_id = obj_id // 1000
-                instance_id = obj_id % 1000 
-                
-                # 3. Handle Mapping and Ignore Regions
                 coco_class_id = KITTI_TO_COCO.get(extracted_class_id)
                 
-                # ID 10 (10000) is ignore region
+                # KITTI Class 10 is the "Ignore" region
                 is_crowd = 1 if extracted_class_id == 10 else 0
                 
                 if coco_class_id is None and not is_crowd:
                     continue
 
-                # 4. Process Mask and BBox
+                # Process Mask and BBox
                 rle_dict = {"size": [h, w], "counts": rle_str.encode('utf-8')}
-                bbox = maskUtils.toBbox(rle_dict).tolist() # [x, y, w, h]
-                area = maskUtils.area(rle_dict).item()
+                bbox = maskUtils.toBbox(rle_dict).tolist() 
+                area = float(maskUtils.area(rle_dict))
 
-                coco_data['annotations'].append({
-                    "id": ann_id,
-                    "image_id": unique_img_id,
-                    # Map ignore regions to 'person' (1) but with iscrowd=1 so they don't hurt metrics
-                    "category_id": coco_class_id if coco_class_id else 1,
-                    "bbox": bbox,
-                    "area": area,
-                    "iscrowd": is_crowd,
-                    "segmentation": rle_dict["counts"].decode('utf-8'),
-                })
-                ann_id += 1
+                # Logic: If it's an ignore region, we add it for BOTH classes.
+                # This prevents False Positive penalties for either class.
+                target_classes = [1, 3] if is_crowd else [coco_class_id]
+
+                for cls_id in target_classes:
+                    coco_data['annotations'].append({
+                        "id": ann_id,
+                        "image_id": unique_img_id,
+                        "category_id": cls_id,
+                        "bbox": bbox,
+                        "area": area,
+                        "iscrowd": is_crowd,
+                        # Store as string for JSON serializability
+                        "segmentation": rle_str 
+                    })
+                    ann_id += 1
 
     with open(OUTPUT_FILE, "w") as f:
         json.dump(coco_data, f)
-    print(f"Finished! Saved to {OUTPUT_FILE}")
+    print(f"Finished! Total annotations: {ann_id}. Saved to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     convert_kitti_mots_to_coco()

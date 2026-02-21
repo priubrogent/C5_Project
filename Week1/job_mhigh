@@ -10,4 +10,6 @@
 #python DeTR/task_d.py
 #python utils/GT_conversor.py
 #python utils/GT_visualization.py
-python utils/dataset_description.py
+#python utils/dataset_description.py
+python DeTR/task_e.py
+
