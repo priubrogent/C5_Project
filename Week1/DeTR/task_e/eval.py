@@ -7,11 +7,10 @@ from torch.utils.data import DataLoader
 from transformers import DetrImageProcessor, DetrForObjectDetection, DetrConfig
 from peft import PeftModel, PeftConfig
 
-from task_e import KittiMotsDataset  # Reusing your dataset class
-
 # Import your custom utilities
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.utils import coco_evaluation, VAL_SEQS, COCO_CLASSES, DETR_TO_COCO_ID
+from utils import KittiMotsDataset
 
 # --- Configuration ---
 DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"

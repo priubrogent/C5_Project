@@ -3,6 +3,4 @@ __pycache__
 Miniconda*
 .vscode
 logs/
-Week1/DeTR/Results_DETR/ground_truth_viz/
-Week1/DeTR/Results_DETR/task_c/
-Week1/DeTR/Results_DETR/task_d/visualizations/
+Week1/DeTR/Results_DETR*

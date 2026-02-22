@@ -6,8 +6,8 @@ import torch
 import albumentations as A
 import cv2
 from pathlib import Path
+import torch.nn as nn
 from torch.utils.data import DataLoader
-from torchvision.datasets import CocoDetection
 from transformers import (
     DetrImageProcessor, 
     DetrForObjectDetection, 
@@ -16,17 +16,20 @@ from transformers import (
     Trainer,
     EarlyStoppingCallback
 )
-from peft import LoraConfig, get_peft_model
+from peft import PeftModel, LoraConfig, get_peft_model
 from tqdm import tqdm
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils.utils import coco_evaluation,  plot_loss, COCO_CLASSES, VAL_SEQS, TRAIN_SEQS, COCO_TO_DETR_ID, DETR_TO_COCO_ID
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from utils.utils import coco_evaluation, plot_loss, VAL_SEQS, TRAIN_SEQS, DETR_TO_COCO_ID
+from utils.KittiMotsDataset import KittiMotsDataset
 
 # --- Configuration ---
 SEED = 42
 DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = "kitti_mots_to_coco_gt.json"
 OUTPUT_DIR = "./DeTR/Results_DETR/task_e/"
+FILE_NAME = "ablation_3_4_6_1"  # Update this for each ablation run
+LORA_ADAPTER_DIR = "./DeTR/Results_DETR/task_e/lora_adapter"
 
 # --- Hyperparameters ---
 NUM_EPOCHS = 10
@@ -36,6 +39,16 @@ WEIGHT_DECAY = 1e-4
 WARMUP_RATIO = 0.1
 LR_SCHEDULER = "cosine"
 OPTIMIZER = "adamw_torch_fused"
+BACKBONE_ABLATION = {
+    1: 3, # 3 in total
+    2: 4, # 4 in total
+    3: 6, # 6 in total
+    4: 1  # 3 in total
+}
+TRANSFORMER_ABLATION = {
+    "encoder": 6, # 6 in total
+    "decoder": 6  # 6 in total
+}
 
 def set_seed(seed):
     """
@@ -48,112 +61,82 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-class KittiMotsDataset(CocoDetection):
-    def __init__(self, img_folder, ann_file, processor, sequence_ids, transform=None):
-        super().__init__(img_folder, ann_file)
-        self.processor = processor
-        self.transform = transform
 
-        self.ids = [
-            idx for idx in self.ids 
-            if (self.coco.loadImgs(idx)[0]['id'] // 100000) in sequence_ids
-        ]
-        
-    def __init__(self, img_folder, ann_file, processor, sequence_ids, transform=None):
-        super().__init__(img_folder, ann_file)
-        self.processor = processor
-        self.transform = transform
-
-        self.ids = [
-            idx for idx in self.ids 
-            if (self.coco.loadImgs(idx)[0]['id'] // 100000) in sequence_ids
-        ]
-
-        # We only keep images and annotations belonging to the selected sequences
-        val_img_ids_set = set(self.ids)
-        
-        self.coco.dataset['images'] = [
-            img for img in self.coco.dataset['images'] if img['id'] in val_img_ids_set
-        ]
-        self.coco.dataset['annotations'] = [
-            ann for ann in self.coco.dataset['annotations'] if ann['image_id'] in val_img_ids_set
-        ]
-        
-        # REBUILD the index
-        self.coco.createIndex()
-
-    def __getitem__(self, idx):
-        # 1. Load image and raw annotations
-        img_id = self.ids[idx]
-        img_metadata = self.coco.loadImgs(img_id)[0]
-        # Use cv2 because Albumentations expects numpy arrays
-        image = np.array(self.coco.loadImgs(img_id)[0]) # Placeholder logic, use your actual loader
-        image = cv2.imread(os.path.join(self.root, img_metadata['file_name']))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        ann_ids = self.coco.getAnnIds(imgIds=img_id)
-        target = self.coco.loadAnns(ann_ids)
-        
-        # 2. Extract boxes and labels for Albumentations
-        bboxes = []
-        class_labels = []
-        for ann in target:
-            cat_id = ann['category_id']
-            if cat_id in COCO_CLASSES and ann.get('iscrowd', 0) == 0:
-                bboxes.append(ann['bbox'])
-                class_labels.append(COCO_TO_DETR_ID[cat_id])
-
-        # 3. Apply Albumentations
-        if self.transform:
-            transformed = self.transform(
-                image=image,
-                bboxes=bboxes,
-                class_labels=class_labels
-            )
-            image = transformed['image']
-            bboxes = transformed['bboxes']
-            class_labels = transformed['class_labels']
-
-        # 4. Format for the DETR Processor
-        # The processor expects the annotations in COCO dict format
-        new_target = []
-        for box, label in zip(bboxes, class_labels):
-            new_target.append({
-                "category_id": label,
-                "bbox": box,
-                "area": box[2] * box[3],
-                "iscrowd": 0
-            })
-
-        encoding = self.processor(
-            images=image, 
-            annotations={'image_id': img_id, 'annotations': new_target}, 
-            return_tensors="pt"
-        )
-        
-        return {
-            "pixel_values": encoding["pixel_values"].squeeze(0), 
-            "labels": encoding["labels"][0]
-        }
+def prune_resnet_backbone(model, pruning_dict):
+    """
+    Updated for Hugging Face DetrForObjectDetection structure.
+    pruning_dict: {stage_number: blocks_to_keep}
+    """
+    # 1. Reach the internal DETR model
+    # If using PEFT, we go through get_base_model()
+    curr_model = model.get_base_model() if hasattr(model, "get_base_model") else model
     
-    
-def train():
-    def collate_fn(batch):
-        """
-        Custom collator to handle variable number of objects per image.
-        """
-        pixel_values = [item["pixel_values"] for item in batch]
-        labels = [item["labels"] for item in batch]
+    # 2. Correct path to the ResNet object in HF Transformers
+    # model.model.backbone -> DetrConvEncoder
+    # model.model.backbone.backbone -> DetrResnetBackbone
+    # model.model.backbone.backbone.model -> The actual ResNet with layer1, layer2, etc.
+    try:
+        backbone = curr_model.model.backbone.backbone.model
+    except AttributeError:
+        # Fallback for some versions of the library
+        backbone = curr_model.model.backbone.model
         
-        # Pad images to the largest size in the batch
-        encoding = processor.pad(pixel_values, return_tensors="pt")
+    print(f"Successfully reached backbone: {type(backbone).__name__}")
+
+    for stage_num, keep_count in pruning_dict.items():
+        stage_name = f"layer{stage_num}"
+        if not hasattr(backbone, stage_name):
+            print(f"Warning: Stage {stage_num} ({stage_name}) not found. Skipping.")
+            continue
+            
+        stage = getattr(backbone, stage_name)
+        total_blocks = len(stage)
         
-        return {
-            "pixel_values": encoding["pixel_values"],
-            "pixel_mask": encoding["pixel_mask"],
-            "labels": labels
-        }
+        # Guard: Ensure we keep at least the downsampling block (index 0)
+        if keep_count < 1:
+            keep_count = 1
+            
+        if keep_count >= total_blocks:
+            continue
+
+        # Replace unwanted blocks with Identity
+        for i in range(keep_count, total_blocks):
+            stage[i] = nn.Identity()
+            
+        print(f"Pruned Stage {stage_num}: Reduced from {total_blocks} to {keep_count} active blocks.")
+        
+def prune_transformer_layers(model, encoder_keep=None, decoder_keep=None):
+    """
+    Prunes the Transformer encoder and decoder layers.
+    encoder_keep: Number of layers to keep in the encoder (default 6)
+    decoder_keep: Number of layers to keep in the decoder (default 6)
+    """
+    curr_model = model.get_base_model() if hasattr(model, "get_base_model") else model
     
+    # Path: model.model.encoder.layers and model.model.decoder.layers
+    transformer = curr_model.model
+    
+    # 1. Prune Encoder
+    if encoder_keep is not None:
+        layers = transformer.encoder.layers
+        total = len(layers)
+        if encoder_keep < 1: encoder_keep = 1
+        if encoder_keep < total:
+            for i in range(encoder_keep, total):
+                layers[i] = nn.Identity()
+            print(f"Pruned Transformer Encoder: Kept {encoder_keep}/{total} layers.")
+
+    # 2. Prune Decoder
+    if decoder_keep is not None:
+        layers = transformer.decoder.layers
+        total = len(layers)
+        if decoder_keep < 1: decoder_keep = 1
+        if decoder_keep < total:
+            for i in range(decoder_keep, total):
+                layers[i] = nn.Identity()
+            print(f"Pruned Transformer Decoder: Kept {decoder_keep}/{total} layers.")
+    
+def ablation():
     # Set seeds for reproducibility
     set_seed(SEED)
     
@@ -176,43 +159,33 @@ def train():
     # Prepare Model and Processor
     processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50")
     # Load the model with the new head
-    model = DetrForObjectDetection.from_pretrained(
+    base_model = DetrForObjectDetection.from_pretrained(
         "facebook/detr-resnet-50", 
         config=config, 
         ignore_mismatched_sizes=True
     )
     
-    # Apply LoRA (Low-Rank Adaptation)
-    # We target the attention projections (q_proj, v_proj)
-    # We MUST save the classifier heads (modules_to_save) to adapt to KITTI classes
-    lora_config = LoraConfig(
-        r=8, 
-        lora_alpha=16,
-        target_modules=[
-            "q_proj", "v_proj",         # Attention projections in the transformer layers
-            "conv1", "conv2", "conv3"   # These are the 3 conv layers in the backbone
-        ],
-        lora_dropout=0.1,
-        bias="none",
-        modules_to_save=["class_labels_classifier", "bbox_predictor"]
-    )
-    model = get_peft_model(model, lora_config)
+    # Charge the LoRA adapters previously obtained from fine-tuning the whole network
+    model = PeftModel.from_pretrained(base_model, LORA_ADAPTER_DIR, is_trainable=True)
     model.print_trainable_parameters()
     model.to(device)
     
-    # Assuming Class 0 = Pedestrian, Class 1 = Car, Class 2 = Background
-    # We give Pedestrians more 'importance' because they are unbalanced
-    class_weights = torch.tensor([2.35, 1.0, 0.1]).to(device)
-    model.criterion.weight_dict["loss_ce"] = class_weights # Update the criterion weights
+    # Do the structured pruning based on the provided ablation configuration
+    prune_resnet_backbone(model, BACKBONE_ABLATION)
+    prune_transformer_layers(
+        model, 
+        encoder_keep=TRANSFORMER_ABLATION["encoder"], 
+        decoder_keep=TRANSFORMER_ABLATION["decoder"]
+    )
     
     # "Safe" augmentations for KITTI-MOTS
     train_transforms = A.Compose([
         A.HorizontalFlip(p=0.5),
         A.ShiftScaleRotate(
             shift_limit=0.1, 
-            scale_limit=0.1,   
+            scale_limit=0.5,   
             rotate_limit=0, 
-            p=0.2
+            p=0.5
         ),
         A.RandomBrightnessContrast(p=0.2),
         A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.05, p=0.2),
@@ -227,8 +200,24 @@ def train():
     train_dataset = KittiMotsDataset(DATASET_PATH, ANNOTATION_FILE, processor, TRAIN_SEQS, transform=train_transforms)
     val_dataset = KittiMotsDataset(DATASET_PATH, ANNOTATION_FILE, processor, VAL_SEQS,transform=None)
 
-    print(f"Number of images the DataLoader sees: {len(val_dataset.ids)}")
-    print(f"Number of images in the COCO object: {len(val_dataset.coco.getImgIds())}")
+    #print(f"Number of images the DataLoader sees: {len(val_dataset.ids)}")
+    #print(f"Number of images in the COCO object: {len(val_dataset.coco.getImgIds())}")
+    
+    def collate_fn(batch):
+        """
+        Custom collator to handle variable number of objects per image.
+        """
+        pixel_values = [item["pixel_values"] for item in batch]
+        labels = [item["labels"] for item in batch]
+        
+        # Pad images to the largest size in the batch
+        encoding = processor.pad(pixel_values, return_tensors="pt")
+        
+        return {
+            "pixel_values": encoding["pixel_values"],
+            "pixel_mask": encoding["pixel_mask"],
+            "labels": labels
+        }
 
     # Define Training Arguments
     training_args = TrainingArguments(
@@ -271,7 +260,7 @@ def train():
     trainer.train()
     
     # Save the final LoRA adapters
-    adapter_path = os.path.join(OUTPUT_DIR, "final_lora_adapter")
+    adapter_path = os.path.join(OUTPUT_DIR, f"{FILE_NAME}_lora_adapter")
     model.save_pretrained(adapter_path)
     print(f"Training complete. Adapters saved to {adapter_path}")
 
@@ -322,12 +311,12 @@ def train():
     # Calculate and Save Metrics using utils.py
     if results_list:
         # We pass the underlying COCO object from val_dataset to the evaluator
-        coco_evaluation(results_list, val_dataset.coco, OUTPUT_DIR, imgIds=val_dataset.ids)
-        plot_loss(trainer, OUTPUT_DIR)
-        print(f"Metrics saved to {OUTPUT_DIR}/evaluation_metrics.json")
+        coco_evaluation(results_list, val_dataset.coco, OUTPUT_DIR, file_name=f"{FILE_NAME}.json")
+        plot_loss(trainer, OUTPUT_DIR, file_name=f"{FILE_NAME}.png")
+        print(f"Metrics saved to {OUTPUT_DIR}/{FILE_NAME}")
     else:
         print("Warning: No detections found on validation set!")
 
 
 if __name__ == "__main__":
-    train()
+    ablation()

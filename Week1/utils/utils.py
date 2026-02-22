@@ -92,7 +92,7 @@ def draw_bboxes(image, bboxes, labels, scores=None, label_map=None, threshold=0.
     return image
         
 
-def coco_evaluation(results_list, coco_gt, output_path):
+def coco_evaluation(results_list, coco_gt, output_path, file_name="evaluation_results.json", save=True):
     """
     Perform COCO evaluation and save results with 3 decimal precision.
     Combines global and per-class metrics into a single JSON output.
@@ -101,6 +101,8 @@ def coco_evaluation(results_list, coco_gt, output_path):
         results_list (list): List of detection results in COCO format.
         coco_gt (COCO): COCO object containing ground truth annotations.
         output_path (str): Path to save the evaluation results.
+    Returns:
+        dict: A dictionary containing all evaluation metrics.
     """
     print("\n--- Running Detailed COCO Evaluation (Fixed Dimensions) ---")
     
@@ -147,10 +149,13 @@ def coco_evaluation(results_list, coco_gt, output_path):
             final_metrics[f"mAR_100_{class_name}_{size_label}"] = round(float(mAR_val), 3)
 
     # Save to JSON
-    output_file = os.path.join(output_path, "evaluation_metrics.json")
-    with open(output_file, "w") as f:
-        json.dump(final_metrics, f, indent=4)
-    print(f"Saved evaluation metrics to: {output_file}")
+    if save:
+        output_file = os.path.join(output_path, file_name)
+        with open(output_file, "w") as f:
+            json.dump(final_metrics, f, indent=4)
+        print(f"Saved evaluation metrics to: {output_file}")
+        
+    return final_metrics
         
         
 def filter_results(scores, labels, boxes):
@@ -176,7 +181,7 @@ def filter_results(scores, labels, boxes):
     return valid_boxes, valid_labels, valid_scores
 
     
-def plot_loss(trainer, output_dir):
+def plot_loss(trainer, output_dir, file_name="loss_curve.png", save=True):
     """
     Plot training and validation loss curves using Epochs as the x-axis.
 
@@ -194,9 +199,8 @@ def plot_loss(trainer, output_dir):
     # Extract validation data
     val_loss = [log["eval_loss"] for log in history if "eval_loss" in log]
     val_epochs = [log["epoch"] for log in history if "eval_loss" in log]
-
-    # Initialize figure
-    plt.figure(figsize=(12, 8))
+    
+    fig = plt.figure(figsize=(12, 8))
     
     # Plot curves using epochs on the X-axis
     plt.plot(train_epochs, train_loss, label="Training Loss", color="blue", lw=3)
@@ -219,6 +223,9 @@ def plot_loss(trainer, output_dir):
     plt.tight_layout()
     
     # Save high-resolution output
-    save_path = os.path.join(output_dir, "loss_curve_epochs.png")
-    plt.savefig(save_path, dpi=300)
-    print(f"Epoch-based loss curve saved to: {save_path}")
+    if save:
+        save_path = os.path.join(output_dir, file_name)
+        plt.savefig(save_path, dpi=300)
+        print(f"Epoch-based loss curve saved to: {save_path}") 
+           
+    return fig

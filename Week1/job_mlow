@@ -8,4 +8,4 @@
 #SBATCH -e logs/err.log # File to which STDERR will be written
 
 #python sweep_launcher.py
-python DeTR/task_d.py
+python DeTR/task_e/ablation.py
