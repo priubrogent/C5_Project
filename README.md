@@ -1,11 +1,11 @@
 
 ## c) infer
-- [ ] Faster R-CNN
+- [x] Faster R-CNN
 - [ ] DeTR
 - [ ] YOLO
 
 ## d) avaluacio pretrained
-- [ ] Faster R-CNN
+- [x] Faster R-CNN
 - [ ] DeTR
 - [ ] YOLO
 
@@ -22,4 +22,5 @@
 ## h) opcional
 - [ ] finetune
 - [ ] comparar
+
 
