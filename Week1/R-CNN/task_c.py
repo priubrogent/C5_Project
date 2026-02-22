@@ -23,7 +23,9 @@ def run_inference():
     model.to(device)
     model.eval()
 
-    COCO_LABELS = weights.meta["categories"]
+    # Convert COCO_LABELS list to dictionary {class_id: class_name}
+    categories = weights.meta["categories"]
+    COCO_LABELS = {i: categories[i] for i in range(len(categories))}
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 

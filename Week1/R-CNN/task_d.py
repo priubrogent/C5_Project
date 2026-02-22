@@ -34,7 +34,9 @@ def visualize_first_frames():
     model.to(device)
     model.eval()
 
-    COCO_LABELS = weights.meta["categories"]
+    # Convert COCO_LABELS list to dictionary {class_id: class_name}
+    categories = weights.meta["categories"]
+    COCO_LABELS = {i: categories[i] for i in range(len(categories))}
 
     # Load Ground Truth
     if not os.path.exists(GT_PATH):
