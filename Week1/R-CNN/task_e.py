@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import albumentations as A
 import cv2
+import wandb
 from pathlib import Path
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection
@@ -130,6 +131,24 @@ def train():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
+    # Initialize wandb
+    wandb.init(
+        project="kitti-mots-rcnn",
+        name="faster-rcnn-finetuning",
+        config={
+            "epochs": NUM_EPOCHS,
+            "batch_size": BATCH_SIZE,
+            "learning_rate": LEARNING_RATE,
+            "weight_decay": WEIGHT_DECAY,
+            "warmup_steps": WARMUP_STEPS,
+            "num_workers": NUM_WORKERS,
+            "seed": SEED,
+            "model": "faster_rcnn_resnet50_fpn",
+            "dataset": "KITTI-MOTS",
+            "num_classes": 2,
+        }
+    )
+
     # Load pre-trained Faster R-CNN model
     weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn(weights=weights)
@@ -237,6 +256,14 @@ def train():
         avg_val_loss = val_loss / len(val_loader)
         val_losses.append(avg_val_loss)
 
+        # Log to wandb
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": avg_train_loss,
+            "val_loss": avg_val_loss,
+            "learning_rate": optimizer.param_groups[0]['lr']
+        })
+
         print(f"Epoch {epoch+1}/{NUM_EPOCHS} - Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
 
         # Update learning rate
@@ -246,6 +273,7 @@ def train():
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, "best_model.pth"))
+            wandb.run.summary["best_val_loss"] = best_val_loss
             print(f"Saved best model with val loss: {best_val_loss:.4f}")
 
     # Save final model
@@ -271,8 +299,12 @@ def train():
     plt.title("Faster R-CNN Training Progress")
     plt.legend()
     plt.grid(True)
-    plt.savefig(os.path.join(OUTPUT_DIR, "loss_curve.png"), dpi=300)
-    print(f"Loss curve saved to {OUTPUT_DIR}/loss_curve.png")
+    loss_curve_path = os.path.join(OUTPUT_DIR, "loss_curve.png")
+    plt.savefig(loss_curve_path, dpi=300)
+    print(f"Loss curve saved to {loss_curve_path}")
+
+    # Log loss curve to wandb
+    wandb.log({"loss_curve": wandb.Image(loss_curve_path)})
 
     # Run Evaluation on Validation Split
     print("\n--- Running Evaluation on Validation Split ---")
@@ -311,8 +343,20 @@ def train():
     if results_list:
         coco_evaluation(results_list, val_dataset.coco, OUTPUT_DIR)
         print(f"Metrics saved to {OUTPUT_DIR}/evaluation_metrics.json")
+
+        # Log evaluation metrics to wandb
+        import json
+        metrics_path = os.path.join(OUTPUT_DIR, "evaluation_metrics.json")
+        if os.path.exists(metrics_path):
+            with open(metrics_path, "r") as f:
+                metrics = json.load(f)
+            wandb.log(metrics)
+            wandb.run.summary.update(metrics)
     else:
         print("Warning: No detections found on validation set!")
+
+    # Finish wandb run
+    wandb.finish()
 
 if __name__ == "__main__":
     train()
