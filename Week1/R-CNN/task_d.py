@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.utils import coco_evaluation, draw_bboxes, filter_results, COCO_CLASSES, TRAIN_SEQS, VAL_SEQS
 
 # --- Configuration ---
-DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
+DATASET_PATH = "/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 OUTPUT_DIR = "./R-CNN/Results_RCNN/task_d/"
 VIS_DIR = "./R-CNN/Results_RCNN/task_d/visualizations"
 GT_PATH = "kitti_mots_to_coco_gt.json"

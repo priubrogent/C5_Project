@@ -9,7 +9,7 @@ from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.utils import draw_bboxes, filter_results
 
-DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
+DATASET_PATH = "/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 OUTPUT_DIR = "./R-CNN/Results_RCNN/task_c/"
 N = 21  # Number of images to process
 
