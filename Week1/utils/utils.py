@@ -10,6 +10,8 @@ import numpy as np
 KITTI_TO_COCO = {1: 3, 2: 1} # Mapping from KITTI MOTS class IDs to COCO class IDs
 COCO_TO_DETR_ID = {1: 0, 3: 1}
 DETR_TO_COCO_ID = {0: 1, 1: 3} # Reverse mapping from DETR class IDs to COCO class IDs
+COCO_TO_RCNN_ID = {1: 1, 3: 2}  # COCO person(1)->RCNN(1), COCO car(3)->RCNN(2), 0 is background
+RCNN_TO_COCO_ID = {1: 1, 2: 3}  # Reverse mapping from R-CNN IDs to COCO IDs
 PERSON_ID = 1  # COCO ID for 'person'
 CAR_ID = 3     # COCO ID for 'car'
 COCO_CLASSES = set(KITTI_TO_COCO.values())
