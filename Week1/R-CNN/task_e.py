@@ -109,10 +109,20 @@ class KittiMotsDataset(CocoDetection):
             x, y, w, h = bbox
             boxes.append([x, y, x + w, y + h])
 
+        # Handle empty annotations - if no boxes after augmentation, skip or add dummy
+        # During training, Faster R-CNN requires at least one box
+        # If no boxes, we return empty tensors with proper shape
+        if len(boxes) == 0:
+            boxes = torch.zeros((0, 4), dtype=torch.float32)
+            labels = torch.zeros((0,), dtype=torch.int64)
+        else:
+            boxes = torch.as_tensor(boxes, dtype=torch.float32)
+            labels = torch.as_tensor(class_labels, dtype=torch.int64)
+
         # Create target dictionary
         target = {
-            "boxes": torch.as_tensor(boxes, dtype=torch.float32),
-            "labels": torch.as_tensor(class_labels, dtype=torch.int64),
+            "boxes": boxes,
+            "labels": labels,
             "image_id": torch.tensor([img_id])
         }
 
@@ -121,7 +131,15 @@ class KittiMotsDataset(CocoDetection):
 def collate_fn(batch):
     """
     Custom collator to handle variable number of objects per image.
+    Filters out images with no bounding boxes (empty annotations).
     """
+    # Filter out samples with no boxes
+    batch = [b for b in batch if len(b[1]["boxes"]) > 0]
+
+    # If all samples were filtered out, return None (will be handled by DataLoader)
+    if len(batch) == 0:
+        return None
+
     return tuple(zip(*batch))
 
 def train():
@@ -222,7 +240,12 @@ def train():
         model.train()
         epoch_loss = 0
 
-        for images, targets in tqdm(train_loader, desc=f"Epoch {epoch+1}/{NUM_EPOCHS} - Training"):
+        for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{NUM_EPOCHS} - Training"):
+            # Skip None batches (all images had empty annotations)
+            if batch is None:
+                continue
+
+            images, targets = batch
             images = list(image.to(device) for image in images)
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
@@ -245,7 +268,12 @@ def train():
         val_loss = 0
 
         with torch.no_grad():
-            for images, targets in tqdm(val_loader, desc=f"Epoch {epoch+1}/{NUM_EPOCHS} - Validation"):
+            for batch in tqdm(val_loader, desc=f"Epoch {epoch+1}/{NUM_EPOCHS} - Validation"):
+                # Skip None batches (all images had empty annotations)
+                if batch is None:
+                    continue
+
+                images, targets = batch
                 images = list(image.to(device) for image in images)
                 targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
