@@ -15,7 +15,7 @@ import torchvision.transforms.functional as F
 from tqdm import tqdm
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils.utils import coco_evaluation, COCO_CLASSES, VAL_SEQS, TRAIN_SEQS
+from utils.utils import coco_evaluation, COCO_CLASSES, VAL_SEQS, TRAIN_SEQS, COCO_TO_RCNN_ID, RCNN_TO_COCO_ID
 
 # --- Configuration ---
 SEED = 42
@@ -30,10 +30,6 @@ LEARNING_RATE = 5e-4
 WEIGHT_DECAY = 5e-4
 WARMUP_STEPS = 500
 NUM_WORKERS = 4
-
-# Label mapping: COCO labels (1=person, 3=car) -> Model labels (1=person, 2=car, 0=background)
-COCO_TO_MODEL = {1: 1, 3: 2}
-MODEL_TO_COCO = {1: 1, 2: 3}
 
 def set_seed(seed):
     """
@@ -90,7 +86,7 @@ class KittiMotsDataset(CocoDetection):
             # Only include valid classes (person=1, car=3) and non-crowd annotations
             if cat_id in COCO_CLASSES and ann.get('iscrowd', 0) == 0:
                 bboxes.append(ann['bbox'])
-                class_labels.append(COCO_TO_MODEL[cat_id])  # Map COCO labels to model labels
+                class_labels.append(COCO_TO_RCNN_ID[cat_id])  # Map COCO labels to R-CNN labels
 
         # 3. Apply Albumentations
         if self.transform:
@@ -329,10 +325,10 @@ def train():
                 for score, label, bbox in zip(output["scores"], output["labels"], output["boxes"]):
                     label_id = label.item()
 
-                    # Filter for valid classes (model labels: 1=person, 2=car)
-                    if label_id in MODEL_TO_COCO:
-                        # Map model labels back to COCO labels
-                        coco_label = MODEL_TO_COCO[label_id]
+                    # Filter for valid classes (R-CNN labels: 1=person, 2=car)
+                    if label_id in RCNN_TO_COCO_ID:
+                        # Map R-CNN labels back to COCO labels
+                        coco_label = RCNN_TO_COCO_ID[label_id]
                         x1, y1, x2, y2 = bbox.tolist()
                         coco_bbox = [x1, y1, x2 - x1, y2 - y1]
 
