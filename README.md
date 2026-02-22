@@ -11,6 +11,8 @@
 
 ## e) finetune (kitti)
 - [ ] Faster R-CNN
+  - [x] Unfreeze everything, standard albumenations
+  - [ ] Unfreeze progresiu
 - [ ] DeTR
 - [ ] YOLO
 
@@ -22,5 +24,6 @@
 ## h) opcional
 - [ ] finetune
 - [ ] comparar
+
 
 
