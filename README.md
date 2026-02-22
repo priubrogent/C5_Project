@@ -18,8 +18,8 @@
 - [ ] Faster R-CNN
 - [ ] DeTR
 
-## g) comparar
-- [ ]
+- [ ] g) comparar
 ## h) opcional
 - [ ] finetune
 - [ ] comparar
+
