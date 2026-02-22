@@ -19,7 +19,7 @@ from utils.utils import coco_evaluation, COCO_CLASSES, VAL_SEQS, TRAIN_SEQS
 
 # --- Configuration ---
 SEED = 42
-DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
+DATASET_PATH = "/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = "kitti_mots_to_coco_gt.json"
 OUTPUT_DIR = "./R-CNN/Results_RCNN/task_e/"
 
@@ -30,6 +30,10 @@ LEARNING_RATE = 5e-4
 WEIGHT_DECAY = 5e-4
 WARMUP_STEPS = 500
 NUM_WORKERS = 4
+
+# Label mapping: COCO labels (1=person, 3=car) -> Model labels (1=person, 2=car, 0=background)
+COCO_TO_MODEL = {1: 1, 3: 2}
+MODEL_TO_COCO = {1: 1, 2: 3}
 
 def set_seed(seed):
     """
@@ -86,7 +90,7 @@ class KittiMotsDataset(CocoDetection):
             # Only include valid classes (person=1, car=3) and non-crowd annotations
             if cat_id in COCO_CLASSES and ann.get('iscrowd', 0) == 0:
                 bboxes.append(ann['bbox'])
-                class_labels.append(cat_id)
+                class_labels.append(COCO_TO_MODEL[cat_id])  # Map COCO labels to model labels
 
         # 3. Apply Albumentations
         if self.transform:
@@ -325,10 +329,10 @@ def train():
                 for score, label, bbox in zip(output["scores"], output["labels"], output["boxes"]):
                     label_id = label.item()
 
-                    # Filter for valid classes (person=1, car=3)
-                    if label_id in [1, 2]:  # Model outputs 1 for person, 2 for car (0 is background)
+                    # Filter for valid classes (model labels: 1=person, 2=car)
+                    if label_id in MODEL_TO_COCO:
                         # Map model labels back to COCO labels
-                        coco_label = 1 if label_id == 1 else 3
+                        coco_label = MODEL_TO_COCO[label_id]
                         x1, y1, x2, y2 = bbox.tolist()
                         coco_bbox = [x1, y1, x2 - x1, y2 - y1]
 
