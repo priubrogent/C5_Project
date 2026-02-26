@@ -17,13 +17,13 @@
 - [ ] YOLO
 
 ## f) finetune (deart)
-- [ ] Faster R-CNN
-- [ ] DeTR
+- [x] Faster R-CNN
 
-- [ ] g) comparar
+## - [ ] g) comparar
 ## h) opcional
 - [ ] finetune
 - [ ] comparar
+
 
 
 
