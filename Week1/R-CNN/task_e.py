@@ -16,25 +16,20 @@ from tqdm import tqdm
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.utils import coco_evaluation, COCO_CLASSES, VAL_SEQS, TRAIN_SEQS, COCO_TO_RCNN_ID, RCNN_TO_COCO_ID
+from utils.notify import notify
 
-# --- Configuration ---
 SEED = 42
 DATASET_PATH = "/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = "kitti_mots_to_coco_gt.json"
-OUTPUT_DIR = "./R-CNN/Results_RCNN/task_e/"
+OUTPUT_DIR = "./R-CNN/Results_RCNN/task_e_def/"
 
-# --- Hyperparameters ---
-NUM_EPOCHS = 10
-BATCH_SIZE = 4  # Faster R-CNN is memory-intensive, use smaller batch size
+NUM_EPOCHS = 20
+BATCH_SIZE = 32
 LEARNING_RATE = 5e-4
 WEIGHT_DECAY = 5e-4
-WARMUP_STEPS = 500
 NUM_WORKERS = 4
 
 def set_seed(seed):
-    """
-    Fix random seeds for reproducibility.
-    """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -47,13 +42,11 @@ class KittiMotsDataset(CocoDetection):
         super().__init__(img_folder, ann_file)
         self.transform = transform
 
-        # Filter to only include images from the selected sequences
         self.ids = [
             idx for idx in self.ids
             if (self.coco.loadImgs(idx)[0]['id'] // 100000) in sequence_ids
         ]
 
-        # Keep only images and annotations belonging to the selected sequences
         val_img_ids_set = set(self.ids)
 
         self.coco.dataset['images'] = [
@@ -63,32 +56,26 @@ class KittiMotsDataset(CocoDetection):
             ann for ann in self.coco.dataset['annotations'] if ann['image_id'] in val_img_ids_set
         ]
 
-        # REBUILD the index
         self.coco.createIndex()
 
     def __getitem__(self, idx):
-        # 1. Load image and raw annotations
         img_id = self.ids[idx]
         img_metadata = self.coco.loadImgs(img_id)[0]
 
-        # Load image using cv2 for Albumentations
         image = cv2.imread(os.path.join(self.root, img_metadata['file_name']))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         ann_ids = self.coco.getAnnIds(imgIds=img_id)
         target = self.coco.loadAnns(ann_ids)
 
-        # 2. Extract boxes and labels for Albumentations
         bboxes = []
         class_labels = []
         for ann in target:
             cat_id = ann['category_id']
-            # Only include valid classes (person=1, car=3) and non-crowd annotations
             if cat_id in COCO_CLASSES and ann.get('iscrowd', 0) == 0:
                 bboxes.append(ann['bbox'])
-                class_labels.append(COCO_TO_RCNN_ID[cat_id])  # Map COCO labels to R-CNN labels
+                class_labels.append(COCO_TO_RCNN_ID[cat_id])
 
-        # 3. Apply Albumentations
         if self.transform:
             transformed = self.transform(
                 image=image,
@@ -99,19 +86,13 @@ class KittiMotsDataset(CocoDetection):
             bboxes = transformed['bboxes']
             class_labels = transformed['class_labels']
 
-        # 4. Convert to PyTorch format for Faster R-CNN
-        # Convert image to tensor
         image = F.to_tensor(image)
 
-        # Convert bboxes from [x, y, w, h] to [x1, y1, x2, y2]
         boxes = []
         for bbox in bboxes:
             x, y, w, h = bbox
             boxes.append([x, y, x + w, y + h])
 
-        # Handle empty annotations - if no boxes after augmentation, skip or add dummy
-        # During training, Faster R-CNN requires at least one box
-        # If no boxes, we return empty tensors with proper shape
         if len(boxes) == 0:
             boxes = torch.zeros((0, 4), dtype=torch.float32)
             labels = torch.zeros((0,), dtype=torch.int64)
@@ -119,7 +100,6 @@ class KittiMotsDataset(CocoDetection):
             boxes = torch.as_tensor(boxes, dtype=torch.float32)
             labels = torch.as_tensor(class_labels, dtype=torch.int64)
 
-        # Create target dictionary
         target = {
             "boxes": boxes,
             "labels": labels,
@@ -129,36 +109,26 @@ class KittiMotsDataset(CocoDetection):
         return image, target
 
 def collate_fn(batch):
-    """
-    Custom collator to handle variable number of objects per image.
-    Filters out images with no bounding boxes (empty annotations).
-    """
-    # Filter out samples with no boxes
     batch = [b for b in batch if len(b[1]["boxes"]) > 0]
-
-    # If all samples were filtered out, return None (will be handled by DataLoader)
     if len(batch) == 0:
         return None
 
     return tuple(zip(*batch))
 
 def train():
-    # Set seeds for reproducibility
     set_seed(SEED)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Initialize wandb
     wandb.init(
-        project="kitti-mots-rcnn",
-        name="faster-rcnn-finetuning",
+        project="kitti-mots-rcnn-final",
+        name="faster-rcnn-finetuning-def-aug-new-bsval",
         config={
             "epochs": NUM_EPOCHS,
             "batch_size": BATCH_SIZE,
             "learning_rate": LEARNING_RATE,
             "weight_decay": WEIGHT_DECAY,
-            "warmup_steps": WARMUP_STEPS,
             "num_workers": NUM_WORKERS,
             "seed": SEED,
             "model": "faster_rcnn_resnet50_fpn",
@@ -167,19 +137,15 @@ def train():
         }
     )
 
-    # Load pre-trained Faster R-CNN model
     weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn(weights=weights)
 
-    # Replace the classifier head to match our number of classes
-    # We have 2 classes (person, car) + 1 background class
-    num_classes = 2 + 1  # 2 foreground classes + background
+    num_classes = 2 + 1
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
     model.to(device)
 
-    # "Safe" augmentations for KITTI-MOTS
     train_transforms = A.Compose([
         A.HorizontalFlip(p=0.5),
         A.ShiftScaleRotate(
@@ -197,14 +163,12 @@ def train():
         min_visibility=0.3,
     ))
 
-    # Initialize Datasets
     train_dataset = KittiMotsDataset(DATASET_PATH, ANNOTATION_FILE, TRAIN_SEQS, transform=train_transforms)
     val_dataset = KittiMotsDataset(DATASET_PATH, ANNOTATION_FILE, VAL_SEQS, transform=None)
 
     print(f"Train dataset size: {len(train_dataset)}")
     print(f"Val dataset size: {len(val_dataset)}")
 
-    # Initialize DataLoaders
     train_loader = DataLoader(
         train_dataset,
         batch_size=BATCH_SIZE,
@@ -214,34 +178,37 @@ def train():
     )
     val_loader = DataLoader(
         val_dataset,
-        batch_size=1,
-        shuffle=False,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
         num_workers=NUM_WORKERS,
         collate_fn=collate_fn
     )
 
-    # Optimizer
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=LEARNING_RATE, momentum=0.9, weight_decay=WEIGHT_DECAY)
 
-    # Learning rate scheduler
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # Training loop
+    notify(
+        f"Training started\nlr={LEARNING_RATE}  bs={BATCH_SIZE}  epochs={NUM_EPOCHS}\n"
+        f"train={len(train_dataset)} imgs  val={len(val_dataset)} imgs",
+        title="R-CNN Task E",
+        tags=["rocket"],
+    )
+
     print("\n--- Starting Fine-Tuning ---")
     train_losses = []
     val_losses = []
     best_val_loss = float('inf')
+    global_step = 0
 
     for epoch in range(NUM_EPOCHS):
-        # Training phase
         model.train()
         epoch_loss = 0
 
         for batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{NUM_EPOCHS} - Training"):
-            # Skip None batches (all images had empty annotations)
             if batch is None:
                 continue
 
@@ -249,27 +216,33 @@ def train():
             images = list(image.to(device) for image in images)
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-            # Forward pass
             loss_dict = model(images, targets)
             losses = sum(loss for loss in loss_dict.values())
 
-            # Backward pass
             optimizer.zero_grad()
             losses.backward()
             optimizer.step()
 
-            epoch_loss += losses.item()
+            batch_loss = losses.item()
+            epoch_loss += batch_loss
+            global_step += 1
+
+            wandb.log({
+                "batch/loss_total":      batch_loss,
+                "batch/loss_classifier": loss_dict.get("loss_classifier", torch.tensor(0.0)).item(),
+                "batch/loss_box_reg":    loss_dict.get("loss_box_reg",    torch.tensor(0.0)).item(),
+                "batch/loss_objectness": loss_dict.get("loss_objectness", torch.tensor(0.0)).item(),
+                "batch/loss_rpn_box_reg":loss_dict.get("loss_rpn_box_reg",torch.tensor(0.0)).item(),
+            }, step=global_step)
 
         avg_train_loss = epoch_loss / len(train_loader)
         train_losses.append(avg_train_loss)
 
-        # Validation phase
-        model.train()  # Keep in train mode to get losses
+        model.train()
         val_loss = 0
 
         with torch.no_grad():
             for batch in tqdm(val_loader, desc=f"Epoch {epoch+1}/{NUM_EPOCHS} - Validation"):
-                # Skip None batches (all images had empty annotations)
                 if batch is None:
                     continue
 
@@ -284,7 +257,6 @@ def train():
         avg_val_loss = val_loss / len(val_loader)
         val_losses.append(avg_val_loss)
 
-        # Log to wandb
         wandb.log({
             "epoch": epoch + 1,
             "train_loss": avg_train_loss,
@@ -292,23 +264,30 @@ def train():
             "learning_rate": optimizer.param_groups[0]['lr']
         })
 
-        print(f"Epoch {epoch+1}/{NUM_EPOCHS} - Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}")
+        print(f"Epoch {epoch+1}/{NUM_EPOCHS} - Train: {avg_train_loss:.4f}  Val: {avg_val_loss:.4f}")
 
-        # Update learning rate
         lr_scheduler.step()
 
-        # Save best model
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, "best_model.pth"))
             wandb.run.summary["best_val_loss"] = best_val_loss
             print(f"Saved best model with val loss: {best_val_loss:.4f}")
+            notify(
+                f"Epoch {epoch+1}/{NUM_EPOCHS} — new best!\ntrain={avg_train_loss:.4f}  val={avg_val_loss:.4f}",
+                title="R-CNN Task E",
+                tags=["star"],
+            )
 
-    # Save final model
     torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, "final_model.pth"))
     print(f"Training complete. Models saved to {OUTPUT_DIR}")
+    notify(
+        f"Training complete!\nbest_val_loss={best_val_loss:.4f}\nResults: {OUTPUT_DIR}",
+        title="R-CNN Task E",
+        priority="high",
+        tags=["white_check_mark"],
+    )
 
-    # Save training history
     import json
     history = {
         "train_losses": train_losses,
@@ -317,7 +296,6 @@ def train():
     with open(os.path.join(OUTPUT_DIR, "training_history.json"), "w") as f:
         json.dump(history, f, indent=4)
 
-    # Plot loss curves
     import matplotlib.pyplot as plt
     plt.figure(figsize=(10, 6))
     plt.plot(range(1, NUM_EPOCHS+1), train_losses, label="Train Loss", marker='o')
@@ -331,31 +309,28 @@ def train():
     plt.savefig(loss_curve_path, dpi=300)
     print(f"Loss curve saved to {loss_curve_path}")
 
-    # Log loss curve to wandb
     wandb.log({"loss_curve": wandb.Image(loss_curve_path)})
 
-    # Run Evaluation on Validation Split
     print("\n--- Running Evaluation on Validation Split ---")
     model.eval()
     results_list = []
 
     with torch.no_grad():
-        for images, targets in tqdm(val_loader, desc="Inference"):
+        for batch in tqdm(val_loader, desc="Inference"):
+            if batch is None:
+                continue
+            images, targets = batch
             images = list(image.to(device) for image in images)
 
-            # Forward pass
             outputs = model(images)
 
-            # Process outputs
             for output, target in zip(outputs, targets):
                 img_id = target["image_id"].item()
 
                 for score, label, bbox in zip(output["scores"], output["labels"], output["boxes"]):
                     label_id = label.item()
 
-                    # Filter for valid classes (R-CNN labels: 1=person, 2=car)
                     if label_id in RCNN_TO_COCO_ID:
-                        # Map R-CNN labels back to COCO labels
                         coco_label = RCNN_TO_COCO_ID[label_id]
                         x1, y1, x2, y2 = bbox.tolist()
                         coco_bbox = [x1, y1, x2 - x1, y2 - y1]
@@ -367,12 +342,10 @@ def train():
                             "score": score.item()
                         })
 
-    # Calculate and Save Metrics using utils.py
     if results_list:
         coco_evaluation(results_list, val_dataset.coco, OUTPUT_DIR)
         print(f"Metrics saved to {OUTPUT_DIR}/evaluation_metrics.json")
 
-        # Log evaluation metrics to wandb
         import json
         metrics_path = os.path.join(OUTPUT_DIR, "evaluation_metrics.json")
         if os.path.exists(metrics_path):
@@ -383,7 +356,6 @@ def train():
     else:
         print("Warning: No detections found on validation set!")
 
-    # Finish wandb run
     wandb.finish()
 
 if __name__ == "__main__":
