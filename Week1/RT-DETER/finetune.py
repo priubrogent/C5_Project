@@ -26,7 +26,7 @@ from utils.KittiMotsDataset import KittiMotsDataset
 # Configuration
 # ---------------------------------------------------------------------------
 SEED = 42
-DATASET_PATH   = "/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02"
+DATASET_PATH   = "/data1tb/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = os.path.join(os.path.dirname(__file__), "..", "kitti_mots_to_coco_gt.json")
 OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune")
 CHECKPOINT     = "PekingU/rtdetr_r101vd"   # r50vd also works and is lighter
@@ -49,6 +49,9 @@ LORA_ALPHA = 32
 # id2label is stored in the config for display and post-processing.
 ID2LABEL = {1: "person", 3: "car"}
 LABEL2ID = {"person": 1, "car": 3}
+
+ID2LABEL = {0: "person", 1: "car"}
+LABEL2ID = {"person": 0, "car": 1}
 
 
 # ---------------------------------------------------------------------------
@@ -102,9 +105,9 @@ def train():
     print(f"Using device: {device}")
 
     # --- wandb ---
-    """
     wandb.init(
-        project="C5-RT-DETR",
+        project="kitti-mots-rtdetr-finetuning",
+        entity="veridas",
         name=f"rtdetr-lora-r{LORA_R}",
         config={
             "checkpoint": CHECKPOINT,
@@ -116,7 +119,6 @@ def train():
             "lora_alpha": LORA_ALPHA,
         },
     )
-    """
     
     # --- Model & processor ---
     processor = RTDetrImageProcessor.from_pretrained(CHECKPOINT)
@@ -194,7 +196,7 @@ def train():
         data_seed=SEED,
         save_total_limit=2,
         dataloader_num_workers=4,
-        report_to="tensorboard",
+        report_to="wandb",
     )
 
     trainer = Trainer(
@@ -261,7 +263,7 @@ def train():
     else:
         print("Warning: no detections produced on the validation set.")
 
-    # wandb.finish()
+    wandb.finish()
 
 
 if __name__ == "__main__":
