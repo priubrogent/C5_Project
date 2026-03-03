@@ -338,9 +338,11 @@ def finetune_yolo_defreeze():
         # Unfreeze desired layers
         unfreeze_last_n_layers(model, stage["unfreeze_layers"])
 
+        total_params     = sum(p.numel() for p in model.model.parameters())
         trainable_params = count_trainable_params(model.model)
 
-        print(f"Trainable parameters: {trainable_params}")
+        print(f"Total parameters:     {total_params:,}")
+        print(f"Trainable parameters: {trainable_params:,} ({100 * trainable_params / total_params:.2f}%)")
 
         wandb.log({
             "stage": stage_idx,
@@ -476,9 +478,12 @@ def finetune_yolo_lora():
         if p.requires_grad:
             print(n, p.shape)
 
+    total_params     = sum(p.numel() for p in trainer.model.model.parameters())
     trainable_params = count_trainable_params(trainer.model.model)
-    print(f"Trainable parameters (LoRA only): {trainable_params}")
-    wandb.log({"trainable_params": trainable_params})
+    print(f"Total parameters:     {total_params:,}")
+    print(f"Trainable parameters: {trainable_params:,} ({100 * trainable_params / total_params:.2f}%)")
+    wandb.log({"total_params": total_params, "trainable_params": trainable_params})
+
 
     trainer.add_callback("on_train_start", on_train_start_freeze_base)
 
