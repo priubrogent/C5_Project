@@ -1,0 +1,31 @@
+program: /home-local/gasbert/master/C5/C5_Project/Week1/YOLO/main_run.py
+
+method: random
+
+metric:
+  name: val/mAP50-95
+  goal: maximize
+
+parameters:
+  lr0:
+    distribution: uniform
+    min: 0.00001
+    max: 0.01
+
+  momentum:
+    distribution: uniform
+    min: 0.5
+    max: 0.98
+
+  weight_decay:
+    distribution: uniform
+    min: 0.0001
+    max: 0.01
+
+command:
+  - env
+  - python
+  - -m
+  - Week1.YOLO.main_run
+  - --task 
+  - e_defreeze
