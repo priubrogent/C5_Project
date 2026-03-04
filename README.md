@@ -1,29 +1,11 @@
+# C5 Project - Object Detection and Recognition
 
-## c) infer
-- [x] Faster R-CNN
-- [ ] DeTR
-- [ ] YOLO
+**Authors:** Arnau Marcos Almansa · Gerard Asbert Marcos · Pau Monserrat Llabrés · Pol Riubrogent Comas
 
-## d) avaluacio pretrained
-- [x] Faster R-CNN
-- [ ] DeTR
-- [ ] YOLO
+---
 
-## e) finetune (kitti)
-- [ ] Faster R-CNN
-  - [x] Unfreeze everything, standard albumenations
-  - [ ] Unfreeze progresiu
-- [ ] DeTR
-- [ ] YOLO
+## Contents
 
-## f) finetune (deart)
-- [x] Faster R-CNN
-
-## - [ ] g) comparar
-## h) opcional
-- [ ] finetune
-- [ ] comparar
-
-
-
-
+| Week | Topic            | Folder           |
+| ---- | ---------------- | ---------------- |
+| 1    | Object detection | [Week1/](Week1/) |
