@@ -26,30 +26,29 @@ from utils.KittiMotsDataset import KittiMotsDataset
 # Configuration
 # ---------------------------------------------------------------------------
 SEED = 42
-DATASET_PATH   = "/data1tb/KITTI-MOTS/training/image_02"
+DATASET_PATH   = "/home/msiau/data/tmp/amarcos/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = os.path.join(os.path.dirname(__file__), "..", "kitti_mots_to_coco_gt.json")
-OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune")
+OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune_fixed2")
 CHECKPOINT     = "PekingU/rtdetr_r101vd"   # r50vd also works and is lighter
 
-# Hyperparameters
-NUM_EPOCHS    = 10
-BATCH_SIZE    = 8
+# Hyperparameters - IMPROVED VERSION 2
+# FIX #1: Increased epochs from 10 to 20 (matching DeTR sweep)
+# FIX #2: Changed to linear scheduler (DeTR sweep showed linear works well)
+# FIX #3: Increased LoRA capacity (r=32, alpha=64)
+NUM_EPOCHS    = 20      # FIXED: Was 10, now 20 for longer training
+BATCH_SIZE    = 16      # Already fixed in v1
 LEARNING_RATE = 1e-4
 WEIGHT_DECAY  = 1e-4
 WARMUP_RATIO  = 0.1
-LR_SCHEDULER  = "cosine"
+LR_SCHEDULER  = "linear"  # FIXED: Was "cosine", now "linear" (DeTR uses this)
 OPTIMIZER     = "adamw_torch_fused"
 
-# LoRA
-LORA_R     = 16
-LORA_ALPHA = 32
+# LoRA - INCREASED CAPACITY
+# FIXED: Increased from r=16, alpha=32 to r=32, alpha=64
+LORA_R     = 32   # FIXED: Doubled from 16
+LORA_ALPHA = 64   # FIXED: Doubled from 32
 
 # RT-DETR class mapping (2 classes: person and car)
-# The dataset converts COCO IDs (1, 3) → model indices (0, 1) via COCO_TO_DETR_ID.
-# id2label is stored in the config for display and post-processing.
-ID2LABEL = {1: "person", 3: "car"}
-LABEL2ID = {"person": 1, "car": 3}
-
 ID2LABEL = {0: "person", 1: "car"}
 LABEL2ID = {"person": 0, "car": 1}
 
@@ -67,12 +66,19 @@ def set_seed(seed: int):
 
 
 def build_train_transforms():
-    """Albumentations augmentations that are safe for driving scenes."""
+    """
+    Augmentations matching DeTR's configuration.
+    """
     return A.Compose(
         [
             A.HorizontalFlip(p=0.5),
-            A.Affine(translate_percent=(-0.1, 0.1), scale=(0.7, 1.3), rotate=0, p=0.5),
-            A.RandomBrightnessContrast(p=0.3),
+            A.ShiftScaleRotate(
+                shift_limit=0.1,
+                scale_limit=0.5,
+                rotate_limit=0,
+                p=0.5
+            ),
+            A.RandomBrightnessContrast(p=0.2),
             A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.05, p=0.2),
             A.GaussianBlur(blur_limit=(3, 5), p=0.1),
         ],
@@ -108,7 +114,7 @@ def train():
     wandb.init(
         project="kitti-mots-rtdetr-finetuning",
         entity="veridas",
-        name=f"rtdetr-lora-r{LORA_R}",
+        name=f"rtdetr-lora-r{LORA_R}-fixed2",
         config={
             "checkpoint": CHECKPOINT,
             "epochs": NUM_EPOCHS,
@@ -117,9 +123,11 @@ def train():
             "weight_decay": WEIGHT_DECAY,
             "lora_r": LORA_R,
             "lora_alpha": LORA_ALPHA,
+            "lr_scheduler": LR_SCHEDULER,
+            "improvements_v2": "epochs=20, linear_scheduler, r=32/alpha=64, conv_layers_in_lora"
         },
     )
-    
+
     # --- Model & processor ---
     processor = RTDetrImageProcessor.from_pretrained(CHECKPOINT)
 
@@ -135,28 +143,48 @@ def train():
     )
 
     # --- LoRA ---
-    # RT-DETR decoder cross-attention uses q_proj / k_proj / v_proj / out_proj.
-    # NOTE: we do NOT use modules_to_save here because RT-DETR names its detection
-    # heads differently from DETR ('class_embed', 'enc_score_head', etc.) and PEFT
-    # would silently ignore unrecognised names, leaving the heads frozen.
-    # Instead we manually unfreeze them below.
+    # MAJOR FIX: Added "convolution" to target_modules to match DeTR's approach
+    # DeTR targets conv1, conv2, conv3 in the backbone - we target all "convolution" layers
+    # This gives LoRA adapters in the visual backbone for better domain adaptation (COCO→KITTI)
     lora_config = LoraConfig(
         r=LORA_R,
         lora_alpha=LORA_ALPHA,
-        target_modules=["q_proj", "k_proj", "v_proj", "out_proj"],
+        target_modules=[
+            "q_proj", "k_proj", "v_proj", "out_proj",  # Transformer attention
+            "convolution"  # FIXED: Added backbone conv layers (matches DeTR's conv1/2/3)
+        ],
         lora_dropout=0.1,
         bias="none",
+        # NOTE: Cannot use modules_to_save with ModuleList - RT-DETR's heads are ModuleLists
     )
+
+    print("\n=== Applying LoRA ===")
+    print(f"LoRA config: r={LORA_R}, alpha={LORA_ALPHA}")
+    print(f"Target modules: {lora_config.target_modules}")
+
     model = get_peft_model(model, lora_config)
 
-    # Unfreeze the RT-DETR detection heads that were re-initialised for 2 classes.
-    # These correspond to the MISMATCH keys in the load report and must be learned.
+    # Manually unfreeze detection heads AFTER PEFT wrapping
+    # The detection heads are ModuleLists containing Linear layers.
     _HEAD_KEYWORDS = ("class_embed", "enc_score_head", "denoising_class_embed", "bbox_embed")
+
+    print("\n=== Unfreezing Detection Heads ===")
+    unfrozen_count = 0
     for name, param in model.named_parameters():
         if any(kw in name for kw in _HEAD_KEYWORDS):
             param.requires_grad = True
+            unfrozen_count += 1
+            print(f"✓ Unfrozen: {name}")
+    print(f"Total detection head parameters unfrozen: {unfrozen_count}\n")
 
+    # Verification: Count total trainable parameters
     model.print_trainable_parameters()
+
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total parameters: {total_params:,}")
+    print(f"Trainable parameters: {trainable_params:,} ({100 * trainable_params / total_params:.2f}%)\n")
+
     model.to(device)
 
     # --- Datasets ---
@@ -206,11 +234,15 @@ def train():
         eval_dataset=val_dataset,
         data_collator=collate_fn,
         callbacks=[
-            EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.005)
+            EarlyStoppingCallback(early_stopping_patience=5, early_stopping_threshold=0.005)
         ],
     )
 
-    print("\n--- Starting RT-DETR LoRA Fine-Tuning ---")
+    print("\n--- Starting RT-DETR LoRA Fine-Tuning (FIXED VERSION 2) ---")
+    print(f"Training for {NUM_EPOCHS} epochs with {LR_SCHEDULER} scheduler")
+    print(f"LoRA: r={LORA_R}, alpha={LORA_ALPHA}")
+    print(f"Targeting: Attention layers + Backbone convolutions\n")
+
     trainer.train()
 
     # Save LoRA adapters
@@ -218,18 +250,6 @@ def train():
     model.save_pretrained(adapter_path)
     processor.save_pretrained(adapter_path)
     print(f"Adapters saved to: {adapter_path}")
-
-    # Save detection head weights separately — PEFT only stores LoRA matrices,
-    # so class_embed / bbox_embed / enc_score_head / denoising_class_embed must
-    # be persisted explicitly so they can be restored at inference time.
-    _HEAD_KEYWORDS = ("class_embed", "enc_score_head", "denoising_class_embed", "bbox_embed")
-    head_state = {
-        name: param.data.clone()
-        for name, param in model.named_parameters()
-        if any(kw in name for kw in _HEAD_KEYWORDS)
-    }
-    torch.save(head_state, os.path.join(adapter_path, "detection_heads.pt"))
-    print(f"Detection head weights saved to: {adapter_path}/detection_heads.pt")
 
     # --- COCO Evaluation on validation split ---
     print("\n--- Running COCO Evaluation on Validation Split ---")
