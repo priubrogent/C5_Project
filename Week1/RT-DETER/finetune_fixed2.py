@@ -31,22 +31,18 @@ ANNOTATION_FILE = os.path.join(os.path.dirname(__file__), "..", "kitti_mots_to_c
 OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune_fixed2")
 CHECKPOINT     = "PekingU/rtdetr_r101vd"   # r50vd also works and is lighter
 
-# Hyperparameters - IMPROVED VERSION 2
-# FIX #1: Increased epochs from 10 to 20 (matching DeTR sweep)
-# FIX #2: Changed to linear scheduler (DeTR sweep showed linear works well)
-# FIX #3: Increased LoRA capacity (r=32, alpha=64)
-NUM_EPOCHS    = 20      # FIXED: Was 10, now 20 for longer training
-BATCH_SIZE    = 16      # Already fixed in v1
+# Hyperparameters
+NUM_EPOCHS    = 20
+BATCH_SIZE    = 16
 LEARNING_RATE = 1e-4
 WEIGHT_DECAY  = 1e-4
 WARMUP_RATIO  = 0.1
-LR_SCHEDULER  = "linear"  # FIXED: Was "cosine", now "linear" (DeTR uses this)
+LR_SCHEDULER  = "linear"
 OPTIMIZER     = "adamw_torch_fused"
 
-# LoRA - INCREASED CAPACITY
-# FIXED: Increased from r=16, alpha=32 to r=32, alpha=64
-LORA_R     = 32   # FIXED: Doubled from 16
-LORA_ALPHA = 64   # FIXED: Doubled from 32
+# LoRA
+LORA_R     = 32
+LORA_ALPHA = 64
 
 # RT-DETR class mapping (2 classes: person and car)
 ID2LABEL = {0: "person", 1: "car"}
@@ -124,7 +120,6 @@ def train():
             "lora_r": LORA_R,
             "lora_alpha": LORA_ALPHA,
             "lr_scheduler": LR_SCHEDULER,
-            "improvements_v2": "epochs=20, linear_scheduler, r=32/alpha=64, conv_layers_in_lora"
         },
     )
 
@@ -143,15 +138,12 @@ def train():
     )
 
     # --- LoRA ---
-    # MAJOR FIX: Added "convolution" to target_modules to match DeTR's approach
-    # DeTR targets conv1, conv2, conv3 in the backbone - we target all "convolution" layers
-    # This gives LoRA adapters in the visual backbone for better domain adaptation (COCO→KITTI)
     lora_config = LoraConfig(
         r=LORA_R,
         lora_alpha=LORA_ALPHA,
         target_modules=[
             "q_proj", "k_proj", "v_proj", "out_proj",  # Transformer attention
-            "convolution"  # FIXED: Added backbone conv layers (matches DeTR's conv1/2/3)
+            "convolution"
         ],
         lora_dropout=0.1,
         bias="none",
@@ -238,10 +230,7 @@ def train():
         ],
     )
 
-    print("\n--- Starting RT-DETR LoRA Fine-Tuning (FIXED VERSION 2) ---")
-    print(f"Training for {NUM_EPOCHS} epochs with {LR_SCHEDULER} scheduler")
-    print(f"LoRA: r={LORA_R}, alpha={LORA_ALPHA}")
-    print(f"Targeting: Attention layers + Backbone convolutions\n")
+    print("\n--- Starting RT-DETR LoRA Fine-Tuning ---")
 
     trainer.train()
 

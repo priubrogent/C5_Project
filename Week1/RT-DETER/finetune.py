@@ -45,11 +45,6 @@ LORA_R     = 16
 LORA_ALPHA = 32
 
 # RT-DETR class mapping (2 classes: person and car)
-# The dataset converts COCO IDs (1, 3) → model indices (0, 1) via COCO_TO_DETR_ID.
-# id2label is stored in the config for display and post-processing.
-ID2LABEL = {1: "person", 3: "car"}
-LABEL2ID = {"person": 1, "car": 3}
-
 ID2LABEL = {0: "person", 1: "car"}
 LABEL2ID = {"person": 0, "car": 1}
 
@@ -85,10 +80,7 @@ def build_train_transforms():
 
 
 def collate_fn(batch):
-    """
-    RT-DETR uses fixed-size inputs (resized by the processor), so we can
-    simply stack pixel_values — no pixel_mask padding needed unlike DETR.
-    """
+    """RT-DETR uses fixed-size inputs; stack pixel_values directly (no pixel_mask needed)."""
     pixel_values = torch.stack([item["pixel_values"] for item in batch])
     labels = [item["labels"] for item in batch]
     return {"pixel_values": pixel_values, "labels": labels}
@@ -219,7 +211,7 @@ def train():
     processor.save_pretrained(adapter_path)
     print(f"Adapters saved to: {adapter_path}")
 
-    # Save detection head weights separately — PEFT only stores LoRA matrices,
+    # Save detection head weights separately PEFT only stores LoRA matrices,
     # so class_embed / bbox_embed / enc_score_head / denoising_class_embed must
     # be persisted explicitly so they can be restored at inference time.
     _HEAD_KEYWORDS = ("class_embed", "enc_score_head", "denoising_class_embed", "bbox_embed")

@@ -32,17 +32,16 @@ ANNOTATION_FILE = os.path.join(os.path.dirname(__file__), "..", "kitti_mots_to_c
 OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune_fixed3")
 CHECKPOINT     = "PekingU/rtdetr_r101vd"
 
-# Hyperparameters - CONSERVATIVE APPROACH
-# Strategy: Smart weight initialization + careful fine-tuning
-NUM_EPOCHS    = 15      # Medium training length
+# Hyperparameters
+NUM_EPOCHS    = 15
 BATCH_SIZE    = 16
-LEARNING_RATE = 5e-5    # LOWER than before (was 1e-4) to preserve COCO knowledge
+LEARNING_RATE = 5e-5
 WEIGHT_DECAY  = 1e-4
 WARMUP_RATIO  = 0.1
 LR_SCHEDULER  = "linear"
 OPTIMIZER     = "adamw_torch_fused"
 
-# LoRA - Moderate capacity
+# LoRA
 LORA_R     = 16
 LORA_ALPHA = 32
 
@@ -59,23 +58,10 @@ COCO_CAR_IDX = 2     # COCO class 3 (car) is at index 2
 # Smart Weight Initialization
 # ---------------------------------------------------------------------------
 def initialize_from_coco_weights(model_2class, model_coco):
-    """
-    Initialize the 2-class detection heads with COCO person/car weights.
-
-    This is the KEY to preserving COCO knowledge:
-    - COCO trained on person (class 0) and car (class 2)
-    - We copy these weights to our 2-class model
-    - This gives a warm start instead of random initialization
-    """
-    print("\n=== Initializing 2-class heads from COCO person/car weights ===")
-
-    # RT-DETR has 6 decoder layers, each with class_embed and bbox_embed
+    """Initialize the 2-class detection heads with COCO person/car weights."""
     num_decoder_layers = len(model_coco.model.decoder.class_embed)
 
     for layer_idx in range(num_decoder_layers):
-        # --- Class Embedding ---
-        # Copy person (COCO idx 0) → KITTI person (idx 0)
-        # Copy car (COCO idx 2) → KITTI car (idx 1)
         coco_class_weight = model_coco.model.decoder.class_embed[layer_idx].weight.data
         coco_class_bias = model_coco.model.decoder.class_embed[layer_idx].bias.data
 
@@ -84,29 +70,17 @@ def initialize_from_coco_weights(model_2class, model_coco):
         model_2class.model.decoder.class_embed[layer_idx].bias.data[0] = coco_class_bias[COCO_PERSON_IDX]
         model_2class.model.decoder.class_embed[layer_idx].bias.data[1] = coco_class_bias[COCO_CAR_IDX]
 
-        print(f"✓ Layer {layer_idx} class_embed: Copied COCO person/car weights")
-
-        # --- Bbox Embedding ---
-        # Bbox predictor is class-agnostic (same for all classes), so we just copy all weights
-        # bbox_embed is an MLP with 3 layers
+        # Bbox predictor is class-agnostic; copy all weights
         coco_bbox_mlp = model_coco.model.decoder.bbox_embed[layer_idx]
         kitti_bbox_mlp = model_2class.model.decoder.bbox_embed[layer_idx]
-
         for mlp_layer_idx in range(len(coco_bbox_mlp.layers)):
             kitti_bbox_mlp.layers[mlp_layer_idx].weight.data = coco_bbox_mlp.layers[mlp_layer_idx].weight.data.clone()
             kitti_bbox_mlp.layers[mlp_layer_idx].bias.data = coco_bbox_mlp.layers[mlp_layer_idx].bias.data.clone()
 
-        print(f"✓ Layer {layer_idx} bbox_embed: Copied COCO bbox MLP weights")
-
-    # Also initialize denoising class embed (used during training)
-    # COCO has 81 classes (80 + background), we have 3 (2 + background)
     if hasattr(model_2class.model, 'denoising_class_embed') and hasattr(model_coco.model, 'denoising_class_embed'):
         model_2class.model.denoising_class_embed.weight.data[0] = model_coco.model.denoising_class_embed.weight.data[COCO_PERSON_IDX]
         model_2class.model.denoising_class_embed.weight.data[1] = model_coco.model.denoising_class_embed.weight.data[COCO_CAR_IDX]
-        # Keep background (last class) as random initialization
-        print(f"✓ denoising_class_embed: Copied COCO person/car weights")
 
-    print("=== Weight initialization complete! ===\n")
     return model_2class
 
 
@@ -176,29 +150,21 @@ def train():
             "lora_r": LORA_R,
             "lora_alpha": LORA_ALPHA,
             "lr_scheduler": LR_SCHEDULER,
-            "strategy": "Smart weight initialization from COCO person/car classes"
         },
     )
 
-    # --- Load COCO pretrained model FIRST (for weight extraction) ---
-    print("\n=== Loading COCO pretrained model ===")
     model_coco = RTDetrForObjectDetection.from_pretrained(CHECKPOINT)
-    print("✓ COCO model loaded (80 classes)")
 
-    # --- Create 2-class model config ---
     model_config = RTDetrConfig.from_pretrained(CHECKPOINT)
     model_config.num_labels = len(ID2LABEL)
     model_config.id2label   = ID2LABEL
     model_config.label2id   = LABEL2ID
 
-    # --- Load 2-class model (initially with random heads) ---
-    print("\n=== Loading 2-class model ===")
     model = RTDetrForObjectDetection.from_pretrained(
         CHECKPOINT,
         config=model_config,
-        ignore_mismatched_sizes=True,   # This creates new 2-class heads (random init)
+        ignore_mismatched_sizes=True,
     )
-    print("✓ 2-class model loaded (random head initialization)")
 
     # --- Initialize 2-class heads with COCO person/car weights ---
     model = initialize_from_coco_weights(model, model_coco)
@@ -210,20 +176,13 @@ def train():
     # --- Model & processor ---
     processor = RTDetrImageProcessor.from_pretrained(CHECKPOINT)
 
-    # --- LoRA ---
-    # Conservative approach: Only target attention layers, NOT backbone convolutions
     lora_config = LoraConfig(
         r=LORA_R,
         lora_alpha=LORA_ALPHA,
-        target_modules=["q_proj", "k_proj", "v_proj", "out_proj"],  # Attention only
+        target_modules=["q_proj", "k_proj", "v_proj", "out_proj"],
         lora_dropout=0.1,
         bias="none",
     )
-
-    print("\n=== Applying LoRA ===")
-    print(f"LoRA config: r={LORA_R}, alpha={LORA_ALPHA}")
-    print(f"Target modules: {lora_config.target_modules}")
-
     model = get_peft_model(model, lora_config)
 
     # Manually unfreeze detection heads AFTER PEFT wrapping
@@ -302,14 +261,8 @@ def train():
         ],
     )
 
-    print("\n" + "="*70)
-    print("STARTING RT-DETR FINE-TUNING WITH SMART WEIGHT INITIALIZATION")
-    print("="*70)
-    print(f"Strategy: Initialize 2-class heads with COCO person/car weights")
-    print(f"Training: {NUM_EPOCHS} epochs, LR={LEARNING_RATE}, {LR_SCHEDULER} scheduler")
-    print(f"LoRA: r={LORA_R}, alpha={LORA_ALPHA}, attention layers only")
-    print(f"Target: Beat pretrained AP@50 = 0.918")
-    print("="*70 + "\n")
+    print(f"\nStarting RT-DETR fine-tuning: {NUM_EPOCHS} epochs, LR={LEARNING_RATE}, {LR_SCHEDULER} scheduler")
+    print(f"LoRA: r={LORA_R}, alpha={LORA_ALPHA}, attention layers only\n")
 
     trainer.train()
 
@@ -375,19 +328,14 @@ def train():
         if metrics:
             wandb.log(metrics)
 
-            # Print comparison
-            print("\n" + "="*70)
-            print("RESULTS COMPARISON")
-            print("="*70)
-            print(f"Pretrained (baseline): AP@50 = 0.918, AP@50:95 = 0.667")
-            print(f"Fixed v3 (this run):   AP@50 = {metrics.get('AP@0.5', 'N/A'):.3f}, AP@50:95 = {metrics.get('AP@0.5:0.95', 'N/A'):.3f}")
+            print(f"Pretrained: AP@50=0.918, AP@50:95=0.667")
+            print(f"This run:   AP@50={metrics.get('AP@0.5', 'N/A'):.3f}, AP@50:95={metrics.get('AP@0.5:0.95', 'N/A'):.3f}")
             if metrics.get('AP@0.5', 0) > 0.918:
-                print("🎉 SUCCESS! Fine-tuning improved over pretrained model!")
+                print("Fine-tuning improved over pretrained model.")
             elif metrics.get('AP@0.5', 0) > 0.90:
-                print("✓ Good result, close to pretrained performance")
+                print("Good result, close to pretrained performance.")
             else:
-                print("⚠ Performance degraded - consider using pretrained model")
-            print("="*70)
+                print("Performance degraded - consider using pretrained model.")
     else:
         print("Warning: no detections produced on the validation set.")
 
