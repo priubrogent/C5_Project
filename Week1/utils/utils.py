@@ -70,8 +70,7 @@ def draw_bboxes(image, bboxes, labels, scores=None, label_map=None, threshold=0.
         else:
             x1, y1, x2, y2 = bbox
 
-        # 4. Prepare Label Text
-        cat_name = label_map.get(label, f"ID:{label}")
+        cat_name = label_map.get(label.item(), f"ID:{label}")
         if box_type == "pred":
             label_text = f"{style['label_prefix']}-{cat_name}: {round(float(score), 2)}"
         elif box_type == "gt":
@@ -194,6 +193,8 @@ def plot_loss(trainer, output_dir, file_name="loss_curve.png", save=True):
     Args:
         trainer (Trainer): The Hugging Face Trainer object after training.
         output_dir (str): Directory where the plot will be saved.
+    Returns:
+        fig: The matplotlib figure object for the loss curve.
     """
     # Extract logs from the trainer state
     history = trainer.state.log_history
@@ -214,6 +215,8 @@ def plot_loss(trainer, output_dir, file_name="loss_curve.png", save=True):
     if val_loss:
         # Markers help distinguish the validation points usually taken at integer epochs
         plt.plot(val_epochs, val_loss, label="Validation Loss", color="red", lw=3, marker='o', markersize=8)
+
+    plt.ylim(0, 2)
 
     # Apply specific font sizes and labels
     plt.xlabel("Epochs", fontsize=FONT_SIZE_AXIS, labelpad=15)

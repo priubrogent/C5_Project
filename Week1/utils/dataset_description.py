@@ -86,7 +86,7 @@ def generate_dataset_report():
     plt.savefig(os.path.join(OUTPUT_DIR, "class_distribution_high_res.png"), dpi=300)
     print(f"Graphic saved to {OUTPUT_DIR}class_distribution_high_res.png")
 
-    # --- Final Text Summary ---
+    # --- Final Text Summary --- 
     print(f"\n--- DATASET SUMMARY ---")
     print(f"Train: {train_stats['frames']} frames, {train_stats['cars']} cars, {train_stats['peds']} peds")
     print(f"Val:   {val_stats['frames']} frames, {val_stats['cars']} cars, {val_stats['peds']} peds")

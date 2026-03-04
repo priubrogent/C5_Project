@@ -11,5 +11,5 @@
 #python utils/GT_conversor.py
 #python utils/GT_visualization.py
 #python utils/dataset_description.py
-python DeTR/task_e/sweep_launcher.py
-
+python DeTR/task_e/qualitative.py
+#python DeTR/task_e/lora_fine_tune.py
