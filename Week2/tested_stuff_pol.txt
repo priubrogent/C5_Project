@@ -1,0 +1,3 @@
+sam inference (sam vit normal)
+    point prompt from middle of bboxes of gt (no ignore region)
+    point prompt from middle of bboxes of gt (taking into account ignore region)
