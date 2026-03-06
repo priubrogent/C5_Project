@@ -12,7 +12,7 @@
 
 ## Week 2 Progress
 - [x] task a
-  - [ ] initial experiments
+  - [x] initial experiments
   - [ ] final experimentation (slides and just)
 
 - [ ] task b (text prompt, grounded sam)
@@ -22,3 +22,4 @@
 - [ ] task f (pretrained sam and finetuned vsresion in deart, or other domain shift)
 - [ ] task g (analyze difference among prompts)
 - [ ] task h (optional)
+
