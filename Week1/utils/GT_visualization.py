@@ -11,7 +11,10 @@ from utils import draw_bboxes
 # --- Hyperparameters ---
 DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 GT_PATH = "kitti_mots_to_coco_gt.json"
-OUTPUT_DIR = "./DeTR/Results_DETR/ground_truth_viz/"
+FOLDER_PATH = "/data/113-2/users/gasbert/master/C5/KITTI-MOTS"
+DATASET_PATH = os.path.join(FOLDER_PATH, "training/image_02")
+GT_PATH = "/data/113-2/users/gasbert/master/C5/KITTI-MOTS/kitti_mots_to_coco_gt.json"
+OUTPUT_DIR = "./YOLO/Results_DETR/ground_truth_viz/"
 
 # Visualization Settings
 N_SEQUENCES = 21             # Number of sequences to process (Max 21)
