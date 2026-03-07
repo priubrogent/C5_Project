@@ -18,10 +18,12 @@ import time
 from Week1.utils.utils import coco_evaluation, TRAIN_SEQS, VAL_SEQS, COCO_CLASSES, visualize_gt_vs_preds, filter_results, draw_bboxes, debug_single_image_detection, LoRAConv2d, inject_lora
 from pycocotools.coco import COCO
 
-KITTI_TO_COCO = {0: 1, 2: 3} # Mapping from KITTI MOTS class IDs to COCO class IDs
+KITTI_TO_COCO = {0: 1, 1: 3} # Mapping from KITTI MOTS class IDs to COCO class IDs
 #Opcions possibles depenent del size: yolov10n.pt, yolov10s.pt, yolov10m.pt, yolov10l.pt, yolov10x.pt
-model = YOLO("yolo26m.pt")
-model.to("cuda")
+#model = YOLO("yolo11x.pt")
+#model.to("cuda")
+
+#print(f"Total model parameters: {sum(p.numel() for p in model.parameters())}")
 
 DATASET_PATH = "/data/113-2/users/gasbert/master/C5/KITTI-MOTS"
 IMAGES_PATH = os.path.join(DATASET_PATH, "training/image_02")
@@ -30,7 +32,7 @@ ANNOTATIONS_PATH = os.path.join(DATASET_PATH, "instances_txt")
 allowed_classes = set(KITTI_TO_COCO.keys())
 
 GT_PATH = "/data/113-2/users/gasbert/master/C5/KITTI-MOTS/kitti_mots_to_coco_gt.json"
-OUTPUT_DIR = "./YOLO/Results_YOLO/task_d/"
+OUTPUT_DIR = "./YOLO/Results_YOLO/task_e/"
 
 
 def visualize_first_frames_yolo():
@@ -126,6 +128,105 @@ def visualize_first_frames_yolo():
         plt.axis('off')
         plt.title(f"YOLO Predictions vs GT: Sequence {seq_idx:04d}")
         plt.show()  # Blocks execution until window is closed'''
+
+def visualize_first_frames_yolo_lora():
+    """
+    Inferences the first image of each sequence using LoRA-finetuned YOLO,
+    overlays predictions, and saves visualizations.
+    """
+    RANK_USED_DURING_TRAINING = 19
+    ALPHA_USED_DURING_TRAINING = 27
+
+    vis_dir = os.path.join(OUTPUT_DIR, "visualizations")
+    os.makedirs(vis_dir, exist_ok=True)
+
+    # -------------------------------------------------
+    # 1. Load base model
+    # -------------------------------------------------
+    print("Loading LoRA fine-tuned YOLO...")
+    model = YOLO("/home-local/gasbert/master/C5/C5_Project/runs/detect/YOLO_LoRA/lora_training/weights/best.pt")
+
+    model.to("cuda")
+    model.model.eval()
+
+    # Disable fusion
+    model.model.fuse = lambda *args, **kwargs: model.model
+
+    print(f"Total model parameters: {sum(p.numel() for p in model.parameters())}")
+
+    # -------------------------------------------------
+    # Load COCO GT
+    # -------------------------------------------------
+    if not os.path.exists(GT_PATH):
+        print(f"Error: {GT_PATH} not found.")
+        return
+    coco_gt = COCO(GT_PATH)
+
+    print("Generating visualizations...")
+
+    for seq_idx in VAL_SEQS:
+        img_path = Path(IMAGES_PATH) / f"{seq_idx:04d}" / "000000.png"
+        if not img_path.exists():
+            continue
+
+        image_cv2 = cv2.imread(str(img_path))
+        if image_cv2 is None:
+            continue
+
+        image_pil = Image.fromarray(
+            cv2.cvtColor(image_cv2, cv2.COLOR_BGR2RGB)
+        )
+
+        unique_image_id = seq_idx * 100000
+
+        # ---------------- YOLO Inference ----------------
+        start_time = time.perf_counter()
+        results = model(image_cv2, verbose=False)
+        end_time = time.perf_counter()
+        inference_time_ms = (end_time - start_time) * 1000
+        print(f"Inference time: {inference_time_ms:.2f} ms")
+
+        result = results[0]
+
+        pred_boxes, pred_labels, pred_scores = [], [], []
+
+        if result.boxes is not None:
+            boxes = result.boxes.xyxy.cpu().numpy()
+            scores = result.boxes.conf.cpu().numpy()
+            classes = result.boxes.cls.cpu().numpy().astype(int)
+            print("Raw predicted classes:", set(classes))
+            keep_indices = [
+                i for i, c in enumerate(classes)
+                if c in allowed_classes
+            ]
+
+            for i in keep_indices:
+                box = boxes[i]
+                score = scores[i]
+                cls = classes[i]
+
+                mapped_cls = KITTI_TO_COCO[cls]
+                pred_boxes.append(box.tolist())
+                pred_labels.append(mapped_cls)
+                pred_scores.append(score)
+
+        # ---------------- Draw Boxes ----------------
+        if pred_boxes:
+            image_pil = draw_bboxes(
+                image_pil,
+                pred_boxes,
+                pred_labels,
+                pred_scores,
+                box_type="pred",
+                label_map={1: "Pedestrian", 3: "Car"}
+            )
+
+        save_path = os.path.join(
+            vis_dir,
+            f"seq_{seq_idx:04d}_vis.png"
+        )
+        image_pil.save(save_path)
+        print(f"Saved: {save_path}")
 
 
 def run_inference_on_dataset():
@@ -526,4 +627,4 @@ if __name__ == "__main__":
     elif args.task == "e_lora":
         finetune_yolo_lora()
     elif args.task == "v":
-        visualize_first_frames_yolo()
+        visualize_first_frames_yolo_lora()
