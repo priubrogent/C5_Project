@@ -16,10 +16,12 @@ from utils.utils import coco_evaluation, draw_bboxes, filter_results, VAL_SEQS
 
 from pycocotools.coco import COCO
 
+MODEL_TO_COCO = {0: 1, 2: 3}
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-DATASET_PATH    = "/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02"
+DATASET_PATH    = "/data1tb/KITTI-MOTS/training/image_02"
 GT_PATH         = os.path.join(os.path.dirname(__file__), "..", "kitti_mots_to_coco_gt.json")
 OUTPUT_DIR      = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "pretrained_eval")
 CHECKPOINT      = "PekingU/rtdetr_r101vd"
@@ -77,12 +79,18 @@ def run_evaluation():
             preds = processor.post_process_object_detection(
                 outputs, target_sizes=target_sizes, threshold=0.0
             )[0]
+            
+            # breakpoint()
 
             for score, label, bbox in zip(preds["scores"], preds["labels"], preds["boxes"]):
                 label_id = label.item()
                 # Keep only person (COCO 1) and car (COCO 3)
-                if label_id not in {1, 3}:
+                # if label_id not in {1, 3}:
+                if label_id not in MODEL_TO_COCO:
                     continue
+                
+                label_id = MODEL_TO_COCO[label_id]
+                
                 x1, y1, x2, y2 = bbox.tolist()
                 results_list.append({
                     "image_id":   unique_img_id,
@@ -128,10 +136,20 @@ def run_evaluation():
             )[0]
 
             # Predictions (red) — filter to person/car only
-            valid_boxes, valid_labels, valid_scores = filter_results(
-                preds["scores"], preds["labels"], preds["boxes"]
-            )
-
+            # valid_boxes, valid_labels, valid_scores = filter_results(
+                # preds["scores"], preds["labels"], preds["boxes"]
+            # )
+            
+            valid_boxes, valid_labels, valid_scores = [], [], []
+            
+            for score, label, bbox in zip(preds["scores"], preds["labels"], preds["boxes"]):
+                label_id = label.item()
+                if label_id in MODEL_TO_COCO:
+                    label_id = MODEL_TO_COCO[label_id]
+                    valid_boxes.append(bbox.tolist())
+                    valid_labels.append(label_id)
+                    valid_scores.append(score.item())
+            
             # Ground truth (green) and ignore regions (orange)
             ann_ids  = coco_gt.getAnnIds(imgIds=[unique_img_id])
             anns     = coco_gt.loadAnns(ann_ids)
@@ -147,7 +165,7 @@ def run_evaluation():
 
             if valid_boxes:
                 image = draw_bboxes(image, valid_boxes, valid_labels, valid_scores,
-                                    label_map=COCO_LABELS, box_type="pred")
+                                    label_map={1: "person", 3: "car"}, box_type="pred")
             if gt_boxes:
                 image = draw_bboxes(image, gt_boxes, gt_labels,
                                     label_map={1: "person", 3: "car"}, box_type="gt")
