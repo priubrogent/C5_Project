@@ -26,18 +26,19 @@ from utils.KittiMotsDataset import KittiMotsDataset
 # Configuration
 # ---------------------------------------------------------------------------
 SEED = 42
-DATASET_PATH   = "/data1tb/KITTI-MOTS/training/image_02"
+# DATASET_PATH   = "/home/msiau/data/tmp/amarcos/KITTI-MOTS/training/image_02"
+DATASET_PATH   = "/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = os.path.join(os.path.dirname(__file__), "..", "kitti_mots_to_coco_gt.json")
-OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune")
-CHECKPOINT     = "PekingU/rtdetr_r101vd"   # r50vd also works and is lighter
+OUTPUT_DIR     = os.path.join(os.path.dirname(__file__), "Results_RTDETR", "finetune_fixed3")
+CHECKPOINT     = "PekingU/rtdetr_r101vd"
 
 # Hyperparameters
-NUM_EPOCHS    = 10
-BATCH_SIZE    = 8
-LEARNING_RATE = 1e-4
+NUM_EPOCHS    = 15
+BATCH_SIZE    = 16
+LEARNING_RATE = 5e-5
 WEIGHT_DECAY  = 1e-4
 WARMUP_RATIO  = 0.1
-LR_SCHEDULER  = "cosine"
+LR_SCHEDULER  = "linear"
 OPTIMIZER     = "adamw_torch_fused"
 
 # LoRA
@@ -47,6 +48,40 @@ LORA_ALPHA = 32
 # RT-DETR class mapping (2 classes: person and car)
 ID2LABEL = {0: "person", 1: "car"}
 LABEL2ID = {"person": 0, "car": 1}
+
+# COCO class indices for person and car (0-indexed in model weights)
+COCO_PERSON_IDX = 0  # COCO class 1 (person) is at index 0
+COCO_CAR_IDX = 2     # COCO class 3 (car) is at index 2
+
+
+# ---------------------------------------------------------------------------
+# Smart Weight Initialization
+# ---------------------------------------------------------------------------
+def initialize_from_coco_weights(model_2class, model_coco):
+    """Initialize the 2-class detection heads with COCO person/car weights."""
+    num_decoder_layers = len(model_coco.model.decoder.class_embed)
+
+    for layer_idx in range(num_decoder_layers):
+        coco_class_weight = model_coco.model.decoder.class_embed[layer_idx].weight.data
+        coco_class_bias = model_coco.model.decoder.class_embed[layer_idx].bias.data
+
+        model_2class.model.decoder.class_embed[layer_idx].weight.data[0] = coco_class_weight[COCO_PERSON_IDX]
+        model_2class.model.decoder.class_embed[layer_idx].weight.data[1] = coco_class_weight[COCO_CAR_IDX]
+        model_2class.model.decoder.class_embed[layer_idx].bias.data[0] = coco_class_bias[COCO_PERSON_IDX]
+        model_2class.model.decoder.class_embed[layer_idx].bias.data[1] = coco_class_bias[COCO_CAR_IDX]
+
+        # Bbox predictor is class-agnostic; copy all weights
+        coco_bbox_mlp = model_coco.model.decoder.bbox_embed[layer_idx]
+        kitti_bbox_mlp = model_2class.model.decoder.bbox_embed[layer_idx]
+        for mlp_layer_idx in range(len(coco_bbox_mlp.layers)):
+            kitti_bbox_mlp.layers[mlp_layer_idx].weight.data = coco_bbox_mlp.layers[mlp_layer_idx].weight.data.clone()
+            kitti_bbox_mlp.layers[mlp_layer_idx].bias.data = coco_bbox_mlp.layers[mlp_layer_idx].bias.data.clone()
+
+    if hasattr(model_2class.model, 'denoising_class_embed') and hasattr(model_coco.model, 'denoising_class_embed'):
+        model_2class.model.denoising_class_embed.weight.data[0] = model_coco.model.denoising_class_embed.weight.data[COCO_PERSON_IDX]
+        model_2class.model.denoising_class_embed.weight.data[1] = model_coco.model.denoising_class_embed.weight.data[COCO_CAR_IDX]
+
+    return model_2class
 
 
 # ---------------------------------------------------------------------------
@@ -62,12 +97,17 @@ def set_seed(seed: int):
 
 
 def build_train_transforms():
-    """Albumentations augmentations that are safe for driving scenes."""
+    """Augmentations matching DeTR's configuration."""
     return A.Compose(
         [
             A.HorizontalFlip(p=0.5),
-            A.Affine(translate_percent=(-0.1, 0.1), scale=(0.7, 1.3), rotate=0, p=0.5),
-            A.RandomBrightnessContrast(p=0.3),
+            A.ShiftScaleRotate(
+                shift_limit=0.1,
+                scale_limit=0.5,
+                rotate_limit=0,
+                p=0.5
+            ),
+            A.RandomBrightnessContrast(p=0.2),
             A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.05, p=0.2),
             A.GaussianBlur(blur_limit=(3, 5), p=0.1),
         ],
@@ -80,7 +120,7 @@ def build_train_transforms():
 
 
 def collate_fn(batch):
-    """RT-DETR uses fixed-size inputs; stack pixel_values directly (no pixel_mask needed)."""
+    """RT-DETR uses fixed-size inputs (resized by the processor)."""
     pixel_values = torch.stack([item["pixel_values"] for item in batch])
     labels = [item["labels"] for item in batch]
     return {"pixel_values": pixel_values, "labels": labels}
@@ -100,7 +140,7 @@ def train():
     wandb.init(
         project="kitti-mots-rtdetr-finetuning",
         entity="veridas",
-        name=f"rtdetr-lora-r{LORA_R}",
+        name=f"rtdetr-lora-r{LORA_R}-fixed3-smart-init",
         config={
             "checkpoint": CHECKPOINT,
             "epochs": NUM_EPOCHS,
@@ -109,11 +149,11 @@ def train():
             "weight_decay": WEIGHT_DECAY,
             "lora_r": LORA_R,
             "lora_alpha": LORA_ALPHA,
+            "lr_scheduler": LR_SCHEDULER,
         },
     )
-    
-    # --- Model & processor ---
-    processor = RTDetrImageProcessor.from_pretrained(CHECKPOINT)
+
+    model_coco = RTDetrForObjectDetection.from_pretrained(CHECKPOINT)
 
     model_config = RTDetrConfig.from_pretrained(CHECKPOINT)
     model_config.num_labels = len(ID2LABEL)
@@ -123,15 +163,19 @@ def train():
     model = RTDetrForObjectDetection.from_pretrained(
         CHECKPOINT,
         config=model_config,
-        ignore_mismatched_sizes=True,   # replaces the COCO 80-class head with a 2-class head
+        ignore_mismatched_sizes=True,
     )
 
-    # --- LoRA ---
-    # RT-DETR decoder cross-attention uses q_proj / k_proj / v_proj / out_proj.
-    # NOTE: we do NOT use modules_to_save here because RT-DETR names its detection
-    # heads differently from DETR ('class_embed', 'enc_score_head', etc.) and PEFT
-    # would silently ignore unrecognised names, leaving the heads frozen.
-    # Instead we manually unfreeze them below.
+    # --- Initialize 2-class heads with COCO person/car weights ---
+    model = initialize_from_coco_weights(model, model_coco)
+
+    # Free memory - don't need COCO model anymore
+    del model_coco
+    torch.cuda.empty_cache()
+
+    # --- Model & processor ---
+    processor = RTDetrImageProcessor.from_pretrained(CHECKPOINT)
+
     lora_config = LoraConfig(
         r=LORA_R,
         lora_alpha=LORA_ALPHA,
@@ -141,14 +185,29 @@ def train():
     )
     model = get_peft_model(model, lora_config)
 
-    # Unfreeze the RT-DETR detection heads that were re-initialised for 2 classes.
-    # These correspond to the MISMATCH keys in the load report and must be learned.
+    # Manually unfreeze detection heads AFTER PEFT wrapping
     _HEAD_KEYWORDS = ("class_embed", "enc_score_head", "denoising_class_embed", "bbox_embed")
+
+    print("\n=== Unfreezing Detection Heads ===")
+    unfrozen_count = 0
     for name, param in model.named_parameters():
         if any(kw in name for kw in _HEAD_KEYWORDS):
             param.requires_grad = True
+            unfrozen_count += 1
+            # Only print first few to avoid spam
+            if unfrozen_count <= 10:
+                print(f"✓ Unfrozen: {name}")
+    print(f"... (showing first 10)")
+    print(f"Total detection head parameters unfrozen: {unfrozen_count}\n")
 
+    # Verification
     model.print_trainable_parameters()
+
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Total parameters: {total_params:,}")
+    print(f"Trainable parameters: {trainable_params:,} ({100 * trainable_params / total_params:.2f}%)\n")
+    
     model.to(device)
 
     # --- Datasets ---
@@ -198,11 +257,13 @@ def train():
         eval_dataset=val_dataset,
         data_collator=collate_fn,
         callbacks=[
-            EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.005)
+            EarlyStoppingCallback(early_stopping_patience=5, early_stopping_threshold=0.005)
         ],
     )
 
-    print("\n--- Starting RT-DETR LoRA Fine-Tuning ---")
+    print(f"\nStarting RT-DETR fine-tuning: {NUM_EPOCHS} epochs, LR={LEARNING_RATE}, {LR_SCHEDULER} scheduler")
+    print(f"LoRA: r={LORA_R}, alpha={LORA_ALPHA}, attention layers only\n")
+
     trainer.train()
 
     # Save LoRA adapters
@@ -211,7 +272,7 @@ def train():
     processor.save_pretrained(adapter_path)
     print(f"Adapters saved to: {adapter_path}")
 
-    # Save detection head weights separately PEFT only stores LoRA matrices,
+    # Save detection head weights separately — PEFT only stores LoRA matrices,
     # so class_embed / bbox_embed / enc_score_head / denoising_class_embed must
     # be persisted explicitly so they can be restored at inference time.
     _HEAD_KEYWORDS = ("class_embed", "enc_score_head", "denoising_class_embed", "bbox_embed")
@@ -237,14 +298,12 @@ def train():
             pixel_values = batch["pixel_values"].to(device)
             labels = batch["labels"]
 
-            # RT-DETR does not use pixel_mask
             outputs = model(pixel_values=pixel_values)
 
             img_id = labels[0]["image_id"].item()
             img_info = val_dataset.coco.loadImgs(img_id)[0]
             target_sizes = torch.tensor([[img_info["height"], img_info["width"]]]).to(device)
 
-            # threshold=0 is required for a full PR curve and correct mAP
             results = processor.post_process_object_detection(
                 outputs, target_sizes=target_sizes, threshold=0.0
             )[0]
@@ -257,13 +316,26 @@ def train():
                     results_list.append({
                         "image_id": img_id,
                         "category_id": coco_label,
-                        "bbox": [x1, y1, x2 - x1, y2 - y1],  # COCO [x, y, w, h]
+                        "bbox": [x1, y1, x2 - x1, y2 - y1],
                         "score": score.item(),
                     })
 
     if results_list:
-        coco_evaluation(results_list, val_dataset.coco, OUTPUT_DIR, save=True)
+        metrics = coco_evaluation(results_list, val_dataset.coco, OUTPUT_DIR, save=True)
         plot_loss(trainer, OUTPUT_DIR, save=True)
+
+        # Log to wandb
+        if metrics:
+            wandb.log(metrics)
+
+            print(f"Pretrained: AP@50=0.918, AP@50:95=0.667")
+            print(f"This run:   AP@50={metrics.get('AP@0.5', 'N/A'):.3f}, AP@50:95={metrics.get('AP@0.5:0.95', 'N/A'):.3f}")
+            if metrics.get('AP@0.5', 0) > 0.918:
+                print("Fine-tuning improved over pretrained model.")
+            elif metrics.get('AP@0.5', 0) > 0.90:
+                print("Good result, close to pretrained performance.")
+            else:
+                print("Performance degraded - consider using pretrained model.")
     else:
         print("Warning: no detections produced on the validation set.")
 

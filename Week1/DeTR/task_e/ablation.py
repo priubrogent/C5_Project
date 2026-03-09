@@ -28,26 +28,22 @@ SEED = 42
 DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = "kitti_mots_to_coco_gt.json"
 OUTPUT_DIR = "./DeTR/Results_DETR/task_e/"
-FILE_NAME = "ablation_3_4_6_1"  # Update this for each ablation run
-LORA_ADAPTER_DIR = "./DeTR/Results_DETR/task_e/lora_adapter"
+FILE_NAME = "ablation_3_4_4_1"  # Update this for each ablation run
+LORA_ADAPTER_DIR = "./DeTR/Results_DETR/task_e/ablation_3_4_6_1_lora_adapter"
 
 # --- Hyperparameters ---
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 BATCH_SIZE = 16
-LEARNING_RATE = 1e-4
-WEIGHT_DECAY = 1e-4
-WARMUP_RATIO = 0.1
+LEARNING_RATE = 0.00004108436067040834
+WEIGHT_DECAY = 0.00002859771074714664
+WARMUP_RATIO = 0.1942830519314843
 LR_SCHEDULER = "cosine"
-OPTIMIZER = "adamw_torch_fused"
+OPTIMIZER = "rmsprop"
 BACKBONE_ABLATION = {
     1: 3, # 3 in total
     2: 4, # 4 in total
-    3: 6, # 6 in total
+    3: 4, # 6 in total
     4: 1  # 3 in total
-}
-TRANSFORMER_ABLATION = {
-    "encoder": 6, # 6 in total
-    "decoder": 6  # 6 in total
 }
 
 def set_seed(seed):
@@ -104,38 +100,7 @@ def prune_resnet_backbone(model, pruning_dict):
             stage[i] = nn.Identity()
             
         print(f"Pruned Stage {stage_num}: Reduced from {total_blocks} to {keep_count} active blocks.")
-        
-def prune_transformer_layers(model, encoder_keep=None, decoder_keep=None):
-    """
-    Prunes the Transformer encoder and decoder layers.
-    encoder_keep: Number of layers to keep in the encoder (default 6)
-    decoder_keep: Number of layers to keep in the decoder (default 6)
-    """
-    curr_model = model.get_base_model() if hasattr(model, "get_base_model") else model
-    
-    # Path: model.model.encoder.layers and model.model.decoder.layers
-    transformer = curr_model.model
-    
-    # 1. Prune Encoder
-    if encoder_keep is not None:
-        layers = transformer.encoder.layers
-        total = len(layers)
-        if encoder_keep < 1: encoder_keep = 1
-        if encoder_keep < total:
-            for i in range(encoder_keep, total):
-                layers[i] = nn.Identity()
-            print(f"Pruned Transformer Encoder: Kept {encoder_keep}/{total} layers.")
 
-    # 2. Prune Decoder
-    if decoder_keep is not None:
-        layers = transformer.decoder.layers
-        total = len(layers)
-        if decoder_keep < 1: decoder_keep = 1
-        if decoder_keep < total:
-            for i in range(decoder_keep, total):
-                layers[i] = nn.Identity()
-            print(f"Pruned Transformer Decoder: Kept {decoder_keep}/{total} layers.")
-    
 def ablation():
     # Set seeds for reproducibility
     set_seed(SEED)
@@ -172,13 +137,8 @@ def ablation():
     
     # Do the structured pruning based on the provided ablation configuration
     prune_resnet_backbone(model, BACKBONE_ABLATION)
-    prune_transformer_layers(
-        model, 
-        encoder_keep=TRANSFORMER_ABLATION["encoder"], 
-        decoder_keep=TRANSFORMER_ABLATION["decoder"]
-    )
     
-    # "Safe" augmentations for KITTI-MOTS
+    """# "Safe" augmentations for KITTI-MOTS
     train_transforms = A.Compose([
         A.HorizontalFlip(p=0.5),
         A.ShiftScaleRotate(
@@ -194,7 +154,18 @@ def ablation():
         format='coco', 
         label_fields=['class_labels'],
         min_visibility=0.3, # Drops boxes that get too cropped
-    ))
+    ))"""
+    
+    train_transforms = A.Compose([
+        A.HorizontalFlip(p=0.5),
+        A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.5),
+        A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.05, p=0.3),
+    ], seed = SEED,
+       bbox_params=A.BboxParams(
+            format='coco', 
+            label_fields=['class_labels'], 
+            min_visibility=0.3)
+    )
 
     # Initialize Datasets
     train_dataset = KittiMotsDataset(DATASET_PATH, ANNOTATION_FILE, processor, TRAIN_SEQS, transform=train_transforms)
@@ -252,7 +223,9 @@ def ablation():
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
         data_collator=collate_fn,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)]
+        callbacks=[EarlyStoppingCallback(
+            early_stopping_patience=7,
+            early_stopping_threshold=0.0025)]
     )
 
     # Start Training

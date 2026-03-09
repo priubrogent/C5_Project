@@ -28,7 +28,7 @@ def run_evaluation():
         pixel_values = [item["pixel_values"] for item in batch]
         labels = [item["labels"] for item in batch]
         
-        # Pad images to the largest size in the batch
+        # Pad images to the lArgest size in the batch
         encoding = processor.pad(pixel_values, return_tensors="pt")
         
         return {

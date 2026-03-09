@@ -5,8 +5,8 @@ from lora_fine_tune import train
 sweep_config = {
     'method': 'bayes', # options: grid, random, bayes
     'metric': {
-        'name': 'eval/loss',
-        'goal': 'minimize'   
+        'name': 'mAP_0.50_0.95',
+        'goal': 'maximize'   
     },
     'parameters': {
         'epochs':{
@@ -15,7 +15,7 @@ sweep_config = {
         'learning_rate': {
             'distribution': 'log_uniform_values', 
             'min': 1e-5,
-            'max': 5e-4
+            'max': 1e-3
         },
         'batch_size': {
             'values': [16]
@@ -39,10 +39,10 @@ sweep_config = {
             'max': 0.2
         },
         'lr_scheduler': {
-            'values': ['linear', 'cosine']
+            'values': ['linear', 'cosine', 'constant']
         },
         'optimizer': {
-            'values': ['adamw_torch_fused', 'adagrad', 'rmsprop']
+            'values': ['adamw_torch_fused', 'rmsprop']
         }
     }
 }
@@ -50,8 +50,7 @@ sweep_config = {
 # 2. Initialize the sweep
 sweep_id = wandb.sweep(
     sweep_config, 
-    project="KITTI-MOTS-DETR-Ablation",
-    entity="your_wandb_username" 
+    project="Week1-DETR",
 )
 
 # 3. Launch the agent

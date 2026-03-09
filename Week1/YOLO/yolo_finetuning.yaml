@@ -1,0 +1,8 @@
+path: /data/113-2/users/gasbert/master/C5/KITTI-MOTS/training_yolo
+
+train: images/train
+val: images/val
+
+names:
+  0: Pedestrian
+  1: Car
