@@ -6,8 +6,8 @@ from pycocotools import mask as maskUtils
 from utils import KITTI_TO_COCO 
 
 # --- Configuration ---
-ANNOTATIONS_DIR = "/ghome/mcv/datasets/C5/KITTI-MOTS/instances_txt"
-OUTPUT_FILE = "kitti_mots_to_coco_gt.json"
+ANNOTATIONS_DIR = "/data/113-2/users/gasbert/master/C5/KITTI-MOTS/instances_txt"
+OUTPUT_FILE = "/data/113-2/users/gasbert/master/C5/KITTI-MOTS/kitti_mots_to_coco_gt.json"
 SEQ_RANGE = 21 
 
 def convert_kitti_mots_to_coco():
