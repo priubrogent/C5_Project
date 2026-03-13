@@ -16,6 +16,7 @@ from pycocotools.cocoeval import COCOeval
 import pycocotools.mask as mask_util
 
 from transformers import SamModel, SamProcessor
+from peft import LoraConfig, get_peft_model, PeftModel
 from tqdm import tqdm
 import wandb
 
@@ -26,6 +27,10 @@ CAT_NAMES     = {1: "Pedestrian", 3: "Car"}
 MASK_COLORS   = {1: (0, 255, 0), 3: (0, 0, 255)}
 SAM_PRED_SIZE = 256
 
+
+# ---------------------------------------------------------------------------
+# Loss functions
+# ---------------------------------------------------------------------------
 
 def focal_loss(pred, target, valid=None, alpha=0.8, gamma=2.0):
     bce     = F.binary_cross_entropy_with_logits(pred, target, reduction="none")
@@ -58,6 +63,10 @@ def seg_loss(pred, target, loss_type, valid=None):
     return focal_loss(pred, target, valid) + dice_loss(pred, target, valid)
 
 
+# ---------------------------------------------------------------------------
+# COCO helpers
+# ---------------------------------------------------------------------------
+
 def build_coco_fixed(coco_path, out_dir):
     with open(coco_path) as f:
         data = json.load(f)
@@ -86,6 +95,10 @@ def overlay_masks(image, masks, cat_ids, alpha=0.45):
     return Image.fromarray(img.astype(np.uint8))
 
 
+# ---------------------------------------------------------------------------
+# Augmentation
+# ---------------------------------------------------------------------------
+
 def get_aug_pipeline():
     import albumentations as A
     return A.Compose(
@@ -103,6 +116,10 @@ def get_aug_pipeline():
         additional_targets={"masks": "masks"},
     )
 
+
+# ---------------------------------------------------------------------------
+# Dataset
+# ---------------------------------------------------------------------------
 
 class KITTISAMDataset(Dataset):
 
@@ -231,25 +248,38 @@ def collate_fn(batch):
     }
 
 
-def apply_freeze(model, strategy):
-    for p in model.parameters():
-        p.requires_grad_(False)
+# ---------------------------------------------------------------------------
+# LoRA setup
+# ---------------------------------------------------------------------------
 
-    for p in model.mask_decoder.parameters():
-        p.requires_grad_(True)
+def apply_lora(model, lora_r, lora_alpha, lora_dropout, target_modules):
+    """Wrap the mask_decoder's attention layers with LoRA adapters.
 
-    if strategy != "decoder_only":
-        n = int(strategy.split("_")[2])
-        for block in model.vision_encoder.layers[-n:]:
-            for p in block.parameters():
-                p.requires_grad_(True)
-        for p in model.vision_encoder.neck.parameters():
-            p.requires_grad_(True)
+    ``target_modules`` is passed directly to LoraConfig, so it can be either:
+      - A single regex string (e.g. the default) that matches only
+        mask_decoder attention projections.
+      - A list of plain module-name suffixes if you want to target by type.
 
-    n_train = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    n_total = sum(p.numel() for p in model.parameters())
-    print(f"Trainable: {n_train:,} / {n_total:,} ({100*n_train/n_total:.1f}%)")
+    Everything outside the matched modules stays frozen because PEFT only
+    inserts trainable LoRA parameters for matched layers and leaves the rest
+    of the model untouched (requires_grad=False by default for non-LoRA params
+    when using get_peft_model).
+    """
+    config = LoraConfig(
+        r=lora_r,
+        lora_alpha=lora_alpha,
+        lora_dropout=lora_dropout,
+        target_modules=target_modules,
+        bias="none",
+    )
+    model = get_peft_model(model, config)
+    model.print_trainable_parameters()
+    return model
 
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
 
 def train_one_epoch(model, dataset, optimizer, device, loss_type, epoch):
     model.train()
@@ -278,6 +308,10 @@ def train_one_epoch(model, dataset, optimizer, device, loss_type, epoch):
 
     return float(np.mean(losses))
 
+
+# ---------------------------------------------------------------------------
+# Evaluation
+# ---------------------------------------------------------------------------
 
 @torch.no_grad()
 def evaluate(model, dataset, processor, device, coco_gt,
@@ -373,11 +407,35 @@ def evaluate(model, dataset, processor, device, coco_gt,
     return metrics
 
 
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
 def parse_args():
-    p = argparse.ArgumentParser()
+    p = argparse.ArgumentParser(
+        description="Fine-tune SAM mask-decoder with LoRA (peft)"
+    )
     p.add_argument("--model_id",     default="facebook/sam-vit-base")
-    p.add_argument("--freeze",       default="decoder_only",
-                   choices=["decoder_only", "decoder_and_2_vit", "decoder_and_4_vit"])
+
+    # LoRA hyperparameters
+    p.add_argument("--lora_r",       type=int,   default=8,
+                   help="LoRA rank (default: 8)")
+    p.add_argument("--lora_alpha",   type=float, default=16.0,
+                   help="LoRA scaling factor (default: 16.0 = 2*r)")
+    p.add_argument("--lora_dropout", type=float, default=0.1,
+                   help="Dropout applied inside LoRA adapters (default: 0.1)")
+    # A regex matching only the mask-decoder's attention projections.
+    # Passed verbatim to LoraConfig(target_modules=...).
+    # Users can override with a comma-separated list of plain module names
+    # (e.g. "q_proj,v_proj") or another regex string.
+    p.add_argument("--lora_target_modules",
+                   default=r"mask_decoder\.transformer\..*\.(q_proj|k_proj|v_proj|out_proj)",
+                   help=(
+                       "Regex or comma-separated module names for LoRA targets. "
+                       "Default targets all attention projections inside "
+                       "mask_decoder.transformer."
+                   ))
+
     p.add_argument("--loss",         default="focal_dice", choices=["focal_dice", "bce"])
     p.add_argument("--augment",      action="store_true")
     p.add_argument("--epochs",       type=int,   default=10)
@@ -390,7 +448,7 @@ def parse_args():
     p.add_argument("--ann_file",
                    default="/home/arnau-marcos-almansa/workspace/C5_Project/Week1/kitti_mots_to_coco_gt.json")
     p.add_argument("--output_dir",
-                   default="/home/arnau-marcos-almansa/workspace/C5_project/Week2/outputs/task_e")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week2/outputs/task_e_lora")
     # wandb
     p.add_argument("--wandb_project", default="kitti-mots-sam-finetuning")
     p.add_argument("--wandb_entity",  default="veridas")
@@ -401,13 +459,23 @@ def parse_args():
     return p.parse_args()
 
 
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
 def main():
     args   = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
+    # If the user passed a comma-separated list instead of a regex, convert it.
+    if "," in args.lora_target_modules:
+        target_modules = [m.strip() for m in args.lora_target_modules.split(",")]
+    else:
+        target_modules = args.lora_target_modules  # regex string
+
     aug_tag   = "aug" if args.augment else "noaug"
     model_tag = args.model_id.split("/")[-1]
-    run_name  = f"{args.freeze}_{args.loss}_{aug_tag}_{model_tag}"
+    run_name  = f"lora_r{args.lora_r}_{args.loss}_{aug_tag}_{model_tag}"
     out_dir   = os.path.join(args.output_dir, run_name)
     os.makedirs(out_dir, exist_ok=True)
 
@@ -420,14 +488,17 @@ def main():
             entity=args.wandb_entity,
             name=args.wandb_run_name or run_name,
             config={
-                "model_id":     args.model_id,
-                "freeze":       args.freeze,
-                "loss":         args.loss,
-                "augment":      args.augment,
-                "epochs":       args.epochs,
-                "batch_size":   args.batch_size,
-                "lr":           args.lr,
-                "weight_decay": args.weight_decay,
+                "model_id":            args.model_id,
+                "lora_r":              args.lora_r,
+                "lora_alpha":          args.lora_alpha,
+                "lora_dropout":        args.lora_dropout,
+                "lora_target_modules": str(target_modules),
+                "loss":                args.loss,
+                "augment":             args.augment,
+                "epochs":              args.epochs,
+                "batch_size":          args.batch_size,
+                "lr":                  args.lr,
+                "weight_decay":        args.weight_decay,
             },
         )
 
@@ -448,7 +519,7 @@ def main():
 
     print(f"Loading {args.model_id}...")
     model = SamModel.from_pretrained(args.model_id).to(device)
-    apply_freeze(model, args.freeze)
+    model = apply_lora(model, args.lora_r, args.lora_alpha, args.lora_dropout, target_modules)
 
     optimizer = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],
@@ -456,9 +527,10 @@ def main():
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
-    history    = {"args": vars(args), "epochs": []}
+    history    = {"args": vars(args), "lora_target_modules": str(target_modules), "epochs": []}
     best_map   = 0.0
     best_epoch = 0
+    best_adapter_dir = os.path.join(out_dir, "best_adapter")
 
     for epoch in range(args.epochs):
         train_loss = train_one_epoch(model, train_ds, optimizer, device,
@@ -484,21 +556,44 @@ def main():
                 **{f"val/{k}": v for k, v in val_metrics.items()},
             })
 
-        torch.save(model.state_dict(), os.path.join(out_dir, f"checkpoint_ep{epoch+1:02d}.pt"))
+        # Save LoRA adapter (lightweight checkpoint, ~MBs vs ~GBs for full weights)
+        adapter_ckpt_dir = os.path.join(out_dir, f"adapter_ep{epoch+1:02d}")
+        model.save_pretrained(adapter_ckpt_dir)
+        print(f"  Adapter saved → {adapter_ckpt_dir}")
 
         if cur_map > best_map:
             best_map, best_epoch = cur_map, epoch + 1
-            torch.save(model.state_dict(), os.path.join(out_dir, "best_model.pt"))
-            print(f"  *** New best: mAP={best_map:.4f}")
+            model.save_pretrained(best_adapter_dir)
+            print(f"  *** New best: mAP={best_map:.4f}  adapter → {best_adapter_dir}")
 
     history["best_epoch"] = best_epoch
     history["best_map"]   = best_map
     with open(os.path.join(out_dir, "history.json"), "w") as f:
         json.dump(history, f, indent=2)
 
+    # ------------------------------------------------------------------
+    # Save merged checkpoints (adapter weights baked into model weights)
+    # ------------------------------------------------------------------
+
+    # 1. Last-epoch merged model
+    print("\nMerging last-epoch LoRA weights into base model...")
+    last_merged = model.merge_and_unload()
+    last_merged_path = os.path.join(out_dir, "last_model_merged.pt")
+    torch.save(last_merged.state_dict(), last_merged_path)
+    print(f"  Merged (last) → {last_merged_path}")
+
+    # 2. Best-epoch merged model (reload adapter, merge, save)
+    print(f"Loading best adapter (epoch {best_epoch}) and merging...")
+    best_base   = SamModel.from_pretrained(args.model_id).to(device)
+    best_peft   = PeftModel.from_pretrained(best_base, best_adapter_dir)
+    best_merged = best_peft.merge_and_unload()
+    best_merged_path = os.path.join(out_dir, "best_model_merged.pt")
+    torch.save(best_merged.state_dict(), best_merged_path)
+    print(f"  Merged (best)  → {best_merged_path}")
+
     if not args.no_wandb:
-        wandb.summary["best_epoch"]       = best_epoch
-        wandb.summary["best_mAP_0.50_0.95"] = best_map
+        wandb.summary["best_epoch"]          = best_epoch
+        wandb.summary["best_mAP_0.50_0.95"]  = best_map
         wandb.finish()
 
     print(f"\nDone. Best mAP={best_map:.4f} at epoch {best_epoch}")
