@@ -218,7 +218,8 @@ def collate_fn(batch):
     max_n = max(item["gt_masks"].shape[0] for item in batch)
 
     pixel_values_list, input_boxes_list, gt_masks_list = [], [], []
-    valid_mask_list, original_sizes_list, reshaped_sizes_list = [], [], []
+    ignore_mask_list, valid_mask_list = [], []
+    original_sizes_list, reshaped_sizes_list = [], []
     img_ids = []
 
     for item in batch:
@@ -232,6 +233,7 @@ def collate_fn(batch):
 
         input_boxes_list.append(F.pad(item["input_boxes"], (0, 0, 0, 0, 0, pad)))
         gt_masks_list.append(F.pad(item["gt_masks"],       (0, 0, 0, 0, 0, pad)))
+        ignore_mask_list.append(item["ignore_mask"])
 
         valid = torch.zeros(max_n, dtype=torch.bool)
         valid[:n] = True
@@ -241,6 +243,7 @@ def collate_fn(batch):
         "pixel_values":         torch.stack(pixel_values_list),
         "input_boxes":          torch.stack(input_boxes_list),
         "gt_masks":             torch.stack(gt_masks_list),
+        "ignore_mask":          torch.stack(ignore_mask_list),
         "valid_mask":           torch.stack(valid_mask_list),
         "original_sizes":       torch.stack(original_sizes_list),
         "reshaped_input_sizes": torch.stack(reshaped_sizes_list),
@@ -281,21 +284,23 @@ def apply_lora(model, lora_r, lora_alpha, lora_dropout, target_modules):
 # Training
 # ---------------------------------------------------------------------------
 
-def train_one_epoch(model, dataset, optimizer, device, loss_type, epoch):
+def train_one_epoch(model, loader, optimizer, device, loss_type, epoch):
     model.train()
     losses = []
-    pbar = tqdm(range(len(dataset)), desc=f"Epoch {epoch+1} [train]")
-    for idx in pbar:
-        item   = dataset[idx]
-        pv     = item["pixel_values"].unsqueeze(0).to(device)
-        ib     = item["input_boxes"].squeeze(1).unsqueeze(0).to(device)
-        gt     = item["gt_masks"].to(device)
-        ignore = item["ignore_mask"].to(device)
+    pbar = tqdm(loader, desc=f"Epoch {epoch+1} [train]")
+    for batch in pbar:
+        pv     = batch["pixel_values"].to(device)            # [B, C, H, W]
+        ib     = batch["input_boxes"].squeeze(2).to(device)  # [B, N, 4]
+        gt     = batch["gt_masks"].to(device)                # [B, N, 256, 256]
+        ignore = batch["ignore_mask"].to(device)             # [B, 1, 256, 256]
+        vm     = batch["valid_mask"].to(device)              # [B, N]
 
         out  = model(pixel_values=pv, input_boxes=ib, multimask_output=False)
-        pred = out.pred_masks[0, :, 0, :, :]
+        pred = out.pred_masks[:, :, 0, :, :]                 # [B, N, 256, 256]
 
-        loss = seg_loss(pred, gt, loss_type, valid=(1.0 - ignore))
+        # Zero out loss for crowd-ignore regions AND padded slots
+        valid = (1.0 - ignore) * vm[:, :, None, None].float()
+        loss = seg_loss(pred, gt, loss_type, valid=valid)
         optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(
@@ -429,19 +434,21 @@ def parse_args():
     # Users can override with a comma-separated list of plain module names
     # (e.g. "q_proj,v_proj") or another regex string.
     p.add_argument("--lora_target_modules",
-                   default=r"mask_decoder\.transformer\..*\.(q_proj|k_proj|v_proj|out_proj)",
+                   default=r"mask_decoder\.transformer\..*\.(q_proj|v_proj)",
                    help=(
                        "Regex or comma-separated module names for LoRA targets. "
-                       "Default targets all attention projections inside "
-                       "mask_decoder.transformer."
+                       "Default targets only query and value projections inside "
+                       "mask_decoder.transformer (standard LoRA practice)."
                    ))
 
     p.add_argument("--loss",         default="focal_dice", choices=["focal_dice", "bce"])
     p.add_argument("--augment",      action="store_true")
     p.add_argument("--epochs",       type=int,   default=10)
     p.add_argument("--batch_size",   type=int,   default=4)
-    p.add_argument("--lr",           type=float, default=1e-4)
-    p.add_argument("--weight_decay", type=float, default=1e-4)
+    p.add_argument("--lr",            type=float, default=1e-6)
+    p.add_argument("--warmup_epochs", type=int,   default=1,
+                   help="Epochs of linear LR warmup before cosine decay (default: 1)")
+    p.add_argument("--weight_decay",  type=float, default=1e-4)
     p.add_argument("--qual_images",  type=int,   default=5)
     p.add_argument("--dataset_root",
                    default="/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02")
@@ -451,7 +458,7 @@ def parse_args():
                    default="/home/arnau-marcos-almansa/workspace/C5_Project/Week2/outputs/task_e_lora")
     # wandb
     p.add_argument("--wandb_project", default="kitti-mots-sam-finetuning")
-    p.add_argument("--wandb_entity",  default="veridas")
+    p.add_argument("--wandb_entity",  default="just-an-arbitrary-team-name")
     p.add_argument("--wandb_run_name", default=None,
                    help="Override the auto-generated run name")
     p.add_argument("--no_wandb", action="store_true",
@@ -498,6 +505,7 @@ def main():
                 "epochs":              args.epochs,
                 "batch_size":          args.batch_size,
                 "lr":                  args.lr,
+                "warmup_epochs":       args.warmup_epochs,
                 "weight_decay":        args.weight_decay,
             },
         )
@@ -525,15 +533,38 @@ def main():
         [p for p in model.parameters() if p.requires_grad],
         lr=args.lr, weight_decay=args.weight_decay,
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
+    warmup_epochs = max(1, args.warmup_epochs)
+    scheduler = torch.optim.lr_scheduler.SequentialLR(
+        optimizer,
+        schedulers=[
+            torch.optim.lr_scheduler.LinearLR(
+                optimizer, start_factor=0.1, end_factor=1.0, total_iters=warmup_epochs
+            ),
+            torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=max(1, args.epochs - warmup_epochs)
+            ),
+        ],
+        milestones=[warmup_epochs],
+    )
 
     history    = {"args": vars(args), "lora_target_modules": str(target_modules), "epochs": []}
     best_map   = 0.0
     best_epoch = 0
     best_adapter_dir = os.path.join(out_dir, "best_adapter")
 
+    print("\n=== Epoch 0 / pretrained baseline ===")
+    init_metrics = evaluate(model, val_ds, processor, device, coco,
+                            out_dir, "epoch00", qual_images=args.qual_images)
+    init_map = init_metrics.get("mAP_0.50_0.95", 0.0)
+    print(f"  mAP[.5:.95]={init_map:.4f}  mAP@.50={init_metrics.get('mAP_0.50', 0):.4f}")
+    print(f"  Pedestrian={init_metrics.get('mAP_Pedestrian', 0):.4f}"
+          f"  Car={init_metrics.get('mAP_Car', 0):.4f}")
+    history["epochs"].append({"epoch": 0, "train_loss": None, "val": init_metrics})
+    if not args.no_wandb:
+        wandb.log({"epoch": 0, **{f"val/{k}": v for k, v in init_metrics.items()}})
+
     for epoch in range(args.epochs):
-        train_loss = train_one_epoch(model, train_ds, optimizer, device,
+        train_loss = train_one_epoch(model, train_loader, optimizer, device,
                                      args.loss, epoch)
         scheduler.step()
 
