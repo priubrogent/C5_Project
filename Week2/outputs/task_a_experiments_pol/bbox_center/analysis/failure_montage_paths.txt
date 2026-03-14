@@ -1,0 +1,15 @@
+# FAILURE cases — image paths for manual inspection
+# Columns: rank | actual_IoU | SAM_score | category | img_path
+
+  1  IoU=0.000  score=0.967          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000373.png
+  2  IoU=0.000  score=0.788          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0006/000000.png
+  3  IoU=0.000  score=0.899          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0018/000318.png
+  4  IoU=0.000  score=0.797   Pedestrian  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0013/000328.png
+  5  IoU=0.000  score=0.792   Pedestrian  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0013/000105.png
+  6  IoU=0.000  score=0.905          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0016/000179.png
+  7  IoU=0.000  score=0.927   Pedestrian  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0013/000332.png
+  8  IoU=0.000  score=0.814   Pedestrian  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0016/000182.png
+  9  IoU=0.000  score=0.844          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0014/000063.png
+ 10  IoU=0.000  score=0.855          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0014/000059.png
+ 11  IoU=0.000  score=0.780   Pedestrian  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0014/000060.png
+ 12  IoU=0.000  score=0.751   Pedestrian  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0016/000154.png

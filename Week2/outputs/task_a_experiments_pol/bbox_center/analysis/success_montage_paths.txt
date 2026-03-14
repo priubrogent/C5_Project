@@ -1,0 +1,15 @@
+# SUCCESS cases — image paths for manual inspection
+# Columns: rank | actual_IoU | SAM_score | category | img_path
+
+  1  IoU=0.989  score=0.858          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000561.png
+  2  IoU=0.987  score=0.955          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000255.png
+  3  IoU=0.987  score=0.995          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000557.png
+  4  IoU=0.986  score=0.980          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000409.png
+  5  IoU=0.985  score=0.877          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000253.png
+  6  IoU=0.984  score=0.975          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0006/000086.png
+  7  IoU=0.984  score=0.788          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0018/000184.png
+  8  IoU=0.984  score=0.910          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000527.png
+  9  IoU=0.983  score=0.952          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000405.png
+ 10  IoU=0.982  score=0.909          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000059.png
+ 11  IoU=0.982  score=0.786          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0018/000202.png
+ 12  IoU=0.981  score=0.885          Car  /hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02/0007/000220.png
