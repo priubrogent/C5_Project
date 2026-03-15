@@ -75,12 +75,14 @@ def parse_args():
     p.add_argument("--segmenter_id", default="facebook/sam-vit-base")
     p.add_argument("--labels",       nargs="+", default=["car", "person"])
     p.add_argument("--threshold",    type=float, default=0.3)
+
     p.add_argument("--dataset_root",
-                   default="/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02")
+                   default="/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02")
     p.add_argument("--ann_file",
-                   default="/hhome/priubrogent/mcvpol/C5/Week1/R-CNN/kitti_mots_to_coco_gt.json")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week1/kitti_mots_to_coco_gt.json")
     p.add_argument("--output_dir",
-                   default="/hhome/priubrogent/mcvpol/C5/Week2/outputs/task_b")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week2/outputs/task_b")
+    
     p.add_argument("--split",        choices=["train", "val", "all"], default="val")
     p.add_argument("--max_images",   type=int, default=None)
     p.add_argument("--qual_images",  type=int, default=10)
