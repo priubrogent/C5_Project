@@ -98,6 +98,36 @@ def get_point_prompts(ann, img_info, strategy, num_points, rng):
                for _ in range(num_points)]
         return pts, [1] * len(pts)
 
+    if strategy in ("sift_best", "sift_topk"):
+        import cv2
+        img_np = np.array(img_info.get("_pil_image"))  # set externally before call
+        gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
+        sift = cv2.SIFT_create()
+        kps = sift.detect(gray, None)
+
+        mask = decode_gt_mask(ann, img_info)
+        H, W = mask.shape
+        inside = [
+            (kp.pt[0], kp.pt[1], kp.response) for kp in kps
+            if 0 <= int(kp.pt[1]) < H and 0 <= int(kp.pt[0]) < W
+            and mask[int(kp.pt[1]), int(kp.pt[0])] > 0
+        ]
+
+        if not inside:
+            # fallback: bbox center
+            return [[x + w / 2, y + h / 2]], [1]
+
+        if strategy == "sift_best":
+            best = max(inside, key=lambda t: t[2])
+            return [[best[0], best[1]]], [1]
+
+        # sift_topk: pick top-num_points by response
+        inside.sort(key=lambda t: t[2], reverse=True)
+        pts = [[t[0], t[1]] for t in inside[:num_points]]
+        while len(pts) < num_points:
+            pts.append(pts[-1])
+        return pts, [1] * len(pts)
+
     raise ValueError(f"Unknown strategy: {strategy}")
 
 
@@ -131,7 +161,8 @@ def parse_args():
     p.add_argument("--qual_images", type=int, default=10)
     p.add_argument("--score_thresh", type=float, default=0.0)
     p.add_argument("--strategy",
-                   choices=["bbox_center", "mask_centroid", "random_mask", "random_bbox"],
+                   choices=["bbox_center", "mask_centroid", "random_mask", "random_bbox",
+                            "sift_best", "sift_topk"],
                    default="bbox_center")
     p.add_argument("--num_points", type=int, default=1)
     p.add_argument("--neg_points", type=int, default=0)
@@ -198,6 +229,8 @@ def main():
         img_info = coco_gt.loadImgs([img_id])[0]
         img_path = os.path.join(args.dataset_root, img_info["file_name"])
         image = Image.open(img_path).convert("RGB")
+
+        img_info["_pil_image"] = np.array(image)
 
         ann_ids = coco_gt.getAnnIds(imgIds=[img_id])
         anns = coco_gt.loadAnns(ann_ids)
