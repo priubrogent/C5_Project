@@ -186,6 +186,11 @@ class KITTISAMDataset(Dataset):
             return_tensors="pt",
         )
 
+        # The processor may cap the number of boxes; align masks/cat_ids accordingly
+        n_boxes = inputs["input_boxes"].shape[1]
+        masks    = masks[:n_boxes]
+        cat_ids  = cat_ids[:n_boxes]
+
         rh = int(inputs["reshaped_input_sizes"][0, 0].item())
         rw = int(inputs["reshaped_input_sizes"][0, 1].item())
 

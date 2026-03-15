@@ -2,6 +2,7 @@ import os
 import json
 import argparse
 import numpy as np
+import cv2
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -14,7 +15,7 @@ VAL_SEQS   = [2, 6, 7, 8, 10, 13, 14, 16, 18]
 VALID_CAT_IDS  = {1, 3}
 CAT_NAMES      = {1: "Pedestrian", 3: "Car"}
 BBOX_COLORS    = {1: "lime", 3: "cyan"}
-MASK_STRATEGIES = {"mask_centroid", "random_mask"}
+MASK_STRATEGIES = {"mask_centroid", "random_mask", "sift_best", "sift_topk"}
 
 STRATEGIES = [
     ("bbox_center",   1),
@@ -23,6 +24,9 @@ STRATEGIES = [
     ("random_mask",   3),
     ("random_bbox",   1),
     ("random_bbox",   3),
+    ("sift_best",     1),
+    ("sift_topk",     1),
+    ("sift_topk",     3),
 ]
 
 
@@ -72,6 +76,29 @@ def get_point_prompts(ann, img_info, strategy, num_points, rng):
         pts = [[float(rng.uniform(x, x + w)), float(rng.uniform(y, y + h))]
                for _ in range(num_points)]
         return pts, [1] * len(pts)
+
+    if strategy in ("sift_best", "sift_topk"):
+        img_np = img_info["_pil_image"]
+        gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
+        kps = cv2.SIFT_create().detect(gray, None)
+        mask = decode_gt_mask(ann, img_info)
+        H, W = mask.shape
+        inside = [
+            (kp.pt[0], kp.pt[1], kp.response) for kp in kps
+            if 0 <= int(kp.pt[1]) < H and 0 <= int(kp.pt[0]) < W
+            and mask[int(kp.pt[1]), int(kp.pt[0])] > 0
+        ]
+        if not inside:
+            return [[x + w / 2, y + h / 2]], [1]
+        if strategy == "sift_best":
+            best = max(inside, key=lambda t: t[2])
+            return [[best[0], best[1]]], [1]
+        inside.sort(key=lambda t: t[2], reverse=True)
+        pts = [[t[0], t[1]] for t in inside[:num_points]]
+        while len(pts) < num_points:
+            pts.append(pts[-1])
+        return pts, [1] * len(pts)
+
     raise ValueError(f"Unknown strategy: {strategy}")
 
 
@@ -153,6 +180,7 @@ def main():
     img_info = coco_gt.loadImgs([img_id])[0]
     img_path = os.path.join(args.dataset_root, img_info["file_name"])
     image = Image.open(img_path).convert("RGB")
+    img_info["_pil_image"] = np.array(image)
 
     ann_ids = coco_gt.getAnnIds(imgIds=[img_id])
     anns = coco_gt.loadAnns(ann_ids)

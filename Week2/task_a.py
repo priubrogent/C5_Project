@@ -151,14 +151,15 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--model", default="facebook/sam-vit-base")
     p.add_argument("--dataset_root",
-                   default="/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02")
+                   default="/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02")
     p.add_argument("--ann_file",
-                   default="/hhome/priubrogent/mcvpol/C5/Week1/R-CNN/kitti_mots_to_coco_gt.json")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week1/kitti_mots_to_coco_gt.json")
     p.add_argument("--output_dir",
-                   default="/hhome/priubrogent/mcvpol/C5/Week2/outputs/task_a_experiments")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week2/outputs/task_a")
     p.add_argument("--split", choices=["train", "val", "all"], default="val")
     p.add_argument("--max_images", type=int, default=None)
-    p.add_argument("--qual_images", type=int, default=10)
+    p.add_argument("--qual_per_seq", type=int, default=5,
+                   help="Qualitative frames to save per sequence")
     p.add_argument("--score_thresh", type=float, default=0.0)
     p.add_argument("--strategy",
                    choices=["bbox_center", "mask_centroid", "random_mask", "random_bbox",
@@ -223,7 +224,7 @@ def main():
     print(f"Images to process: {len(img_ids_filtered)} (split={args.split})")
 
     results = []
-    qual_count = 0
+    qual_counts = {}
 
     for img_id in tqdm(img_ids_filtered, desc="SAM inference"):
         img_info = coco_gt.loadImgs([img_id])[0]
@@ -295,7 +296,9 @@ def main():
             cat_ids_for_viz.append(ann["category_id"])
 
         # Qualitative visualisation
-        if qual_count < args.qual_images:
+        seq_id   = img_id // 100000
+        frame_id = img_id % 100000
+        if qual_counts.get(seq_id, 0) < args.qual_per_seq:
             gt_masks_for_viz = [decode_gt_mask(a, img_info) for a in anns]
 
             fig, axes = plt.subplots(1, 3, figsize=(18, 5))
@@ -324,12 +327,10 @@ def main():
             ]
             fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=11)
             plt.tight_layout()
-            seq_id = img_id // 100000
-            frame_id = img_id % 100000
             plt.savefig(os.path.join(qual_dir, f"seq{seq_id:04d}_frame{frame_id:06d}.png"),
                         dpi=100, bbox_inches="tight")
             plt.close()
-            qual_count += 1
+            qual_counts[seq_id] = qual_counts.get(seq_id, 0) + 1
 
     print(f"\nTotal predictions: {len(results)}")
     if not results:
