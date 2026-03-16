@@ -52,6 +52,16 @@ def build_coco_gt_segm(original_coco_path: str) -> dict:
     return data
 
 
+def decode_gt_mask(ann, img_info):
+    segm = ann["segmentation"]
+    h, w = img_info["height"], img_info["width"]
+    if isinstance(segm, dict):
+        rle = segm
+    else:
+        rle = {"counts": segm, "size": [h, w]}
+    return mask_util.decode(rle).astype(np.uint8)
+
+
 def overlay_masks(image: Image.Image, masks, cat_ids, alpha=0.45) -> Image.Image:
     img_arr = np.array(image).copy()
     for mask, cat_id in zip(masks, cat_ids):
@@ -76,14 +86,15 @@ def parse_args():
     p.add_argument("--threshold",    type=float, default=0.25,
                    help="YOLO confidence threshold (ultralytics default: 0.25)")
     p.add_argument("--dataset_root",
-                   default="/hhome/priubrogent/mcv/datasets/C5/KITTI-MOTS/training/image_02")
+                   default="/home/arnau-marcos-almansa/Downloads/KITTI-MOTS/training/image_02")
     p.add_argument("--ann_file",
-                   default="/hhome/priubrogent/mcvpol/C5/Week1/R-CNN/kitti_mots_to_coco_gt.json")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week1/kitti_mots_to_coco_gt.json")
     p.add_argument("--output_dir",
-                   default="/hhome/priubrogent/mcvpol/C5/Week2/outputs/task_c")
+                   default="/home/arnau-marcos-almansa/workspace/C5_Project/Week2/outputs/task_c")
     p.add_argument("--split",       choices=["train", "val", "all"], default="val")
     p.add_argument("--max_images",  type=int, default=None)
-    p.add_argument("--qual_images", type=int, default=10)
+    p.add_argument("--qual_per_seq", type=int, default=5,
+                   help="Qualitative frames to save per sequence")
     return p.parse_args()
 
 
@@ -172,7 +183,7 @@ def main():
 
     segm_results = []
     bbox_results = []
-    qual_count   = 0
+    qual_counts  = {}
 
     for img_id in tqdm(img_ids, desc="YOLO + SAM inference"):
         img_info = coco_gt.loadImgs([img_id])[0]
@@ -240,8 +251,19 @@ def main():
             pred_masks_viz.append(mask_np)
             cat_ids_viz.append(cat_id)
 
-        if qual_count < args.qual_images:
-            fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+        seq_id   = img_id // 100000
+        frame_id = img_id % 100000
+        if qual_counts.get(seq_id, 0) < args.qual_per_seq:
+            ann_ids    = coco_gt.getAnnIds(imgIds=[img_id])
+            gt_anns    = coco_gt.loadAnns(ann_ids)
+            gt_anns    = [a for a in gt_anns if a["category_id"] in VALID_CAT_IDS
+                          and a.get("iscrowd", 0) == 0]
+            gt_masks   = [decode_gt_mask(a, img_info) for a in gt_anns]
+            gt_cat_ids = [a["category_id"] for a in gt_anns]
+
+            W, H = image.size
+            dpi = 100
+            fig, axes = plt.subplots(1, 3, figsize=(W * 3 / dpi, H / dpi), dpi=dpi)
 
             axes[0].imshow(image)
             for box, score, cat_id in valid_dets:
@@ -258,10 +280,15 @@ def main():
             axes[0].set_title(f"YOLO {model_tag} (conf={args.threshold})")
             axes[0].axis("off")
 
-            pred_vis = overlay_masks(image.copy(), pred_masks_viz, cat_ids_viz)
-            axes[1].imshow(pred_vis)
-            axes[1].set_title("SAM predictions")
+            gt_vis = overlay_masks(image.copy(), gt_masks, gt_cat_ids)
+            axes[1].imshow(gt_vis)
+            axes[1].set_title("GT masks")
             axes[1].axis("off")
+
+            pred_vis = overlay_masks(image.copy(), pred_masks_viz, cat_ids_viz)
+            axes[2].imshow(pred_vis)
+            axes[2].set_title("SAM predictions")
+            axes[2].axis("off")
 
             legend = [
                 mpatches.Patch(color=(0, 1, 0), label="Pedestrian"),
@@ -269,14 +296,12 @@ def main():
             ]
             fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=11)
             plt.tight_layout()
-            seq_id   = img_id // 100000
-            frame_id = img_id % 100000
             plt.savefig(
                 os.path.join(qual_dir, f"seq{seq_id:04d}_frame{frame_id:06d}.png"),
-                dpi=100, bbox_inches="tight",
+                dpi=dpi, bbox_inches="tight",
             )
             plt.close()
-            qual_count += 1
+            qual_counts[seq_id] = qual_counts.get(seq_id, 0) + 1
 
     print(f"\nTotal predictions: {len(segm_results)}")
     if not segm_results:
