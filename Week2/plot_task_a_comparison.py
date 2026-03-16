@@ -1,8 +1,6 @@
 """
 Plot pretrained vs fine-tuned SAM comparison across all task_a prompt strategies.
 
-To fill in the missing value, search for TODO below.
-
 Run:
     python plot_task_a_comparison.py
     python plot_task_a_comparison.py --output_dir outputs/plots
@@ -16,12 +14,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-# ---------------------------------------------------------------------------
-# DATA  (hardcoded)
-# Each entry: (display_label, group, pretrained, finetuned)
-# Values are dicts with keys: map5095, map50, map75, map_ped, map_car
-# Use None for missing values.
-# ---------------------------------------------------------------------------
 
 def R(map5095, map50, map75, map_ped, map_car):
     return dict(map5095=map5095, map50=map50, map75=map75,
@@ -41,8 +33,6 @@ EXPERIMENTS = [
     # ("SIFT TopK n=1",       "SIFT",         R(0.2540, 0.4375, 0.2654, 0.1562, 0.3518), R(0.2825, 0.4872, 0.2927, 0.1974, 0.3676)),
     # ("SIFT TopK n=3",       "SIFT",         None,                                       R(0.4580, 0.7507, 0.4842, 0.3723, 0.5438)),
     # ("SIFT TopK n=5",       "SIFT",         None,                                       R(0.4306, 0.7233, 0.4367, 0.3396, 0.5217)),
-    # TODO: fill in pretrained gt_bbox value once available
-    # R(map5095, map50, map75, map_ped, map_car)
     ("GT BBox",             "GT BBox",      R(0.5740, 0.9026, 0.6339, 0.4530, 0.6949), R(0.5843, 0.9037, 0.6488, 0.4770, 0.7255)),
 ]
 
