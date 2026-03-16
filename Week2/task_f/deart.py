@@ -196,8 +196,10 @@ def parse_args() -> argparse.Namespace:
                        os.path.dirname(__file__), "..", "outputs", "task_f", "deart"
                    ),
                    help="Where to write qualitative figures.")
-    p.add_argument("--num_images", type=int, default=20,
+    p.add_argument("--num_images", type=int, default=100,
                    help="Number of images to process (among those with person annotations).")
+    p.add_argument("--seed", type=int, default=42,
+                   help="Random seed for dataset shuffling.")
     return p.parse_args()
 
 
@@ -235,6 +237,8 @@ def main() -> None:
 
     hf_ds = load_dataset(args.hf_dataset, split=args.hf_split)
     print(f"  Dataset size: {len(hf_ds)} images")
+    hf_ds = hf_ds.shuffle(seed=args.seed)
+    print(f"  Shuffled with seed {args.seed}")
 
     # ── Qualitative inference ─────────────────────────────────────────────────
     run_qualitative(

@@ -301,7 +301,9 @@ def main():
         if qual_counts.get(seq_id, 0) < args.qual_per_seq:
             gt_masks_for_viz = [decode_gt_mask(a, img_info) for a in anns]
 
-            fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+            W, H = image.size
+            dpi = 100
+            fig, axes = plt.subplots(1, 3, figsize=(W * 3 / dpi, H / dpi), dpi=dpi)
             axes[0].imshow(image)
             axes[0].set_title("Input image")
             axes[0].axis("off")
@@ -328,7 +330,7 @@ def main():
             fig.legend(handles=legend, loc="lower center", ncol=2, fontsize=11)
             plt.tight_layout()
             plt.savefig(os.path.join(qual_dir, f"seq{seq_id:04d}_frame{frame_id:06d}.png"),
-                        dpi=100, bbox_inches="tight")
+                        dpi=dpi, bbox_inches="tight")
             plt.close()
             qual_counts[seq_id] = qual_counts.get(seq_id, 0) + 1
 

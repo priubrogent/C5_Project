@@ -52,6 +52,16 @@ def build_coco_gt_segm(original_coco_path: str) -> dict:
     return data
 
 
+def decode_gt_mask(ann, img_info):
+    segm = ann["segmentation"]
+    h, w = img_info["height"], img_info["width"]
+    if isinstance(segm, dict):
+        rle = segm
+    else:
+        rle = {"counts": segm, "size": [h, w]}
+    return mask_util.decode(rle).astype(np.uint8)
+
+
 def overlay_masks(image: Image.Image, masks, cat_ids, alpha=0.45) -> Image.Image:
     img_arr = np.array(image).copy()
     for mask, cat_id in zip(masks, cat_ids):
@@ -244,7 +254,16 @@ def main():
         seq_id   = img_id // 100000
         frame_id = img_id % 100000
         if qual_counts.get(seq_id, 0) < args.qual_per_seq:
-            fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+            ann_ids    = coco_gt.getAnnIds(imgIds=[img_id])
+            gt_anns    = coco_gt.loadAnns(ann_ids)
+            gt_anns    = [a for a in gt_anns if a["category_id"] in VALID_CAT_IDS
+                          and a.get("iscrowd", 0) == 0]
+            gt_masks   = [decode_gt_mask(a, img_info) for a in gt_anns]
+            gt_cat_ids = [a["category_id"] for a in gt_anns]
+
+            W, H = image.size
+            dpi = 100
+            fig, axes = plt.subplots(1, 3, figsize=(W * 3 / dpi, H / dpi), dpi=dpi)
 
             axes[0].imshow(image)
             for box, score, cat_id in valid_dets:
@@ -261,10 +280,15 @@ def main():
             axes[0].set_title(f"YOLO {model_tag} (conf={args.threshold})")
             axes[0].axis("off")
 
-            pred_vis = overlay_masks(image.copy(), pred_masks_viz, cat_ids_viz)
-            axes[1].imshow(pred_vis)
-            axes[1].set_title("SAM predictions")
+            gt_vis = overlay_masks(image.copy(), gt_masks, gt_cat_ids)
+            axes[1].imshow(gt_vis)
+            axes[1].set_title("GT masks")
             axes[1].axis("off")
+
+            pred_vis = overlay_masks(image.copy(), pred_masks_viz, cat_ids_viz)
+            axes[2].imshow(pred_vis)
+            axes[2].set_title("SAM predictions")
+            axes[2].axis("off")
 
             legend = [
                 mpatches.Patch(color=(0, 1, 0), label="Pedestrian"),
@@ -274,7 +298,7 @@ def main():
             plt.tight_layout()
             plt.savefig(
                 os.path.join(qual_dir, f"seq{seq_id:04d}_frame{frame_id:06d}.png"),
-                dpi=100, bbox_inches="tight",
+                dpi=dpi, bbox_inches="tight",
             )
             plt.close()
             qual_counts[seq_id] = qual_counts.get(seq_id, 0) + 1
