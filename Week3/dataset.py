@@ -1,6 +1,9 @@
+from collections import Counter
 import json
 import os
 import random
+import re
+import unicodedata
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
@@ -80,9 +83,70 @@ def explore_dataset(ann_file):
     for c in random.sample(captions, 5):
         print(f"  {c}")
 
+def _clean_caption(
+    caption: str,
+    normalize_accents=True,
+    keep_numbers=True
+):
+    caption = caption.lower()
+
+    if normalize_accents:
+        caption = unicodedata.normalize('NFKD', caption)
+        caption = caption.encode('ascii', 'ignore').decode('ascii')
+
+    caption = caption.replace('-', ' ')
+
+    if keep_numbers:
+        caption = re.sub(r"[^\w\s]", "", caption, flags=re.UNICODE)
+    else:
+        caption = re.sub(r"[^\p{L}\s]", "", caption)
+
+    caption = caption.replace('_', '')
+    caption = re.sub(r"\s+", " ", caption).strip()
+
+    return caption
+
+def explore_dataset_word_frequencies(ann_file, clean=False):
+    with open(ann_file) as f:
+        data = json.load(f)
+    
+    captions = [a['caption'] for a in data['annotations']]
+    if clean:
+        captions = [_clean_caption(caption) for caption in captions]
+    counter = Counter()
+    for cap in captions:
+        counter.update(cap.lower().split())
+    
+    word_frequency = sorted(counter.items(), key=lambda el: el[1], reverse=True)
+    total = counter.total()
+    for word, frequency in word_frequency:
+        print(f"{word} -> {frequency} -> {frequency / total * 100:2f} %")
+    
+
+def explore_dataset_char_frequencies(ann_file, clean=False):
+    with open(ann_file) as f:
+        data = json.load(f)
+    
+    captions = [a['caption'] for a in data['annotations']]
+    if clean:
+        captions = [_clean_caption(caption) for caption in captions]
+    words = [word for caption in captions for word in caption.lower().split()]
+    chars = [char for word in words for char in word.split()]
+    counter = Counter()
+    for char in chars:
+        counter.update(char)
+    
+    word_frequency = sorted(counter.items(), key=lambda el: el[1], reverse=True)
+    total = counter.total()
+    for word, frequency in word_frequency:
+        print(f"{word} -> {frequency} -> {frequency / total * 100:2f} %")
+    
+
 
 if __name__ == '__main__':
     import sys
     ann = sys.argv[1] if len(sys.argv) > 1 else \
         '/home/priubrogent/01_MCV/C5/vizwiz_dataset/annotations/train.json'
     explore_dataset(ann)
+    explore_dataset_word_frequencies(ann, clean=True)
+    explore_dataset_char_frequencies(ann, clean=True)

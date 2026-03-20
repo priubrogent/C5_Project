@@ -2,6 +2,8 @@ import json
 import os
 import pickle
 from collections import Counter
+import re
+import unicodedata
 
 SOS = '<SOS>'
 EOS = '<EOS>'
@@ -67,10 +69,35 @@ class WordTokenizer:
     def _tokenize(text: str) -> list:
         return text.lower().split()
 
+
+    @staticmethod
+    def _clean_caption(
+        caption: str,
+        normalize_accents=False,
+        keep_numbers=True
+    ):
+        caption = caption.lower()
+
+        if normalize_accents:
+            caption = unicodedata.normalize('NFKD', caption)
+            caption = caption.encode('ascii', 'ignore').decode('ascii')
+
+        caption = caption.replace('-', ' ')
+
+        if keep_numbers:
+            caption = re.sub(r"[^\w\s]", "", caption, flags=re.UNICODE)
+        else:
+            caption = re.sub(r"[^\p{L}\s]", "", caption)
+
+        caption = caption.replace('_', '')
+        caption = re.sub(r"\s+", " ", caption).strip()
+
+        return caption
+
     def build(self, captions: list):
         counter = Counter()
         for cap in captions:
-            counter.update(self._tokenize(cap))
+            counter.update(self._tokenize(self._clean_caption(cap, normalize_accents=True)))
         words = [w for w, c in counter.most_common() if c >= self.min_freq]
         self.vocab = [PAD, SOS, EOS, UNK] + words
         self.idx2tok = {k: v for k, v in enumerate(self.vocab)}
