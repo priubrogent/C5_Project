@@ -102,7 +102,6 @@ for ENCODER in "${ENCODERS[@]}"; do
         --run_name      "$RUN_NAME" \
         --seed          42 \
         --num_workers   4 \
-        --max_eval_samples 2000 \
         --data_root     "$DATA_ROOT" \
         --out_root      "$OUT_ROOT" \
         --device        "$DEVICE" \
