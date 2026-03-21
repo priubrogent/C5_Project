@@ -99,7 +99,10 @@ def _clean_caption(
     if keep_numbers:
         caption = re.sub(r"[^\w\s]", "", caption, flags=re.UNICODE)
     else:
-        caption = re.sub(r"[^\p{L}\s]", "", caption)
+        caption = ''.join(
+            c for c in caption
+            if unicodedata.category(c).startswith('L') or c.isspace()
+        )
 
     caption = caption.replace('_', '')
     caption = re.sub(r"\s+", " ", caption).strip()

@@ -209,9 +209,17 @@ class SubwordTokenizer:
         from tokenizers import Tokenizer
         tok = cls.__new__(cls)
         tok._tokenizer = Tokenizer.from_file(path)
-        with open(path + '.meta') as f:
-            meta = json.load(f)
-        tok.__dict__.update(meta)
+        meta_path = path + '.meta'
+        if os.path.exists(meta_path):
+            with open(meta_path) as f:
+                tok.__dict__.update(json.load(f))
+        else:
+            # Reconstruct from the tokenizer itself (no .meta file available)
+            tok.vocab_size = tok._tokenizer.get_vocab_size()
+            tok.pad_idx    = tok._tokenizer.token_to_id(PAD)
+            tok.sos_idx    = tok._tokenizer.token_to_id(SOS)
+            tok.eos_idx    = tok._tokenizer.token_to_id(EOS)
+            tok.max_len    = 50   # default; overridden by build_tokenizer
         tok._built = True
         return tok
 

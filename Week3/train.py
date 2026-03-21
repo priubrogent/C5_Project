@@ -34,13 +34,35 @@ def compute_metrics(bleu, rouge, meteor, predictions, references):
     return {'bleu1': bleu1, 'bleu2': bleu2, 'rougeL': rougeL, 'meteor': met}
 
 
-def train_one_epoch(model, optimizer, criterion, dataloader, device, teacher_forcing):
+@torch.no_grad()
+def save_val_samples(model, dataset, tokenizer, device, path, epoch, indices):
+    model.eval()
+    samples = []
+    for idx in indices:
+        img, _, all_captions = dataset[idx]
+        fname = dataset.samples[idx][0]
+        gen = model.generate(img.unsqueeze(0).to(device),
+                             tokenizer.max_len - 1, tokenizer.sos_idx, tokenizer.eos_idx)
+        pred = tokenizer.decode(gen[0].cpu().tolist())
+        samples.append({
+            'epoch':      epoch,
+            'image':      fname,
+            'image_path': os.path.join(dataset.img_dir, fname),
+            'captions':   all_captions,
+            'prediction': pred,
+        })
+    with open(path, 'w') as f:
+        json.dump(samples, f, indent=2, ensure_ascii=False)
+
+
+def train_one_epoch(model, optimizer, criterion, dataloader, device, tf_prob):
     model.train()
     total_loss, n = 0.0, 0
     for imgs, captions, _ in dataloader:
         imgs, captions = imgs.to(device), captions.to(device)
         optimizer.zero_grad()
-        logits = model(imgs, captions, teacher_forcing=teacher_forcing)
+        use_tf = random.random() < tf_prob
+        logits = model(imgs, captions, teacher_forcing=use_tf)
         loss = criterion(logits, captions[:, 1:])
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), 5.0)
@@ -51,12 +73,10 @@ def train_one_epoch(model, optimizer, criterion, dataloader, device, teacher_for
 
 
 @torch.no_grad()
-def eval_epoch(model, criterion, dataloader, tokenizer, device,
-               bleu, rouge, meteor, max_eval_samples=1000):
+def eval_epoch(model, criterion, dataloader, tokenizer, device, bleu, rouge, meteor):
     model.eval()
     total_loss, n = 0.0, 0
     predictions, references = [], []
-    n_eval = 0
 
     for imgs, captions, all_captions in dataloader:
         imgs, captions = imgs.to(device), captions.to(device)
@@ -65,14 +85,12 @@ def eval_epoch(model, criterion, dataloader, tokenizer, device,
         total_loss += loss.item() * imgs.shape[0]
         n += imgs.shape[0]
 
-        if n_eval < max_eval_samples:
-            gen = model.generate(imgs, tokenizer.max_len - 1, tokenizer.sos_idx, tokenizer.eos_idx)
-            for i in range(imgs.shape[0]):
-                pred = tokenizer.decode(gen[i].cpu().tolist())
-                if pred.strip():
-                    predictions.append(pred)
-                    references.append(all_captions[i])
-            n_eval += imgs.shape[0]
+        gen = model.generate(imgs, tokenizer.max_len - 1, tokenizer.sos_idx, tokenizer.eos_idx)
+        for i in range(imgs.shape[0]):
+            pred = tokenizer.decode(gen[i].cpu().tolist())
+            if pred.strip():
+                predictions.append(pred)
+                references.append(all_captions[i])
 
     metrics = compute_metrics(bleu, rouge, meteor, predictions, references) if predictions else {}
     return total_loss / n, metrics
@@ -96,6 +114,7 @@ def parse_args():
     p.add_argument('--optimizer', default='adam', choices=['adam', 'adamw', 'sgd'])
     p.add_argument('--teacher_forcing', action='store_true', default=True)
     p.add_argument('--no_teacher_forcing', dest='teacher_forcing', action='store_false')
+    p.add_argument('--scheduled_tf', action='store_true', default=False)
     p.add_argument('--lr_decay', type=float, default=0.5)
     p.add_argument('--lr_patience', type=int, default=5)
     p.add_argument('--es_patience', type=int, default=10)
@@ -105,7 +124,6 @@ def parse_args():
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--num_workers', type=int, default=4)
     p.add_argument('--val_fraction', type=float, default=0.1)
-    p.add_argument('--max_eval_samples', type=int, default=9999999999999999999)
     p.add_argument('--wandb', action='store_true', default=False)
     p.add_argument('--wandb_project', default='c5-week3-captioning')
     p.add_argument('--wandb_entity', default=None)
@@ -190,27 +208,44 @@ def main():
     es_counter      = 0
     history         = []
 
+    # Fix the same 1000 val indices for qualitative tracking across all epochs
+    val_sample_indices = random.sample(range(len(ds_val)), min(1000, len(ds_val)))
+
+    tf_mode = 'scheduled' if args.scheduled_tf else ('on' if args.teacher_forcing else 'off')
     print(f"Early stopping: metric={args.es_metric} mode={es_mode} patience={args.es_patience}")
+    print(f"Teacher forcing: {tf_mode}")
 
     for epoch in range(1, args.epochs + 1):
+        if args.scheduled_tf:
+            tf_prob = 1.0 - (epoch - 1) / max(1, args.epochs - 1)
+        elif args.teacher_forcing:
+            tf_prob = 1.0
+        else:
+            tf_prob = 0.0
+
         t0 = time.time()
-        train_loss = train_one_epoch(model, optimizer, criterion, dl_train,
-                                     device, args.teacher_forcing)
+        train_loss = train_one_epoch(model, optimizer, criterion, dl_train, device, tf_prob)
         val_loss, val_metrics = eval_epoch(model, criterion, dl_val, tokenizer, device,
-                                           bleu, rouge, meteor, args.max_eval_samples)
+                                           bleu, rouge, meteor)
         elapsed = time.time() - t0
         scheduler.step(val_loss)
 
-        row = {'epoch': epoch, 'train_loss': round(train_loss, 4),
+        row = {'epoch': epoch, 'tf_prob': round(tf_prob, 3),
+               'train_loss': round(train_loss, 4),
                'val_loss': round(val_loss, 4),
                **{k: round(v, 2) for k, v in val_metrics.items()},
                'time_s': round(elapsed, 1)}
         history.append(row)
 
+        save_val_samples(model, ds_val, tokenizer, device,
+                         out_dir / 'val_samples.json', epoch, val_sample_indices)
+
         # best loss checkpoint
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), out_dir / 'best_loss_model.pt')
+            save_val_samples(model, ds_val, tokenizer, device,
+                             out_dir / 'best_val_samples.json', epoch, val_sample_indices)
 
         # best early-stopping metric checkpoint
         es_value = val_loss if args.es_metric == 'val_loss' else val_metrics.get(args.es_metric, best_es_value)
@@ -222,7 +257,7 @@ def main():
         else:
             es_counter += 1
 
-        print(f"Epoch {epoch:3d}/{args.epochs}  "
+        print(f"Epoch {epoch:3d}/{args.epochs}  tf={tf_prob:.2f}  "
               f"train_loss={train_loss:.4f}  val_loss={val_loss:.4f}  "
               f"BLEU-1={val_metrics.get('bleu1', 0):.1f}%  "
               f"BLEU-2={val_metrics.get('bleu2', 0):.1f}%  "
@@ -245,7 +280,7 @@ def main():
     print("\nRunning final test evaluation (best metric checkpoint)...")
     model.load_state_dict(torch.load(out_dir / 'best_metric_model.pt'))
     test_loss, test_metrics = eval_epoch(model, criterion, dl_test, tokenizer, device,
-                                         bleu, rouge, meteor, max_eval_samples=len(ds_test))
+                                         bleu, rouge, meteor)
 
     print(f"\n{'='*60}")
     print(f"TEST RESULTS [{args.run_name}]")
