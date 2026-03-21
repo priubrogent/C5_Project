@@ -105,7 +105,7 @@ def parse_args():
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--num_workers', type=int, default=4)
     p.add_argument('--val_fraction', type=float, default=0.1)
-    p.add_argument('--max_eval_samples', type=int, default=2000)
+    p.add_argument('--max_eval_samples', type=int, default=9999999999999999999)
     p.add_argument('--wandb', action='store_true', default=False)
     p.add_argument('--wandb_project', default='c5-week3-captioning')
     p.add_argument('--wandb_entity', default=None)
