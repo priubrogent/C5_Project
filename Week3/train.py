@@ -97,7 +97,10 @@ def parse_args():
     p.add_argument('--teacher_forcing', action='store_true', default=True)
     p.add_argument('--no_teacher_forcing', dest='teacher_forcing', action='store_false')
     p.add_argument('--lr_decay', type=float, default=0.5)
-    p.add_argument('--patience', type=int, default=5)
+    p.add_argument('--lr_patience', type=int, default=5)
+    p.add_argument('--es_patience', type=int, default=10)
+    p.add_argument('--es_metric', default='val_loss',
+                   choices=['val_loss', 'bleu1', 'bleu2', 'rougeL', 'meteor'])
     p.add_argument('--run_name', default='run')
     p.add_argument('--seed', type=int, default=42)
     p.add_argument('--num_workers', type=int, default=4)
@@ -171,7 +174,7 @@ def main():
                                     momentum=0.9, weight_decay=args.weight_decay)
 
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=args.lr_decay, patience=args.patience)
+        optimizer, mode='min', factor=args.lr_decay, patience=args.lr_patience)
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_idx)
     bleu, rouge, meteor = load_metrics()
 
@@ -180,8 +183,14 @@ def main():
         wandb.init(project=args.wandb_project, entity=args.wandb_entity,
                    name=args.run_name, config=vars(args))
 
-    best_val_loss = float('inf')
-    history = []
+    # Early stopping: auto-detect direction from metric name
+    es_mode = 'min' if args.es_metric == 'val_loss' else 'max'
+    best_val_loss   = float('inf')
+    best_es_value   = float('inf') if es_mode == 'min' else float('-inf')
+    es_counter      = 0
+    history         = []
+
+    print(f"Early stopping: metric={args.es_metric} mode={es_mode} patience={args.es_patience}")
 
     for epoch in range(1, args.epochs + 1):
         t0 = time.time()
@@ -198,27 +207,43 @@ def main():
                'time_s': round(elapsed, 1)}
         history.append(row)
 
+        # best loss checkpoint
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            torch.save(model.state_dict(), out_dir / 'best_loss_model.pt')
+
+        # best early-stopping metric checkpoint
+        es_value = val_loss if args.es_metric == 'val_loss' else val_metrics.get(args.es_metric, best_es_value)
+        improved = (es_value < best_es_value) if es_mode == 'min' else (es_value > best_es_value)
+        if improved:
+            best_es_value = es_value
+            es_counter    = 0
+            torch.save(model.state_dict(), out_dir / 'best_metric_model.pt')
+        else:
+            es_counter += 1
+
         print(f"Epoch {epoch:3d}/{args.epochs}  "
               f"train_loss={train_loss:.4f}  val_loss={val_loss:.4f}  "
               f"BLEU-1={val_metrics.get('bleu1', 0):.1f}%  "
               f"BLEU-2={val_metrics.get('bleu2', 0):.1f}%  "
               f"ROUGE-L={val_metrics.get('rougeL', 0):.1f}%  "
               f"METEOR={val_metrics.get('meteor', 0):.1f}%  "
-              f"[{elapsed:.0f}s]")
+              f"ES={es_counter}/{args.es_patience}  [{elapsed:.0f}s]")
 
         if args.wandb:
             import wandb
             wandb.log(row)
 
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            torch.save(model.state_dict(), out_dir / 'best_model.pt')
-
         with open(out_dir / 'history.json', 'w') as f:
             json.dump(history, f, indent=2)
 
-    print("\nRunning final test evaluation...")
-    model.load_state_dict(torch.load(out_dir / 'best_model.pt'))
+        if es_counter >= args.es_patience:
+            print(f"\nEarly stopping triggered at epoch {epoch} "
+                  f"(no improvement in {args.es_metric} for {args.es_patience} epochs).")
+            break
+
+    print("\nRunning final test evaluation (best metric checkpoint)...")
+    model.load_state_dict(torch.load(out_dir / 'best_metric_model.pt'))
     test_loss, test_metrics = eval_epoch(model, criterion, dl_test, tokenizer, device,
                                          bleu, rouge, meteor, max_eval_samples=len(ds_test))
 
