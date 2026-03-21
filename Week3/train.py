@@ -8,12 +8,17 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torchvision.transforms.functional import to_pil_image
 
 import evaluate as hf_evaluate
 
 from dataset import VizWizDataset, collate_fn
 from models import CaptioningModel
 from tokenizer import build_tokenizer
+
+# ImageNet normalization constants (for denormalization)
+IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
 _DEFAULT_DATA_ROOT = '/media/arnau-marcos-almansa/Ubuntu Data/vizwiz_dataset'
 _DEFAULT_OUT_ROOT  = '/home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs'
@@ -32,6 +37,41 @@ def compute_metrics(bleu, rouge, meteor, predictions, references):
     rougeL = rouge.compute(predictions=predictions, references=[r[0] for r in references])['rougeL'] * 100
     met    = meteor.compute(predictions=predictions, references=references)['meteor'] * 100
     return {'bleu1': bleu1, 'bleu2': bleu2, 'rougeL': rougeL, 'meteor': met}
+
+
+def get_fixed_examples(dataset, n=10, seed=42):
+    """Select n fixed indices from a dataset for qualitative evaluation."""
+    rng = random.Random(seed)
+    indices = rng.sample(range(len(dataset)), min(n, len(dataset)))
+    return indices
+
+
+@torch.no_grad()
+def log_qualitative_examples(model, dataset, indices, tokenizer, device, epoch, split, wandb):
+    """Generate captions for fixed examples and log to wandb."""
+    model.eval()
+    images_with_captions = []
+
+    for idx in indices:
+        img_tensor, _, gt_captions = dataset[idx]
+        img_tensor = img_tensor.unsqueeze(0).to(device)
+
+        # Generate caption
+        gen = model.generate(img_tensor, tokenizer.max_len - 1, tokenizer.sos_idx, tokenizer.eos_idx)
+        pred_caption = tokenizer.decode(gen[0].cpu().tolist())
+
+        # Denormalize image for visualization
+        img_denorm = img_tensor[0].cpu() * IMAGENET_STD + IMAGENET_MEAN
+        img_denorm = img_denorm.clamp(0, 1)
+        pil_img = to_pil_image(img_denorm)
+
+        # Format caption: predicted + ground truth
+        gt_str = gt_captions[0] if gt_captions else "N/A"
+        caption_text = f"Pred: {pred_caption}\nGT: {gt_str}"
+
+        images_with_captions.append(wandb.Image(pil_img, caption=caption_text))
+
+    wandb.log({f"{split}_qualitative": images_with_captions}, step=epoch)
 
 
 def train_one_epoch(model, optimizer, criterion, dataloader, device, teacher_forcing):
@@ -183,6 +223,11 @@ def main():
         wandb.init(project=args.wandb_project, entity=args.wandb_entity,
                    name=args.run_name, config=vars(args))
 
+    # Select fixed examples for qualitative evaluation (always same 10)
+    train_qual_indices = get_fixed_examples(ds_train, n=10, seed=args.seed)
+    val_qual_indices = get_fixed_examples(ds_val, n=10, seed=args.seed)
+    print(f"Selected {len(train_qual_indices)} train and {len(val_qual_indices)} val examples for qualitative eval")
+
     # Early stopping: auto-detect direction from metric name
     es_mode = 'min' if args.es_metric == 'val_loss' else 'max'
     best_val_loss   = float('inf')
@@ -233,6 +278,9 @@ def main():
         if args.wandb:
             import wandb
             wandb.log(row)
+            # Log qualitative examples
+            log_qualitative_examples(model, ds_train, train_qual_indices, tokenizer, device, epoch, "train", wandb)
+            log_qualitative_examples(model, ds_val, val_qual_indices, tokenizer, device, epoch, "val", wandb)
 
         with open(out_dir / 'history.json', 'w') as f:
             json.dump(history, f, indent=2)
