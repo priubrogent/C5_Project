@@ -20,8 +20,8 @@ from tokenizer import build_tokenizer
 IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
 IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
-_DEFAULT_DATA_ROOT = '/media/arnau-marcos-almansa/Ubuntu Data/vizwiz_dataset'
-_DEFAULT_OUT_ROOT  = '/home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs'
+_DEFAULT_DATA_ROOT = '/hhome/priubrogent/mcvpol/vizwiz_dataset'
+_DEFAULT_OUT_ROOT  = '/hhome/priubrogent/mcvpol/C5/Week3/outputs'
 
 
 def load_metrics():
