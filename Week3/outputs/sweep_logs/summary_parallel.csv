@@ -1,0 +1,2 @@
+encoder,test_loss,bleu1,bleu2,rougeL,meteor,status
+resnet18,0.8243,40.80,23.93,21.80,31.01,ok
