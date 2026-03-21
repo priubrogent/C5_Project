@@ -82,7 +82,7 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument('--encoder', default='resnet18',
                    choices=['resnet18', 'resnet34', 'resnet50', 'vgg16', 'vgg19'])
-    p.add_argument('--decoder', default='gru', choices=['gru', 'lstm'])
+    p.add_argument('--decoder', default='gru', choices=['gru', 'lstm', "gru_attn"])
     p.add_argument('--decoder_layers', type=int, default=1)
     p.add_argument('--hidden_dim', type=int, default=512)
     p.add_argument('--embed_dim', type=int, default=512)
