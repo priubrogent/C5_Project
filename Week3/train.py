@@ -47,31 +47,43 @@ def get_fixed_examples(dataset, n=10, seed=42):
 
 
 @torch.no_grad()
-def log_qualitative_examples(model, dataset, indices, tokenizer, device, epoch, split, wandb):
-    """Generate captions for fixed examples and log to wandb."""
+def log_qualitative_examples(model, dataset, indices, tokenizer, device, epoch, split,
+                             out_path, wandb_module=None, n_wandb=10):
+    """Generate captions for fixed examples, save all locally and log a subset to W&B."""
     model.eval()
-    images_with_captions = []
+    records = []
+    wandb_images = []
 
-    for idx in indices:
+    for i, idx in enumerate(indices):
         img_tensor, _, gt_captions = dataset[idx]
+        fname = dataset.samples[idx][0]
         img_tensor = img_tensor.unsqueeze(0).to(device)
 
-        # Generate caption
         gen = model.generate(img_tensor, tokenizer.max_len - 1, tokenizer.sos_idx, tokenizer.eos_idx)
         pred_caption = tokenizer.decode(gen[0].cpu().tolist())
 
-        # Denormalize image for visualization
-        img_denorm = img_tensor[0].cpu() * IMAGENET_STD + IMAGENET_MEAN
-        img_denorm = img_denorm.clamp(0, 1)
-        pil_img = to_pil_image(img_denorm)
+        records.append({
+            'epoch':      epoch,
+            'image':      fname,
+            'image_path': os.path.join(dataset.img_dir, fname),
+            'captions':   gt_captions,
+            'prediction': pred_caption,
+        })
 
-        # Format caption: predicted + ground truth
-        gt_str = gt_captions[0] if gt_captions else "N/A"
-        caption_text = f"Pred: {pred_caption}\nGT: {gt_str}"
+        if wandb_module is not None and i < n_wandb:
+            img_denorm = img_tensor[0].cpu() * IMAGENET_STD + IMAGENET_MEAN
+            img_denorm = img_denorm.clamp(0, 1)
+            pil_img = to_pil_image(img_denorm)
+            gt_str = gt_captions[0] if gt_captions else 'N/A'
+            wandb_images.append(
+                wandb_module.Image(pil_img, caption=f"Pred: {pred_caption}\nGT: {gt_str}")
+            )
 
-        images_with_captions.append(wandb.Image(pil_img, caption=caption_text))
+    with open(out_path, 'w') as f:
+        json.dump(records, f, indent=2, ensure_ascii=False)
 
-    wandb.log({f"{split}_qualitative": images_with_captions}, step=epoch)
+    if wandb_module is not None:
+        wandb_module.log({f"{split}_qualitative": wandb_images}, step=epoch)
 
 
 def train_one_epoch(model, optimizer, criterion, dataloader, device, tf_prob):
@@ -215,15 +227,16 @@ def main():
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_idx)
     bleu, rouge, meteor = load_metrics()
 
+    wandb_module = None
     if args.wandb:
-        import wandb
-        wandb.init(project=args.wandb_project, entity=args.wandb_entity,
-                   name=args.run_name, config=vars(args))
+        import wandb as wandb_module
+        wandb_module.init(project=args.wandb_project, entity=args.wandb_entity,
+                          name=args.run_name, config=vars(args))
 
-    # Select fixed examples for qualitative evaluation (always same 10)
-    train_qual_indices = get_fixed_examples(ds_train, n=10, seed=args.seed)
-    val_qual_indices = get_fixed_examples(ds_val, n=10, seed=args.seed)
-    print(f"Selected {len(train_qual_indices)} train and {len(val_qual_indices)} val examples for qualitative eval")
+    # Fixed indices for qualitative evaluation — same every epoch for tracking
+    train_qual_indices = get_fixed_examples(ds_train, n=100, seed=args.seed)
+    val_qual_indices   = get_fixed_examples(ds_val,   n=100, seed=args.seed)
+    print(f"Qualitative eval: {len(train_qual_indices)} train, {len(val_qual_indices)} val examples")
 
     # Early stopping: auto-detect direction from metric name
     es_mode = 'min' if args.es_metric == 'val_loss' else 'max'
@@ -231,9 +244,6 @@ def main():
     best_es_value   = float('inf') if es_mode == 'min' else float('-inf')
     es_counter      = 0
     history         = []
-
-    # Fix the same 1000 val indices for qualitative tracking across all epochs
-    val_sample_indices = random.sample(range(len(ds_val)), min(1000, len(ds_val)))
 
     tf_mode = 'scheduled' if args.scheduled_tf else ('on' if args.teacher_forcing else 'off')
     print(f"Early stopping: metric={args.es_metric} mode={es_mode} patience={args.es_patience}")
@@ -284,12 +294,13 @@ def main():
               f"METEOR={val_metrics.get('meteor', 0):.1f}%  "
               f"ES={es_counter}/{args.es_patience}  [{elapsed:.0f}s]")
 
-        if args.wandb:
-            import wandb
-            wandb.log(row)
-            # Log qualitative examples
-            log_qualitative_examples(model, ds_train, train_qual_indices, tokenizer, device, epoch, "train", wandb)
-            log_qualitative_examples(model, ds_val, val_qual_indices, tokenizer, device, epoch, "val", wandb)
+        if wandb_module is not None:
+            wandb_module.log(row)
+
+        log_qualitative_examples(model, ds_train, train_qual_indices, tokenizer, device,
+                                 epoch, 'train', out_dir / 'train_samples.json', wandb_module)
+        log_qualitative_examples(model, ds_val, val_qual_indices, tokenizer, device,
+                                 epoch, 'val', out_dir / 'val_samples.json', wandb_module)
 
         with open(out_dir / 'history.json', 'w') as f:
             json.dump(history, f, indent=2)
@@ -316,10 +327,9 @@ def main():
     with open(out_dir / 'test_results.json', 'w') as f:
         json.dump({'test_loss': test_loss, **test_metrics}, f, indent=2)
 
-    if args.wandb:
-        import wandb
-        wandb.log({'test_' + k: v for k, v in test_metrics.items()})
-        wandb.finish()
+    if wandb_module is not None:
+        wandb_module.log({'test_' + k: v for k, v in test_metrics.items()})
+        wandb_module.finish()
 
 
 if __name__ == '__main__':
