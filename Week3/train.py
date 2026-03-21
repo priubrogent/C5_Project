@@ -15,13 +15,8 @@ from dataset import VizWizDataset, collate_fn
 from models import CaptioningModel
 from tokenizer import build_tokenizer
 
-DATA_ROOT     = '/home/priubrogent/01_MCV/C5/vizwiz_dataset'
-TRAIN_IMG_DIR = os.path.join(DATA_ROOT, 'train')
-VAL_IMG_DIR   = os.path.join(DATA_ROOT, 'val')
-TRAIN_ANN     = os.path.join(DATA_ROOT, 'annotations', 'train.json')
-VAL_ANN       = os.path.join(DATA_ROOT, 'annotations', 'val.json')
-CACHE_DIR     = os.path.join(DATA_ROOT, 'tokenizer_cache')
-OUT_ROOT      = '/home/priubrogent/01_MCV/C5/00_Project/Week3/outputs'
+_DEFAULT_DATA_ROOT = '/media/arnau-marcos-almansa/Ubuntu Data/vizwiz_dataset'
+_DEFAULT_OUT_ROOT  = '/home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs'
 
 
 def load_metrics():
@@ -109,6 +104,10 @@ def parse_args():
     p.add_argument('--val_fraction', type=float, default=0.1)
     p.add_argument('--max_eval_samples', type=int, default=2000)
     p.add_argument('--wandb', action='store_true', default=False)
+    p.add_argument('--wandb_project', default='c5-week3-captioning')
+    p.add_argument('--wandb_entity', default=None)
+    p.add_argument('--data_root', default=_DEFAULT_DATA_ROOT)
+    p.add_argument('--out_root', default=_DEFAULT_OUT_ROOT)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     return p.parse_args()
 
@@ -118,7 +117,13 @@ def main():
     random.seed(args.seed)
     torch.manual_seed(args.seed)
 
-    out_dir = Path(OUT_ROOT) / args.run_name
+    train_img_dir = os.path.join(args.data_root, 'train')
+    val_img_dir   = os.path.join(args.data_root, 'val')
+    train_ann     = os.path.join(args.data_root, 'annotations', 'train.json')
+    val_ann       = os.path.join(args.data_root, 'annotations', 'val.json')
+    cache_dir     = os.path.join(args.data_root, 'tokenizer_cache')
+
+    out_dir = Path(args.out_root) / args.run_name
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(out_dir / 'config.json', 'w') as f:
         json.dump(vars(args), f, indent=2)
@@ -127,14 +132,14 @@ def main():
     print(f"Device: {device}")
 
     print(f"Building tokenizer ({args.text_repr})...")
-    tokenizer = build_tokenizer(args.text_repr, TRAIN_ANN, CACHE_DIR, max_len=args.max_len)
+    tokenizer = build_tokenizer(args.text_repr, train_ann, cache_dir, max_len=args.max_len)
 
     print("Loading datasets...")
-    ds_train = VizWizDataset(TRAIN_IMG_DIR, TRAIN_ANN, tokenizer,
+    ds_train = VizWizDataset(train_img_dir, train_ann, tokenizer,
                              split='train', val_fraction=args.val_fraction, seed=args.seed)
-    ds_val   = VizWizDataset(TRAIN_IMG_DIR, TRAIN_ANN, tokenizer,
+    ds_val   = VizWizDataset(train_img_dir, train_ann, tokenizer,
                              split='val', val_fraction=args.val_fraction, seed=args.seed)
-    ds_test  = VizWizDataset(VAL_IMG_DIR, VAL_ANN, tokenizer, split='test', seed=args.seed)
+    ds_test  = VizWizDataset(val_img_dir, val_ann, tokenizer, split='test', seed=args.seed)
     print(f"  train: {len(ds_train)}, val: {len(ds_val)}, test: {len(ds_test)}")
 
     dl_kw = dict(batch_size=args.batch_size, num_workers=args.num_workers,
@@ -172,7 +177,8 @@ def main():
 
     if args.wandb:
         import wandb
-        wandb.init(project='c5-week3-captioning', name=args.run_name, config=vars(args))
+        wandb.init(project=args.wandb_project, entity=args.wandb_entity,
+                   name=args.run_name, config=vars(args))
 
     best_val_loss = float('inf')
     history = []
