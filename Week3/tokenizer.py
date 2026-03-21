@@ -87,7 +87,10 @@ class WordTokenizer:
         if keep_numbers:
             caption = re.sub(r"[^\w\s]", "", caption, flags=re.UNICODE)
         else:
-            caption = re.sub(r"[^\p{L}\s]", "", caption)
+            caption = ''.join(
+                c for c in caption
+                if unicodedata.category(c).startswith('L') or c.isspace()
+            )
 
         caption = caption.replace('_', '')
         caption = re.sub(r"\s+", " ", caption).strip()
@@ -123,7 +126,8 @@ class WordTokenizer:
 
     def encode(self, text: str) -> list:
         assert self._built, "Call build() first"
-        tokens = [self.tok2idx.get(w, self.unk_idx) for w in self._tokenize(text)]
+        tokens = [self.tok2idx.get(w, self.unk_idx)
+                  for w in self._tokenize(self._clean_caption(text, normalize_accents=True))]
         seq = [self.sos_idx] + tokens + [self.eos_idx]
         seq = seq[:self.max_len]
         seq += [self.pad_idx] * (self.max_len - len(seq))
@@ -259,6 +263,8 @@ def build_tokenizer(text_repr, ann_file, cache_dir, max_len=None):
         if os.path.exists(cache_path):
             tok = SubwordTokenizer.load(cache_path)
             tok.max_len = ml
+            tok._tokenizer.enable_padding(pad_id=tok.pad_idx, pad_token=PAD, length=ml)
+            tok._tokenizer.enable_truncation(max_length=ml)
             print(f"[SubwordTokenizer] loaded from {cache_path}")
             return tok
         tok = SubwordTokenizer(max_len=ml, vocab_size=4000)
