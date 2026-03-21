@@ -1,0 +1,1 @@
+./run_encoder_sweep_parallel.sh: line 115: --wandb: command not found
