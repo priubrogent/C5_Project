@@ -1,0 +1,4 @@
+encoder,test_loss,bleu1,bleu2,rougeL,meteor,status
+resnet50,,,,,FAILED
+vgg16,,,,,FAILED
+vgg19,,,,,FAILED

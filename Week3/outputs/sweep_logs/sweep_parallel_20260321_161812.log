@@ -1,0 +1,23 @@
+[2026-03-21 16:18:12] ========================================================
+[2026-03-21 16:18:12] Parallel encoder sweep started
+[2026-03-21 16:18:12]   encoders    : resnet50 vgg16 vgg19
+[2026-03-21 16:18:12]   epochs      : 50
+[2026-03-21 16:18:12]   batch_size  : 64
+[2026-03-21 16:18:12]   GPUs        : 0 1 2
+[2026-03-21 16:18:12]   data_root   : /home/msiau/data/tmp/amarcos/vizwiz_dataset
+[2026-03-21 16:18:12]   out_root    : outputs
+[2026-03-21 16:18:12]   wandb       : true (entity=just-an-arbitrary-team-name, project=mcv-c5-image_captioning)
+[2026-03-21 16:18:12] ========================================================
+[2026-03-21 16:18:12] 
+[2026-03-21 16:18:12]   Launching baseline_resnet50 on GPU 0 -> outputs/sweep_logs/baseline_resnet50.log
+[2026-03-21 16:18:12]   Launching baseline_vgg19 on GPU 2 -> outputs/sweep_logs/baseline_vgg19.log
+[2026-03-21 16:18:12]   Launching baseline_vgg16 on GPU 1 -> outputs/sweep_logs/baseline_vgg16.log
+[2026-03-21 16:18:12] Batch running: resnet50 vgg16 vgg19 (PIDs: 20686 20687 20688)
+[2026-03-21 16:18:12] Waiting for batch to finish...
+[2026-03-21 17:20:27]   resnet50 -> FAILED (exit=127). See outputs/sweep_logs/baseline_resnet50.log
+[2026-03-21 17:23:35]   vgg16 -> FAILED (exit=127). See outputs/sweep_logs/baseline_vgg16.log
+[2026-03-21 17:30:09]   vgg19 -> FAILED (exit=127). See outputs/sweep_logs/baseline_vgg19.log
+[2026-03-21 17:30:09] Batch done.
+[2026-03-21 17:30:09] 
+[2026-03-21 17:30:09] ========================================================
+[2026-03-21 17:30:09] Sweep complete. Summary:

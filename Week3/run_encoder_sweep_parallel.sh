@@ -20,8 +20,8 @@
 set -euo pipefail
 
 # ---------- defaults ----------
-DATA_ROOT="/media/arnau-marcos-almansa/Ubuntu Data/vizwiz_dataset"
-OUT_ROOT="/home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs"
+DATA_ROOT="/home/msiau/data/tmp/amarcos/vizwiz_dataset"
+OUT_ROOT="outputs"
 WANDB_ENTITY="just-an-arbitrary-team-name"
 WANDB_PROJECT="mcv-c5-image_captioning"
 EPOCHS=50
@@ -49,6 +49,7 @@ IFS=',' read -ra GPUS <<< "$GPU_IDS"
 NUM_GPUS=${#GPUS[@]}
 
 ENCODERS=(resnet18 resnet34 resnet50 vgg16 vgg19)
+ENCODERS=(resnet50 vgg16 vgg19)
 
 SWEEP_LOG_DIR="${OUT_ROOT}/sweep_logs"
 mkdir -p "$SWEEP_LOG_DIR"
@@ -109,6 +110,7 @@ launch_run() {
         --data_root      "$DATA_ROOT" \
         --out_root       "$OUT_ROOT" \
         --device         cuda \
+	--es_metric meteor
         "${WANDB_ARGS[@]}" \
         > "$RUN_LOG" 2>&1
 }
