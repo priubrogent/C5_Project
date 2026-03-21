@@ -198,6 +198,25 @@ class CaptioningModel(nn.Module):
 
                 return torch.stack(outputs, dim=2)
 
+        # Standard GRU / LSTM path
+        hidden = self._init_hidden(img)
+
+        if teacher_forcing:
+            inp = self.dropout(self.embed(captions[:, :-1]))
+            out, _ = self.decoder(inp, hidden)
+            return self.proj(out).permute(0, 2, 1)
+
+        B, T = captions.shape
+        current = captions[:, 0]
+        outputs = []
+        for _ in range(T - 1):
+            emb = self.dropout(self.embed(current)).unsqueeze(1)
+            out, hidden = self.decoder(emb, hidden)
+            logit = self.proj(out.squeeze(1))
+            outputs.append(logit)
+            current = logit.argmax(dim=-1)
+        return torch.stack(outputs, dim=2)
+
     @torch.no_grad()
     def generate(self, img, max_len, sos_idx, eos_idx):
         self.eval()
