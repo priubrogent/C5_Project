@@ -1,0 +1,1302 @@
+[
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00023280.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00023280.jpg",
+    "captions": [
+      "Inside a bag of plastic is a cinnamon roll",
+      "a package of marinated milkfish in a frozen package",
+      "A giant gross bug is inside of a wrapper with food inside of it.",
+      "Some food is in a white, orange, and clear package.",
+      "The bag of food is frozen and is clear with orange trim and gold writing that is hard to make out."
+    ],
+    "prediction": "A bag of of severe to recognize a in a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00004048.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00004048.jpg",
+    "captions": [
+      "Spectracide weed stop for lawns is seen in black colored container",
+      "A paper towel sits on a cement floor with a plastic bottle of weed killer on top of the towel.",
+      "Plastic container for a weed killer of Spectracide brand",
+      "Bottle of Spectracide weed killer lying on paper towel",
+      "black bottle of weed stopper that is on top of a paper towel."
+    ],
+    "prediction": "A bottle of of of is is on a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00000906.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00000906.jpg",
+    "captions": [
+      "a person is holding a red can with tomato like drawings on it",
+      "A can with pictures of tomatoes on it being held in place on its side.",
+      "Two fingers touching an aluminum can of tomatoes",
+      "A metal can of tomatoes laying down on a counter top and held by a hand.",
+      "An aluminum can with a red label with tomatoes on it"
+    ],
+    "prediction": "A can of a of a a tomatoes tomatoes a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00009959.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00009959.jpg",
+    "captions": [
+      "The front cover of a satellite radio and digital clock.",
+      "A person is holding a alarm clock radio with a time on it,",
+      "A VCR is displaying red numbers in LED",
+      "Quality issues are too severe to recognize visual content.",
+      "A cable TV electronics box showing a screen that displays the channel number  as well as buttons to control the volume and channel."
+    ],
+    "prediction": "A issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008852.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008852.jpg",
+    "captions": [
+      "A crumpled up piece of purple fabric sitting on a red carpeted floor.",
+      "A wonderful view of the fog windows in the room is very thick",
+      "A crumpled up blue tarp or poncho, on a pink floor.",
+      "A blue piece of fabric bunched up on a red rug.",
+      "A blue article of clothing is laying on a maroon surface."
+    ],
+    "prediction": "A crumpled up purple a on a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008074.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008074.jpg",
+    "captions": [
+      "a black plastic touch screen cell phone with a black plastic case",
+      "a black mobile phone with a porch on a wooden surface",
+      "Quality issues are too severe to recognize visual content.",
+      "Pictured is a cell phone on a desk in a cell phone case.",
+      "An old iPhone with a black case on a wooden table."
+    ],
+    "prediction": "A black cell a a a on a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00005059.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00005059.jpg",
+    "captions": [
+      "flash on laptop appear like white color crystal",
+      "Quality issues are too severe to recognize visual content.",
+      "A black laptop computer that is open and not powered on.",
+      "a black dell laptop with opened screen but powered off",
+      "black laptop keyboard and screen with a starburst image."
+    ],
+    "prediction": "A black laptop too severe to recognize visual screen ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003734.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003734.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "An opened bottle of Creme de Cassis sits on a dresser in a green painted room",
+      "An bottle of Creme de Cassis sits on a cabinet against a lime green wall.",
+      "Quality issues are too severe to recognize visual content.",
+      "bottle of creme de cassis sitting on the top of a counter."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00019846.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00019846.jpg",
+    "captions": [
+      "a red and white Burger King sign with Christmas decor above it",
+      "The front signage of a Burger King restaurant.",
+      "a red Burger King sign with white text",
+      "Store front for the Burger King fast food chain.",
+      "The entrance to Burger King looking up at the large sign."
+    ],
+    "prediction": "Sto ve Bur ger King st itos with a red and white sign ature"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003162.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003162.jpg",
+    "captions": [
+      "A dial on a thermostat shows signs of the white plastic aging.",
+      "Round dial thermostat reading temperature of 82 degrees.",
+      "A device which is either a scale or thermostat or something similar, and has a dial with the needle pointed at 83",
+      "Gold thermometer with temperature set to 82-85 sideways.",
+      "A partial view of a thermostat set on 82"
+    ],
+    "prediction": "A thermostat dial a thermostat a a a wall"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00021506.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00021506.jpg",
+    "captions": [
+      "Peterson Field guides book called eastern birds by roger tory Peterson",
+      "A field guide to birds is sitting on a glass topped table over a black and white striped chair.",
+      "A field guide to birds is lying on a table top.",
+      "A book about eastern birds with a bird on the cover.",
+      "A blue book with an image of two birds on it"
+    ],
+    "prediction": "A book book book is on a a a a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00015349.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00015349.jpg",
+    "captions": [
+      "A black can of Pepsi is on the table.",
+      "An image of a can of Pepsi pop.",
+      "a black can of Pepsi MAX with transform your patch on it",
+      "A can of Pepsi Max in a black can and bold lettering.",
+      "A can of soda is on top of a table."
+    ],
+    "prediction": "A can of Pepsi of of Pepsi Ma x the"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00001166.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00001166.jpg",
+    "captions": [
+      "This looks like a soap formula for cleaning wood surfaces.",
+      "Quality issues are too severe to recognize visual content.",
+      "Container showing a liquid soap for cleaning wood surfaces",
+      "A bottle of oil soap that is laying on a counter top.",
+      "back of a bottle of murphy oil soap."
+    ],
+    "prediction": "A bottle of of of of of a a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00001084.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00001084.jpg",
+    "captions": [
+      "half a can of tomatoes - it is unclear what type.",
+      "A can of tomatoes with a black label and a picture of tomatoes at the top is shown.",
+      "Thumb and two fingers alongside an unopened can of food.",
+      "On a tile counter is a can of food with the label not showing.",
+      "A person's hand rests on the wall by a can of tomatoes."
+    ],
+    "prediction": "A person of a a a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003413.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003413.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "a white door frame to a closet next to a tan brown wall",
+      "The side of a doorway with a white next to a cream colored wall."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007914.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007914.jpg",
+    "captions": [
+      "a close up of a ball of red colored yarn",
+      "I see some yarn near a white object",
+      "a roll of rolled up red yarn on a white fabric",
+      "A red ball of yarn is right on the table.",
+      "A solid red yarn bundle on a white and gray fabric."
+    ],
+    "prediction": "A yarn of of red yarn is on yarn"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008410.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008410.jpg",
+    "captions": [
+      "A paper titled \"Setting up a Transition to College Class\"",
+      "A very wonderful view and worth seeing at all times, my friend",
+      "Page with text explaining transitioning to a college class.",
+      "a paper telling how to set up a transition to college class",
+      "Paper with instructions on setting up a transition to college class."
+    ],
+    "prediction": "A paper of of of of of of of a a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00018382.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00018382.jpg",
+    "captions": [
+      "A black and navy blue jacket on a plastic hanger.",
+      "A black and blue windbreaker on a white hanger.",
+      "A dark winter jacket that is black and blue with a hood and collar and zipper pockets",
+      "Grey and blue men's coat with white piping on a hanger.",
+      "A black and blue jacket hanging on a hanger."
+    ],
+    "prediction": "A black and black and blue and black a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00021926.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00021926.jpg",
+    "captions": [
+      "A closeup of a tall can of Budweiser beer .",
+      "A Budweiser can is sitting on a white surface.",
+      "a red and white can of budweiser beer, the beer appears to be cold.",
+      "Budweiser beer can with pictures of hops and leaves as well as writing about the company.",
+      "A white aluminum can of Beer with red Trim."
+    ],
+    "prediction": "Bud we is er beer can with a red and white label ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00000963.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00000963.jpg",
+    "captions": [
+      "The back label of a bag of Hershey's kisses.",
+      "A bag of chocolates depicting nutritional information as well as ingredients.",
+      "A package of Hershey's chocolate kisses is on the table.",
+      "A single wrapped Hershey's Kiss resting on a red carpet.",
+      "a kiss shaped package of Hershey kisses on orange and cream upholstered  patterned fabric"
+    ],
+    "prediction": "A package of Her she y ' s s on s on a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00020424.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00020424.jpg",
+    "captions": [
+      "Back of an open green box of Uncle Tom's",
+      "A green box containing some kind of snack bar, not centered.",
+      "The corner of a green box with white writing on it saying \"uncle\"",
+      "An open box of Muesli Bars displayed with brand name beginning with Uncle.",
+      "A green, open box of Muesli bars on a red cloth."
+    ],
+    "prediction": "The back of a box of of of a box ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007200.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007200.jpg",
+    "captions": [
+      "the back of a plastic container showing nutrition facts",
+      "A nutrition label on the back of a Hormel box that lists calories and ingredients.",
+      "Nutrition facts for something from Hormel are visible.",
+      "A Hormel packaged food item lying on a wood table, with the label containing the nutrition facts facing up.",
+      "A picture of Hormel flipped over that shows the ingredients, half of the food is cut off."
+    ],
+    "prediction": "A back of of of of a facts facts facts"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00019828.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00019828.jpg",
+    "captions": [
+      "A can of green beans lying on its side on the counter.",
+      "A can of beans is right on top of the table.",
+      "Natural and green nut beans pack is here.",
+      "a can of green bean vegetables from green giant",
+      "A package of beans is on top of a table."
+    ],
+    "prediction": "A can of of beans is on a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00015264.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00015264.jpg",
+    "captions": [
+      "A closed Asus laptop resting on a tablecloth",
+      "A closed black laptop with gray lettering is shown on a white and green fabric background.",
+      "A black Asus closed laptop on cream-and-green circle patterned fabric.",
+      "A black asus laptop on a white with green circles sheet",
+      "The back cover of a laptop computer displaying the logo."
+    ],
+    "prediction": "A black of with with with on on on"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007974.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007974.jpg",
+    "captions": [
+      "a close up of a silver mens wrist watch",
+      "a silver watch with links as the band and multiple circles in the center",
+      "A close-up of a silver wrist watch worn by a man.",
+      "A person is wearing a silver watch with a black face on their wrist.",
+      "A guy wearing a silver men's wrist watch with a black face."
+    ],
+    "prediction": "A silver watch with silver band s and silver band s ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00016343.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00016343.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A red cotton jacket has a metal zipper.",
+      "blurry magenta sweater with zipper through the left side of image",
+      "A close up of a purple zippered sweater that is zipped up.",
+      "a pink jacket with a zipper that is zipped up"
+    ],
+    "prediction": "A issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00021465.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00021465.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00010079.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00010079.jpg",
+    "captions": [
+      "a white color paper is placed on a brown surface",
+      "A joker playing card lays face up on the carpet.",
+      "A white and black joker playing card laying on a brown surface.",
+      "a card with a black and white jester sitting on a brown surface.",
+      "A Joker card on top of another card from a deck of cards."
+    ],
+    "prediction": "A playing card with a spa on a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00000235.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00000235.jpg",
+    "captions": [
+      "An alarm clock showing 1:03 am sitting on  a piece of wood.",
+      "A plastic alarm clock on a wooden table",
+      "An up close view of an alarm clock displaying the time of 1:03 pm.",
+      "A digital alarm clock face is displaying a time of 1:03 pm in orange.",
+      "A silver-colored digital alarm clock with \"103\" showing in red-orange and a small lit yellow dot."
+    ],
+    "prediction": "A issues clock clock clock on a wooden a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00005790.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00005790.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Three separate tiles connected between them by grout",
+      "An extreme close up of a tiled wall.",
+      "An extreme close up of what looks like some bathroom or kitchen tiles",
+      "Photo is of shiny, white floor tiles with a shadow across them."
+    ],
+    "prediction": "A issues are too severe to a a tile ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00015373.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00015373.jpg",
+    "captions": [
+      "a big metal desk drawer with a chair to the side",
+      "A nice seat with some wheels is next to a  person leg.",
+      "A metal desk with a single drawer on a rug",
+      "A metal drawer on top of a furry rug.",
+      "A metal cabinet with a handle and a chair nearby."
+    ],
+    "prediction": "A metal drawer on a chair a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00012356.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00012356.jpg",
+    "captions": [
+      "a wine colored paper with BIG SELECTION written on it",
+      "A large red box of chocolates and toffees.",
+      "A box of packaged chocolates with a red label.",
+      "A red candy box is pictured here shown in landscape.",
+      "A RED COLOR RECTANGULAR SHAPED CHOCOLATE BOX WAS HANDLED A PERSON"
+    ],
+    "prediction": "A red box of chocolates is on a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00010068.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00010068.jpg",
+    "captions": [
+      "a DVD playing laying on a black table with a water bottle and glass",
+      "A black desk with electronic items on it, some bottles and a glass.",
+      "A water bottle, glass and some electronic device is on the table.",
+      "Several electronic items sit on a black desk along with a bottle of water and a drinking glass.",
+      "Portable Sony DVD player sitting on a desk"
+    ],
+    "prediction": "A black table with a radio on on a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00005641.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00005641.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A can of food is on a counter-top.",
+      "a can with a yellow label laying on its side, obscuring the contents of the can",
+      "A picture of food is on the tin can",
+      "a can with yellow label and the nutrition facts in white"
+    ],
+    "prediction": "A can of food is on a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007797.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007797.jpg",
+    "captions": [
+      "A TV dinner inside of a blue box is lying on a counter, there is text that describes the box.",
+      "A food packaging box laying on a counter top.",
+      "Quality issues are too severe to recognize visual content.",
+      "A box containing food with writing on it is on top of a table.",
+      "Package of frozen TV dinner front label showing"
+    ],
+    "prediction": "A box of food is on recognize on a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00012221.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00012221.jpg",
+    "captions": [
+      "A medication bottle of a certain medicine turned on the drug facts side,",
+      "a bottle that looks like it's for medicine that shows a drug facts label",
+      "The drug facts portion of a label on a medication bottle.",
+      "a white bottle of drug showing drug facts",
+      "blurry bottle of wine or something else with a sticker"
+    ],
+    "prediction": "A bottle of medicine bottle is on a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003724.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003724.jpg",
+    "captions": [
+      "Appears to  be a picture of a can of food",
+      "A tin can of Del Monte branded tomato juice.",
+      "yellow, green, red, metal labeled can fruit cocktail",
+      "Hand holding a can of Del Monte fruit cocktail juice.",
+      "a container/ box / bottle that contains liquid / goods."
+    ],
+    "prediction": "A can of of of of of a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003376.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003376.jpg",
+    "captions": [
+      "A red rigid surface with bubble feeling feelers on it",
+      "A piece of red plastic with bumpy texture that is the size of an M&M candy.",
+      "A red substance has some  round protruding point that are in uniform.",
+      "Quality issues are too severe to recognize visual content.",
+      "bumpy texture on pink plastic, zoomed in close"
+    ],
+    "prediction": "A red plastic of of of a a a s . . ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013810.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013810.jpg",
+    "captions": [
+      "A table mat placed above the table cloth",
+      "Linen table covering that has floral patterns on it.",
+      "A floral mat with a secondary mat decorate the top of a dinner table.",
+      "A place mat sitting n a lace table cloth on a table.",
+      "a piece of fabric with flower like design"
+    ],
+    "prediction": "A place mat with a mat and table cloth ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003523.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003523.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "A picture of the food is on the packaging."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013042.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013042.jpg",
+    "captions": [
+      "A tile counter top with two cans of food placed on top of it.",
+      "Two cans of food on a tiled white counter",
+      "Front label of a can of soup with a red background with a front label of a can of pineapples behind it.",
+      "Two cans of food, one possibly with pineapple slices.",
+      "A white tiled kitchen counter and two cans that are partly visible."
+    ],
+    "prediction": "A cans of of of a counter a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00012489.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00012489.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "This appears to be a display for a Burger King ad",
+      "A page of coupons for the fast food restaurant Burger King.",
+      "dark background with a picture of a loaded cheeseburger",
+      "An add for Burger King with a burger on it."
+    ],
+    "prediction": "A issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00021989.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00021989.jpg",
+    "captions": [
+      "Red raspberry colored cinder block on top of a table",
+      "a red flat object standing on the floor",
+      "A wall that is painted red with some green storage boxes to the right of it.",
+      "green boxes and a red piece of cloth on a gray and tan counter top",
+      "A reddish box containing an unknown product on a counter."
+    ],
+    "prediction": "A red box with a on on a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00009577.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00009577.jpg",
+    "captions": [
+      "The backside of a white package showing its nutrition label",
+      "The lower right portion of a Schwan food product bag shows the barcode and nutritional panel, as well as the photographer's stomach at the bottom of the photo.",
+      "The bottom right corner of a bag of food containing a bar code.",
+      "Someone is standing at a countertop, with a plastic package of food on it.",
+      "Bottom of back side of a package of food from the Schwan company."
+    ],
+    "prediction": "The backside of a food product showing the ingredients and nutrition facts ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00001582.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00001582.jpg",
+    "captions": [
+      "A wonderful view of the fog windows in the room is very thick",
+      "Sugar peas are in the package on the table.",
+      "Quality issues are too severe to recognize visual content.",
+      "A box of Green Giant sugar snap peas.",
+      "A box of green beans is sitting on top of a gray surface."
+    ],
+    "prediction": "A package of too severe green green green beans ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00016708.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00016708.jpg",
+    "captions": [
+      "A person holding a small brown metal object",
+      "A person holding a medal thing in their hand.",
+      "A brown charm that has a flower pattern overlay.",
+      "A brushed metal key ring with Clover spelled out and a clover shape.",
+      "Someone holding some type of metal charm or keychain."
+    ],
+    "prediction": "A person holding a metal key ring metal key chain ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00019520.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00019520.jpg",
+    "captions": [
+      "An empty container of antiseptic Listerine mouthwash",
+      "A bottle of Listerine fluoride mouth rinse from Canada.",
+      "The label of a bottle of liquid mouth rinse for dental hygiene.",
+      "UP CLOSE VIEW OF A BOTTLE OF MOUTH WASH",
+      "A 1 liter bottle of antiseptic mouthwash which contain fluoride as main ingredient which kills germs that cause Gingivitis, plaque,Bad breath"
+    ],
+    "prediction": "A bottle of of of of bottle ant ep tic mouthwash"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00004533.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00004533.jpg",
+    "captions": [
+      "Part of a cabinet with a box of Pickwick and other stuff messily hanging around.",
+      "A desk with a power strip, a can of hairspray on it and a shelf above.",
+      "A shelf with a box branded Pickwick and a table with various items is displayed.",
+      "A power strip and papers are on a desk.",
+      "A shelf with a red box on it and papers below it."
+    ],
+    "prediction": "A shelf with a a with of a a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013756.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013756.jpg",
+    "captions": [
+      "A white cloth is draping on the wall with attached silver decoration.",
+      "Some kind of white women's garment hanging from something.",
+      "in this photo is a piece of fabric with rhinestones",
+      "Quality issues are too severe to recognize visual content.",
+      "Pictured is a shirt with Rhinestones on a hanger."
+    ],
+    "prediction": "A white are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00002873.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00002873.jpg",
+    "captions": [
+      "A white truck driving next to a huge green tree.",
+      "A bus is starting to drive out of a parking lot near a tree across the road from the camera.",
+      "a white van is parked sideways in the street",
+      "a photograph of a truck that is white near a tree",
+      "A street view, can see a short bus or RV in a parking area."
+    ],
+    "prediction": "A street view a a street a a a a and a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00020094.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00020094.jpg",
+    "captions": [
+      "A black dog sitting on a grey tile floor, looking away from the camera.",
+      "A close of partial picture of a black dog.",
+      "A black cat with head towards the camera.",
+      "Here is a photo of a black large dog with dark brown eyes sitting on a tiled floor.",
+      "A medium-sized black dog sitting on a gray tile floor."
+    ],
+    "prediction": "A black dog is on on on on a floor ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00010626.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00010626.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A six pack of smiths beer on a wooden table.",
+      "A box contains multiple bottles of liquid drink",
+      "A CASE OF IMPORTED BEER ON A TABLE",
+      "A box of drinks in brown glass bottles."
+    ],
+    "prediction": "A box of of box of of a box ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00022892.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00022892.jpg",
+    "captions": [
+      "desktop monitor on a desk with a speaker showing and many wires",
+      "A large computer screen with a small display window open on it.",
+      "a Dell computer monitor showing some color box",
+      "it looks like a desktop LCD monitor with black color on the table.",
+      "A desktop is placed on a table and a pen is seen near desktop and many wiring's is also seen in the image."
+    ],
+    "prediction": "A desktop computer monitor is on a a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00022520.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00022520.jpg",
+    "captions": [
+      "A close up picture of a black keyboard, zoomed in on the O and P keys.",
+      "The laptop has different color keys and letters",
+      "A picture of the keys on a keyboard.",
+      "A close up of keys on a black keyboard",
+      "Part of a keyboard showing the letters OPL and the number 0 clearly."
+    ],
+    "prediction": "A close up of a keyboard a black keyboard ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013140.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013140.jpg",
+    "captions": [
+      "The side of the front label on a can of corn",
+      "A white can of cream style sweet corn sits on a counter.",
+      "A close up of a can of cream style corn sitting on a counter.",
+      "A can of cream style corn sits on a light colored cabinet.",
+      "A canned good item that contains some type of creamed corn"
+    ],
+    "prediction": "A can of cream of cream of cream cream corn"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00021015.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00021015.jpg",
+    "captions": [
+      "a light blue floral print pillow with polka dots",
+      "A piece of cloth consist of two colors  which are flower like  in decoration.",
+      "A blue and white tropical floral fabric pattern",
+      "Across the entirety of the image is a white sheet decorated with a blue floral pattern.",
+      "A package is out of sight to the left, but the blanket is blue and floral."
+    ],
+    "prediction": "A blue of white of with with a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00006962.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00006962.jpg",
+    "captions": [
+      "A can of grape soda is laying next to a stove burner.",
+      "A can of diet grape soda that is calorie free.",
+      "A can of diet grape soda sitting on a stove top.",
+      "a can of grape soda laying on its side on a stovetop",
+      "A can of grape soda is sitting next to a burner on a black stove."
+    ],
+    "prediction": "A can of diet grape soda is on a stove"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00002525.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00002525.jpg",
+    "captions": [
+      "A close up view of a white button on a white and black plaid button up shirt.",
+      "Part of a purple and gray plaid shirt, with one button in the middle.",
+      "Pictured is a portion of a button up tee shirt.",
+      "The button on a brown and white button down dress shirt.",
+      "A shirt that has a plaid type pattern on a white background, featuring a button."
+    ],
+    "prediction": "A button up a a a a a a button button up shirt ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00001666.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00001666.jpg",
+    "captions": [
+      "Two Kool-Aid packets, one reads \"Strawberry\" and the other reads \"Orange\", caffeine free.",
+      "Two small Kool-Aid pouches in the flavors orange and strawberry.",
+      "In  this image is a pack of orange kool-Aid",
+      "A container / package that contains various goods / edible / liquid items.",
+      "A couple package of drink mix are on top of a stove."
+    ],
+    "prediction": "A packet of of aid on on on on on ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008242.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008242.jpg",
+    "captions": [
+      "A red bottle of Pepto bismol with its cap",
+      "I see a bottle of pepto bismol on the table",
+      "A cough syrup bottle sitting on a counter top.",
+      "An unopened bottle of liquid medicine is in a room with a floral rug and large plush figure.",
+      "A bottle of medication is sitting on a counter."
+    ],
+    "prediction": "A bottle of bottle a a a on a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00010486.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00010486.jpg",
+    "captions": [
+      "A picture of an older looking blue and black cell phone.",
+      "And opened slide up blue cellular phone sitting on a counter.",
+      "A small cellphone that appears to be turned off.",
+      "An AT&T black cell phone with blue accents sitting on a granite top.",
+      "cell phone sitting on counter top with at&t logo."
+    ],
+    "prediction": "An old cell phone on a on a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00002908.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00002908.jpg",
+    "captions": [
+      "Control panel for a stove that has different numbers on it.",
+      "A dial on a stove that sets the temperature.",
+      "a closeup of the temperature dial of an oven",
+      "a temperature dial for an oven, set to 425 degrees Fahrenheit",
+      "The thermostat for an over is set to 150 degrees."
+    ],
+    "prediction": "A dial for an oven with the temperature set to 3 50 degrees ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008416.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008416.jpg",
+    "captions": [
+      "Three plastic bottle containers containing conditioner inside of it",
+      "Three bottles laying on a counter the first on the left is shampoo the middle one is lotion and the one on the right is conditioner.",
+      "Bottles of Renew Botanicals shampoo, lotion, and conditioner.",
+      "Several bottles of toiletries are on top of a table.",
+      "Re-nu brand shampoo, lotion, and conditioner in plastic bottles"
+    ],
+    "prediction": "Three bottles of shampoo , conditioner , conditioner , and conditioner ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00003679.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00003679.jpg",
+    "captions": [
+      "A plastic cd cover case with blackness all around it.",
+      "A package of two compact disc in a container.",
+      "A white and pink CD case sits on top of a black surface.",
+      "A packaged Christian music CD entitled \"Songs 4 Life\".",
+      "A music CD, label reads: Songs of life, as seen on TV, 22 songs by today's top Christian artists, 2 CD's."
+    ],
+    "prediction": "A package of of of picture of of a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013816.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013816.jpg",
+    "captions": [
+      "Included in this picture is a framed picture hanging on the wall.",
+      "A bedroom that is the color red and is the theme throughout the room.",
+      "Looks like it is the corner of a bedroom, part of a mirrored headboard included.",
+      "a red wall in a bedroom with a framed painting on the wall",
+      "Room with red walls, floral picture on wall, mirrored headboard and lamp."
+    ],
+    "prediction": "A red wall with a a a a wall a a wall on a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00010071.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00010071.jpg",
+    "captions": [
+      "A TV dinner package sitting on a lightly stained wooden surface",
+      "a yellow color container of special lasagne on a brown background",
+      "A frozen package of special lasagne is on the edge of a wooden table.",
+      "A frozen dinner package that is labelled \"special lasagne\"",
+      "Package of \"Special Lasagna\" frozen dinner sitting on a wooden table."
+    ],
+    "prediction": "A yellow of frozen special las ag ne on a wooden"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00016500.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00016500.jpg",
+    "captions": [
+      "The side of an iPad screen with app showing",
+      "a closeup of an iPhone screen showing its apps",
+      "A screen for a smartphone is turned on  the table.",
+      "a picture of the home screen of a cell phone.",
+      "A black iPhone with 3G data displays a few apps."
+    ],
+    "prediction": "a picture of a cell phone with a screen"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00023144.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00023144.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content there is no image",
+      "Quality issues are too severe to recognize visual content."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013260.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013260.jpg",
+    "captions": [
+      "A white box placed on a person's lap",
+      "A blank white hardcover book is in someone's lap.",
+      "A plain white box on a person's lap.",
+      "Quality issues are too severe to recognize visual content.",
+      "A light brown box sitting on top of some dark black fabric or upholstery."
+    ],
+    "prediction": "A white box too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00005894.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00005894.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A gray t-shirt has sin city Las Vegas on it,",
+      "A grey t-shirt with a red \"Sin City Las Vegas\" logo.",
+      "This heather gray t-shirt promotes Las Vegas, Nevada.",
+      "a shirt with a Las Vegas logo on it"
+    ],
+    "prediction": "A gray t shirt with with with a Las Ve gas on it ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013461.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013461.jpg",
+    "captions": [
+      "A bottle of PGX Daily Ultra Matrix Softgel from Webber naturals.",
+      "A white bottle of a workout supplement on a wooden table",
+      "A closeup view of a PGX daily multivitamin softgel.",
+      "a bottle of pills that looks to be used for health",
+      "A large plastic bottle of health supplements, on a wooden counter, displays a bold red and black logo."
+    ],
+    "prediction": "A bottle of of of of of a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00012908.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00012908.jpg",
+    "captions": [
+      "A patterned woven fabric of a sweatshirt or blanket.",
+      "Quality issues are too severe to recognize visual content.",
+      "A close up image of a grey, ribbed, knit fabric.",
+      "Dark fabric of a sweater or a couch.",
+      "knit material of a ribbed sweater only showing part of the garment"
+    ],
+    "prediction": "A close up of a fabric with a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007582.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007582.jpg",
+    "captions": [
+      "A box of cereal is being photographed upside down.",
+      "A box of peanut butter Cinnamon Toast Crunch is on a table.",
+      "a box of peanut toast crunch cereal with a cartoon chef on the front holding a bottle of peanut butter and a bowl of cereals with milk splashing out.",
+      "Peanut butter toasted crunch cereal box with picture of cereal and chef on front.",
+      "Box of peanut butter toast crunch by General Mills."
+    ],
+    "prediction": "A box of peanut butter crunch cereal a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00009666.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00009666.jpg",
+    "captions": [
+      "A person holding a small \"to and from\" box",
+      "A hand holding a small red box with swirls on it.",
+      "Pink card with a pattern of purple wisps and flowers that has the words \"To:\" and \"From:\" printed on it.",
+      "Hand holding a red envelope that likely contains a gift card.",
+      "A card or envelope that you give to someone usually a gift card."
+    ],
+    "prediction": "A hand holding a a a a a a a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00002589.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00002589.jpg",
+    "captions": [
+      "a red colored can of tasty pantry mushroom",
+      "a can of condensed cream of mushroom soup",
+      "appears to be a picture of a can of food",
+      "A red rack of drying dishes next to a kitchen sink with person holding a tin can of mushroom soup",
+      "A person holding a can of mushroom soup next to a kitchen sink with dishes drying nearby."
+    ],
+    "prediction": "A can of soup of soup of soup soup a soup of soup soup"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00022185.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00022185.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "A blurry picture with something red and white that I can't make out.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00023119.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00023119.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "an item that has a green coiled plastic wrapping, a yellow lens and a white string loop at the end",
+      "A tether tie holder with a plastic yellow object on the end.",
+      "A springy green contraption is on the table.",
+      "Small stretchy green wire placed on wooden table."
+    ],
+    "prediction": "A small green ch ap stick with a green a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00006199.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00006199.jpg",
+    "captions": [
+      "a close up of a intricately designed womens purse",
+      "A large handbag that contains a short strap/handle at the top and has a flowered design on the outside of it.",
+      "Purse is a tote style bag that is dark gray in color with red, green and yellow floral print with short carry handles.",
+      "Close-up of a large, short-handled handbag with a floral print in shades of brown, tan, and rust with a label that I cannot make out",
+      "A handbag with a black handle and multi-patterned fabric"
+    ],
+    "prediction": "A close up of a hand and hand bag with a a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00019442.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00019442.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A small round metal lithium battery on table.",
+      "A piece of translucent glass or plastic with a round silver lithium battery on top",
+      "A shiny silver circle is attached to some glass",
+      "A view of a glass table with a lithium ion battery on it."
+    ],
+    "prediction": "A issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008849.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008849.jpg",
+    "captions": [
+      "A white plastic pump bottle of lotion with peaches illustrated on it stands against a dark background.",
+      "Beige bottle of Mango body lotion for very dry skin",
+      "A tall bottle of fruit infused scented lotion.",
+      "Body Shop Mango whipped body lotion with a pump next to a textured striped fabric.",
+      "A mango whip lotion bottle with a pump on it."
+    ],
+    "prediction": "Body lotion bottle with a pump on it of a ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00005920.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00005920.jpg",
+    "captions": [
+      "appears to be a picture of a book",
+      "A book about elephants with three elephants on the cover.",
+      "A book titled \"Faithful Elephants\" with white cover and three elephants on it placed on a pink carpet or cloth.",
+      "A book of a true story of animals people and war titled faithful elephants.",
+      "\"Faithful Elephants\" A true story of Animals, People and War, by Yukio Tsuchiya."
+    ],
+    "prediction": "A book about ele phan ts of a a the a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00016815.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00016815.jpg",
+    "captions": [
+      "Part of a label for food with leaves and a piece of cooked meat displayed on it.",
+      "A tiny portion of a box picturing greens in an extreme close up.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "A piece of food sits near the edge of a plate that has flowery designs on it."
+    ],
+    "prediction": "A issues of too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00013788.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00013788.jpg",
+    "captions": [
+      "the front side of box of Bleu Classic perfume",
+      "A blue fabric against a golden background with several label descriptions.",
+      "dolce & gabbana perfume, still in the box, fragrance is \"bleu classic\"",
+      "A blue box of Dolce and Gabbana Bleu classic cologne",
+      "some type of cigarettes that are still in a package"
+    ],
+    "prediction": "A blue of of box of en a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00009779.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00009779.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A bag contains ingredients and a barcode on the back.",
+      "Quality issues are too severe to recognize visual content.",
+      "the back of a food package with a barcode and some blurry words",
+      "A package of food is shown that shows the barcode and the ingredients."
+    ],
+    "prediction": "A issues of too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00023300.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00023300.jpg",
+    "captions": [
+      "a can of Progresso Rich and Hearty soup",
+      "A can of progresso rich and hearty chicken and homestyle noodles soup",
+      "A can of Progresso soup sitting on a counter top.",
+      "A can of soup sitting on a counter.",
+      "Can of Progresso chicken noodle soup, can resting on a counter with kitchen appliances/tools on the counter also."
+    ],
+    "prediction": "A can of Progresso soup sitting on a counter ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00020271.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00020271.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007947.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007947.jpg",
+    "captions": [
+      "a set of keys on a plastic black bracelet",
+      "I see a key chain on the couch",
+      "A key ring with multiple keys, a decorative charm and stretchable strap to wear around the wrist.",
+      "Set of car keys that contains one key, one black coiled arm band, and a small photograph.",
+      "Pictured is a key ring on a couch near a dresser or cabinet."
+    ],
+    "prediction": "A set of keys and a a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00011769.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00011769.jpg",
+    "captions": [
+      "Green Fabric linen on top of a counter with creases",
+      "A green object with wrinkles, looks like a blanket.",
+      "A green fabric is draped over something unknown",
+      "A closeup of green fabric lying on a table fills the view.",
+      "Green fabric with a ribbed pattern, wrinkled, possibly velvet"
+    ],
+    "prediction": "A green fabric too severe to recognize a visual ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00002033.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00002033.jpg",
+    "captions": [
+      "A person is holding a white bottle of a drink on the grass outside.",
+      "Body lotion in a plastic bottle is being shown here.",
+      "Someone holds a bottle of juice in their left hand while standing in a residential area near a green lawn and tree.",
+      "Someone is holding a bottle of 365 juice close to the camera with a white SUV stopped at an intersection in the background.",
+      "An orange and green bottle of a liquid product"
+    ],
+    "prediction": "A person is holding a bottle of a a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00008282.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00008282.jpg",
+    "captions": [
+      "A person is holding a Nokia phone with buttons on it.",
+      "A small cell phone that is turned off and has several buttons on it.",
+      "A hand holding a black cell phone above a counter is shown.",
+      "a small, black, open faced Nokia brand cell phone",
+      "Hand holding a small older Nokia cell phone, not a current smart phone."
+    ],
+    "prediction": "A Nokia cell phone is phone phone a a phone"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00001177.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00001177.jpg",
+    "captions": [
+      "appears to be a picture of a pack of sprite",
+      "A close-up of a case of Sprite cans.",
+      "A box of soda sitting on a dark wood colored table.",
+      "A box of sprite that probably contains cans of the drink.",
+      "Close shot of a can or box of Sprite soft drink."
+    ],
+    "prediction": "A close up of a box of of Sprite ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00011442.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00011442.jpg",
+    "captions": [
+      "The top of a can of green label tomato sauce",
+      "A hand holds a can of tomato sauce against a light background.",
+      "a can of tomato sauce from an unknown brand",
+      "A hand holding a can with a green label having the words \"food\" and \"Tomato Sauce\" on it.",
+      "someone holding a green can of tomato sauce"
+    ],
+    "prediction": "A hand holding a can of tomato sauce sauce ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00014596.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00014596.jpg",
+    "captions": [
+      "The control panel of a white air conditioning unit.",
+      "A fan or some kind of electrical appliance with buttons and a digital read-out.",
+      "A simple air conditioner  with different cycles including a fan.",
+      "air conditioner with digital button and fan directed in certain direction",
+      "A red apple sitting on top of a white window air conditioning unit."
+    ],
+    "prediction": "The control panel of a air conditioner and air conditioner ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00009692.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00009692.jpg",
+    "captions": [
+      "A can of Hormel foods product that has the nutritional fact on the fact of it.",
+      "A can of Hormel food sitting in front of a microwave, next to a Tim Horton mug.",
+      "Nutrition Facts of a Hormel can in front of a travel mug and a microwave.",
+      "A can of Hormel product sitting on the counter with microwave in background",
+      "a close up on a can that's half way between the description and barcode, and the nutrition facts"
+    ],
+    "prediction": "A can of food is on a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00002400.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00002400.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Silver can of coke placed on a brown wooden table.",
+      "Blurry image of plates on top of a table",
+      "The can is metallic and has red text and has a metal pull tab.",
+      "Quality issues are too severe to recognize visual content."
+    ],
+    "prediction": "Silver can of coke on a wooden table table"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007637.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007637.jpg",
+    "captions": [
+      "Hallway with photos on the walls, as well as a large swivel chair and TV",
+      "A view down a hallway looking into a room with a recliner and a television set turned on with pictures lining the walls.",
+      "a hallways goes into a sitting room containing a chair and television",
+      "A lazy man chair is in a room by the TV",
+      "A living room as seen through a dark hallway, with easy chair and a working television in the room."
+    ],
+    "prediction": "A living room with a a a a a a a a"
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00020634.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00020634.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "Quality issues are too severe to recognize visual content.",
+      "A box of unknown product is held in front of a fish tank",
+      "Quality issues are too severe to recognize visual content.",
+      "A room with a person's hand holding a bottle of clearish white liquid."
+    ],
+    "prediction": "Quality issues are too severe to recognize visual content ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00011413.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00011413.jpg",
+    "captions": [
+      "a pot of Carmex lip balm on a counter top",
+      "Jar of Carmex lip balm on top of a counter.",
+      "A small tub of Carmex lip balm sitting on a counter top next to a paper with letters on it.",
+      "A small jar of lip balm is on a marbled countertop.",
+      "A white jar of lip balm with a yellow cap sits on a tan countertop flanked on either side by white and green boxes."
+    ],
+    "prediction": "A small of of lip alm alm alm on a a marbled countertop ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00007695.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00007695.jpg",
+    "captions": [
+      "Quality issues are too severe to recognize visual content.",
+      "A pile of dirty clothes are on the ground.",
+      "A pile of clothes and shoes are near a chair.",
+      "Someone may be naked because there is a pile of clothes next to the chair!",
+      "Green garden chair with shoes and clothing on outside floor."
+    ],
+    "prediction": "Green garden chair with shoes and shoes on top of it ."
+  },
+  {
+    "epoch": 32,
+    "image": "VizWiz_train_00018157.jpg",
+    "image_path": "/home/msiau/data/tmp/amarcos/vizwiz_dataset/train/VizWiz_train_00018157.jpg",
+    "captions": [
+      "A container of pudding has purple text and a white background.",
+      "a close up of part of a container of pudding",
+      "The bottom center section of a pudding box is shown.",
+      "Quality issues are too severe to recognize visual content.",
+      "container that says pudding above a counter top."
+    ],
+    "prediction": "A issues of of of of recognize visual content ."
+  }
+]

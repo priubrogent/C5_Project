@@ -49,6 +49,7 @@ TEXT_REPR="char"
 # ---------- parse CLI ----------
 while [[ $# -gt 0 ]]; do
     case "$1" in
+	--encoder)       ENCODER="$2";       shift 2 ;;
         --data_root)     DATA_ROOT="$2";     shift 2 ;;
         --out_root)      OUT_ROOT="$2";      shift 2 ;;
         --wandb_entity)  WANDB_ENTITY="$2";  shift 2 ;;
@@ -125,7 +126,7 @@ launch_run() {
         --optimizer      adam \
         --lr_decay       0.5 \
         --lr_patience    5 \
-        --es_patience    10 \
+        --es_patience    20 \
         --es_metric      val_loss \
         --run_name       "$RUN_NAME" \
         --seed           42 \

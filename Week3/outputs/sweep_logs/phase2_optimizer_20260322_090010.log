@@ -1,0 +1,39 @@
+[2026-03-22 09:00:10] ========================================================
+[2026-03-22 09:00:10] Phase 2 — Optimizer + LR sweep
+[2026-03-22 09:00:10]   backbone : resnet50 + gru x1 | subword max_len=50 | dim=512
+[2026-03-22 09:00:10]   tf       : scheduled
+[2026-03-22 09:00:10]   epochs   : 50  batch=64
+[2026-03-22 09:00:10]   GPUs     : 0 1 2
+[2026-03-22 09:00:10]   wandb    : true
+[2026-03-22 09:00:10]   baseline : resnet50_gru_subword_tf_scheduled (adam lr=1e-3, already run)
+[2026-03-22 09:00:10] ========================================================
+[2026-03-22 09:00:10]   Launching resnet50_gru_subword_adamw_1e3 (opt=adamw lr=1e-3) on GPU 0
+[2026-03-22 09:00:10]   Sleeping 10s before next launch...
+[2026-03-22 09:00:20]   Sleeping 10s before next launch...
+[2026-03-22 09:00:20]   Launching resnet50_gru_subword_adamw_3e4 (opt=adamw lr=3e-4) on GPU 1
+[2026-03-22 09:00:30] 
+[2026-03-22 09:00:30]   Launching resnet50_gru_subword_sgd_1e2 (opt=sgd lr=1e-2) on GPU 2
+[2026-03-22 09:00:30] All runs launched (PIDs: 65801 65961 66816). Waiting...
+[2026-03-22 10:54:49]   resnet50_gru_subword_adamw_1e3 -> OK  |  2.9934,65.66,45.20,30.97,41.79,ok
+[2026-03-22 11:55:09]   resnet50_gru_subword_adamw_3e4 -> OK  |  3.0389,65.56,45.91,30.12,35.73,ok
+[2026-03-22 11:59:00]   resnet50_gru_subword_sgd_1e2 -> OK  |  3.8220,59.42,40.95,26.40,35.81,ok
+[2026-03-22 11:59:00] 
+[2026-03-22 11:59:00] ========================================================
+[2026-03-22 11:59:00] Phase 2 complete. Summary (include baseline for comparison):
+run                             optimizer  lr    test_loss  bleu1  bleu2  rougeL  meteor  status
+resnet50_gru_subword_adamw_1e3  adamw      1e-3  2.9934     65.66  45.20  30.97   41.79   ok
+resnet50_gru_subword_adamw_3e4  adamw      3e-4  3.0389     65.56  45.91  30.12   35.73   ok
+resnet50_gru_subword_sgd_1e2    sgd        1e-2  3.8220     59.42  40.95  26.40   35.81   ok
+[2026-03-22 11:59:00] 
+[2026-03-22 11:59:00] Baseline (adam lr=1e-3): resnet50_gru_subword_tf_scheduled
+[2026-03-22 11:59:00]   bleu1=67.52  bleu2=46.45  rougeL=30.17  meteor=38.14  val_loss=3.2500
+[2026-03-22 11:59:00] 
+[2026-03-22 11:59:00] To find the winner:
+[2026-03-22 11:59:00]   python - <<'EOF'
+[2026-03-22 11:59:00]   import json, glob
+[2026-03-22 11:59:00]   paths = glob.glob('outputs/resnet50_gru_subword_*/history.json')
+[2026-03-22 11:59:00]   for p in paths:
+[2026-03-22 11:59:00]       h = json.load(open(p)); best = min(h, key=lambda r: r['val_loss'])
+[2026-03-22 11:59:00]       print(p, '-> val_loss:', best['val_loss'], 'epoch:', best['epoch'])
+[2026-03-22 11:59:00]   EOF
+[2026-03-22 11:59:00] ========================================================

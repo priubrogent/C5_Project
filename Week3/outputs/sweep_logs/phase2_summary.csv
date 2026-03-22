@@ -1,0 +1,4 @@
+run,optimizer,lr,test_loss,bleu1,bleu2,rougeL,meteor,status
+resnet50_gru_subword_adamw_1e3,adamw,1e-3,2.9934,65.66,45.20,30.97,41.79,ok
+resnet50_gru_subword_adamw_3e4,adamw,3e-4,3.0389,65.56,45.91,30.12,35.73,ok
+resnet50_gru_subword_sgd_1e2,sgd,1e-2,3.8220,59.42,40.95,26.40,35.81,ok
