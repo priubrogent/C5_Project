@@ -1,0 +1,7 @@
+run,tokenizer,tf_mode,test_loss,bleu1,bleu2,rougeL,meteor,status
+resnet50_gru_word_tf_on,word,on,3.0300,56.24,38.25,28.44,35.30,ok
+resnet50_gru_word_tf_off,word,off,4.5088,51.95,37.45,29.62,32.40,ok
+resnet50_gru_word_tf_scheduled,word,scheduled,3.1995,55.63,41.00,30.59,33.49,ok
+resnet50_gru_subword_tf_on,subword,on,3.0671,62.13,39.89,28.12,39.51,ok
+resnet50_gru_subword_tf_off,subword,off,4.8192,62.40,43.14,28.70,35.83,ok
+resnet50_gru_subword_tf_scheduled,subword,scheduled,3.2902,67.95,46.92,29.68,38.76,ok

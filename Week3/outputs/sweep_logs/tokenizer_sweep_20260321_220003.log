@@ -1,0 +1,35 @@
+[2026-03-21 22:00:03] ========================================================
+[2026-03-21 22:00:03] Tokenizer sweep started
+[2026-03-21 22:00:03]   encoder     : resnet50
+[2026-03-21 22:00:03]   decoder     : gru
+[2026-03-21 22:00:03]   configs     : char:150 word:35 subword:50
+[2026-03-21 22:00:03]   epochs      : 50
+[2026-03-21 22:00:03]   batch_size  : 64
+[2026-03-21 22:00:03]   GPUs        : 4 5 6
+[2026-03-21 22:00:03]   data_root   : /home/msiau/data/tmp/amarcos/vizwiz_dataset
+[2026-03-21 22:00:03]   out_root    : outputs
+[2026-03-21 22:00:03]   wandb       : true (entity=just-an-arbitrary-team-name, project=mcv-c5-image_captioning)
+[2026-03-21 22:00:03] ========================================================
+[2026-03-21 22:00:03]   Launching resnet50_gru_char on GPU 4 -> outputs/sweep_logs/resnet50_gru_char.log
+[2026-03-21 22:00:03]   Sleeping 10s before next launch...
+[2026-03-21 22:00:13]   Sleeping 10s before next launch...
+[2026-03-21 22:00:13]   Launching resnet50_gru_word on GPU 5 -> outputs/sweep_logs/resnet50_gru_word.log
+[2026-03-21 22:00:23] 
+[2026-03-21 22:00:23]   Launching resnet50_gru_subword on GPU 6 -> outputs/sweep_logs/resnet50_gru_subword.log
+[2026-03-21 22:00:23] All runs launched (PIDs: 32457 32616 32935). Waiting...
+[2026-03-21 22:00:23] 
+[2026-03-21 22:46:54]   resnet50_gru_char -> OK  |  0.9826,56.16,37.19,24.71,39.91,ok
+[2026-03-21 22:52:55]   resnet50_gru_word -> OK  |  3.2103,55.96,39.02,28.69,37.64,ok
+[2026-03-21 23:10:57]   resnet50_gru_subword -> OK  |  3.2125,64.68,45.37,28.96,43.66,ok
+[2026-03-21 23:10:57] 
+[2026-03-21 23:10:57] ========================================================
+[2026-03-21 23:10:57] Tokenizer sweep complete. Summary:
+encoder   decoder  text_repr  max_len  test_loss  bleu1  bleu2  rougeL  meteor  status
+resnet50  gru      char       150      0.9826     56.16  37.19  24.71   39.91   ok
+resnet50  gru      word       35       3.2103     55.96  39.02  28.69   37.64   ok
+vgg16     gru      char       150      0.9062     56.61  37.11  25.46   41.08   ok
+vgg16     gru      word       35       3.3674     50.15  30.94  25.02   30.25   ok
+vgg16     gru      subword    50       3.4707     60.65  35.66  26.14   35.25   ok
+resnet50  gru      subword    50       3.2125     64.68  45.37  28.96   43.66   ok
+[2026-03-21 23:10:57] Individual logs: outputs/sweep_logs
+[2026-03-21 23:10:57] ========================================================

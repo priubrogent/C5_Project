@@ -1,0 +1,20 @@
+[2026-03-21 19:13:57] ========================================================
+[2026-03-21 19:13:57] Decoder sweep started
+[2026-03-21 19:13:57]   encoder     : vgg16
+[2026-03-21 19:13:57]   configs     : gru_1l:gru:1:0.0 lstm_1l:lstm:1:0.0 gru_2l:gru:2:0.3 lstm_2l:lstm:2:0.3
+[2026-03-21 19:13:57]   epochs      : 50
+[2026-03-21 19:13:57]   batch_size  : 64
+[2026-03-21 19:13:57]   GPUs        : 0 1 2
+[2026-03-21 19:13:57]   data_root   : /home/msiau/data/tmp/amarcos/vizwiz_dataset
+[2026-03-21 19:13:57]   out_root    : outputs
+[2026-03-21 19:13:57]   wandb       : true (entity=just-an-arbitrary-team-name, project=mcv-c5-image_captioning)
+[2026-03-21 19:13:57] ========================================================
+[2026-03-21 19:13:57]   Launching vgg16_gru_1l on GPU 0 -> outputs/sweep_logs/vgg16_gru_1l.log
+[2026-03-21 19:13:57]   Sleeping 10s before next launch...
+[2026-03-21 19:14:07]   Sleeping 10s before next launch...
+[2026-03-21 19:14:07]   Launching vgg16_lstm_1l on GPU 1 -> outputs/sweep_logs/vgg16_lstm_1l.log
+[2026-03-21 19:14:17]   Launching vgg16_gru_2l on GPU 2 -> outputs/sweep_logs/vgg16_gru_2l.log
+[2026-03-21 19:14:17] 
+[2026-03-21 19:14:17] Batch running: gru_1l lstm_1l gru_2l (PIDs: 24217 24435 24834)
+[2026-03-21 19:14:17] Waiting for batch to finish...
+[2026-03-21 19:14:18]   vgg16_gru_1l -> FAILED (exit=1). See outputs/sweep_logs/vgg16_gru_1l.log

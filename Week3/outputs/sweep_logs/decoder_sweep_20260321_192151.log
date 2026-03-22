@@ -1,0 +1,41 @@
+[2026-03-21 19:21:51] ========================================================
+[2026-03-21 19:21:51] Decoder sweep started
+[2026-03-21 19:21:51]   encoder     : vgg16
+[2026-03-21 19:21:51]   configs     : gru_1l:gru:1:0.0 lstm_1l:lstm:1:0.0 gru_2l:gru:2:0.3 lstm_2l:lstm:2:0.3
+[2026-03-21 19:21:51]   epochs      : 50
+[2026-03-21 19:21:51]   batch_size  : 64
+[2026-03-21 19:21:51]   GPUs        : 0 1 2
+[2026-03-21 19:21:51]   data_root   : /home/msiau/data/tmp/amarcos/vizwiz_dataset
+[2026-03-21 19:21:51]   out_root    : outputs
+[2026-03-21 19:21:51]   wandb       : true (entity=just-an-arbitrary-team-name, project=mcv-c5-image_captioning)
+[2026-03-21 19:21:51] ========================================================
+[2026-03-21 19:21:51]   Sleeping 10s before next launch...
+[2026-03-21 19:21:51]   Launching vgg16_gru_1l on GPU 0 -> outputs/sweep_logs/vgg16_gru_1l.log
+[2026-03-21 19:22:01]   Sleeping 10s before next launch...
+[2026-03-21 19:22:01]   Launching vgg16_lstm_1l on GPU 1 -> outputs/sweep_logs/vgg16_lstm_1l.log
+[2026-03-21 19:22:11] 
+[2026-03-21 19:22:11]   Launching vgg16_gru_2l on GPU 2 -> outputs/sweep_logs/vgg16_gru_2l.log
+[2026-03-21 19:22:11] Batch running: gru_1l lstm_1l gru_2l (PIDs: 25041 25259 25659)
+[2026-03-21 19:22:11] Waiting for batch to finish...
+[2026-03-21 20:27:55]   vgg16_gru_1l -> OK  |  0.9062,56.50,36.83,25.56,40.80,ok
+[2026-03-21 20:48:08]   vgg16_lstm_1l -> OK  |  0.9101,46.76,23.09,19.07,28.12,ok
+[2026-03-21 20:48:08]   vgg16_gru_2l -> OK  |  0.9292,49.48,31.74,24.17,37.69,ok
+[2026-03-21 20:48:08] Batch done.
+[2026-03-21 20:48:08] 
+[2026-03-21 20:48:08] Sleeping 10s before next batch...
+[2026-03-21 20:48:18] 
+[2026-03-21 20:48:18]   Launching vgg16_lstm_2l on GPU 0 -> outputs/sweep_logs/vgg16_lstm_2l.log
+[2026-03-21 20:48:18] Batch running: lstm_2l (PIDs: 28716)
+[2026-03-21 20:48:18] Waiting for batch to finish...
+[2026-03-21 21:44:18]   vgg16_lstm_2l -> OK  |  0.9625,29.82,13.67,14.18,28.26,ok
+[2026-03-21 21:44:18] Batch done.
+[2026-03-21 21:44:18] 
+[2026-03-21 21:44:18] ========================================================
+[2026-03-21 21:44:18] Decoder sweep complete. Summary:
+encoder  decoder  layers  dropout  test_loss  bleu1  bleu2  rougeL  meteor  status
+vgg16    gru      1       0.0      0.9062     56.50  36.83  25.56   40.80   ok
+vgg16    lstm     1       0.0      0.9101     46.76  23.09  19.07   28.12   ok
+vgg16    gru      2       0.3      0.9292     49.48  31.74  24.17   37.69   ok
+vgg16    lstm     2       0.3      0.9625     29.82  13.67  14.18   28.26   ok
+[2026-03-21 21:44:18] Individual logs: outputs/sweep_logs
+[2026-03-21 21:44:18] ========================================================

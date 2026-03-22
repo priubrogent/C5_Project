@@ -1,6 +1,6 @@
 {
   "encoder": "vgg16",
-  "decoder": "gru",
+  "decoder": "lstm",
   "decoder_layers": 2,
   "hidden_dim": 512,
   "embed_dim": 512,
@@ -17,7 +17,7 @@
   "lr_patience": 5,
   "es_patience": 10,
   "es_metric": "meteor",
-  "run_name": "vgg16_gru_2l",
+  "run_name": "vgg16_lstm_2l",
   "seed": 42,
   "num_workers": 4,
   "val_fraction": 0.1,

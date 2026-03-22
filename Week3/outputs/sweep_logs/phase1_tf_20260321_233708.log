@@ -1,0 +1,33 @@
+[2026-03-21 23:37:08] ========================================================
+[2026-03-21 23:37:08] Phase 1 — Teacher Forcing sweep
+[2026-03-21 23:37:08]   backbone : vgg16 + gru x1 | char | dim=512
+[2026-03-21 23:37:08]   epochs   : 50  batch=64
+[2026-03-21 23:37:08]   GPUs     : 0 1 2
+[2026-03-21 23:37:08]   wandb    : true
+[2026-03-21 23:37:08] ========================================================
+[2026-03-21 23:37:08]   Sleeping 10s before next launch...
+[2026-03-21 23:37:08]   Launching vgg16_gru_tf_on (tf=on) on GPU 0
+[2026-03-21 23:37:18]   Launching vgg16_gru_tf_off (tf=off) on GPU 1
+[2026-03-21 23:37:18]   Sleeping 10s before next launch...
+[2026-03-21 23:37:28] 
+[2026-03-21 23:37:28]   Launching vgg16_gru_tf_scheduled (tf=scheduled) on GPU 2
+[2026-03-21 23:37:28] All runs launched (PIDs: 37303 37523 37922). Waiting...
+[2026-03-22 02:38:02]   vgg16_gru_tf_on -> OK  |  0.8277,54.06,31.78,23.65,31.92,ok
+[2026-03-22 02:38:02]   vgg16_gru_tf_off -> OK  |  2.6865,12.29,10.56,18.57,17.92,ok
+[2026-03-22 02:38:02]   vgg16_gru_tf_scheduled -> OK  |  0.9951,13.63,2.75,16.05,10.33,ok
+[2026-03-22 02:38:02] 
+[2026-03-22 02:38:02] ========================================================
+[2026-03-22 02:38:02] Phase 1 complete. Summary (pick winner by best val_loss):
+run                     tf_mode    test_loss  bleu1  bleu2  rougeL  meteor  status
+vgg16_gru_tf_on         on         0.8277     54.06  31.78  23.65   31.92   ok
+vgg16_gru_tf_off        off        2.6865     12.29  10.56  18.57   17.92   ok
+vgg16_gru_tf_scheduled  scheduled  0.9951     13.63  2.75   16.05   10.33   ok
+[2026-03-22 02:38:02] 
+[2026-03-22 02:38:02] To find the winner:
+[2026-03-22 02:38:02]   python - <<'EOF'
+[2026-03-22 02:38:02]   import json, glob
+[2026-03-22 02:38:02]   for p in glob.glob('outputs/vgg16_gru_tf_*/history.json'):
+[2026-03-22 02:38:02]       h = json.load(open(p)); best = min(h, key=lambda r: r['val_loss'])
+[2026-03-22 02:38:02]       print(p, '-> best val_loss:', best['val_loss'], 'epoch:', best['epoch'])
+[2026-03-22 02:38:02]   EOF
+[2026-03-22 02:38:02] ========================================================

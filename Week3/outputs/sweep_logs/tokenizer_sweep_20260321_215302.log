@@ -1,0 +1,20 @@
+[2026-03-21 21:53:02] ========================================================
+[2026-03-21 21:53:02] Tokenizer sweep started
+[2026-03-21 21:53:02]   encoder     : resnet50
+[2026-03-21 21:53:02]   decoder     : gru
+[2026-03-21 21:53:02]   configs     : char:150 word:35 subword:50
+[2026-03-21 21:53:02]   epochs      : 50
+[2026-03-21 21:53:02]   batch_size  : 64
+[2026-03-21 21:53:02]   GPUs        : 4 5 6
+[2026-03-21 21:53:02]   data_root   : /home/msiau/data/tmp/amarcos/vizwiz_dataset
+[2026-03-21 21:53:02]   out_root    : outputs
+[2026-03-21 21:53:02]   wandb       : true (entity=just-an-arbitrary-team-name, project=mcv-c5-image_captioning)
+[2026-03-21 21:53:02] ========================================================
+[2026-03-21 21:53:02]   Launching resnet50_gru_char on GPU 4 -> outputs/sweep_logs/resnet50_gru_char.log
+[2026-03-21 21:53:02]   Sleeping 10s before next launch...
+[2026-03-21 21:53:12]   Sleeping 10s before next launch...
+[2026-03-21 21:53:12]   Launching resnet50_gru_word on GPU 5 -> outputs/sweep_logs/resnet50_gru_word.log
+[2026-03-21 21:53:22]   Launching resnet50_gru_subword on GPU 6 -> outputs/sweep_logs/resnet50_gru_subword.log
+[2026-03-21 21:53:22] 
+[2026-03-21 21:53:22] All runs launched (PIDs: 31240 31399 31742). Waiting...
+[2026-03-21 21:53:22] 
