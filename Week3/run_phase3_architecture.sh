@@ -27,7 +27,7 @@
 #   --wandb_entity NAME
 #   --wandb_project NAME
 #   --epochs N            (default: 50)
-#   --batch_size N        (default: 64, overridden to 32 for 1024-dim runs)
+#   --batch_size N        (default: 128)
 #   --gpu_ids IDS         (default: 1,2,4,5,6,7)
 #   --tf_mode scheduled|on  (default: scheduled)
 #   --no_wandb
@@ -39,8 +39,8 @@ DATA_ROOT="/home/msiau/data/tmp/amarcos/vizwiz_dataset"
 OUT_ROOT="outputs"
 WANDB_ENTITY="just-an-arbitrary-team-name"
 WANDB_PROJECT="mcv-c5-image_captioning"
-EPOCHS=50
-BATCH_SIZE=64
+EPOCHS=200
+BATCH_SIZE=128
 GPU_IDS="1,2,4,5,6,7"
 USE_WANDB=true
 WANDB_SLEEP=10
@@ -48,10 +48,10 @@ WANDB_SLEEP=10
 # ---------- fixed backbone ----------
 ENCODER="resnet50"
 TEXT_REPR="subword"
-OPTIMIZER="adamw"
+OPTIMIZER="adam"
 LR="1e-3"
 WEIGHT_DECAY="1e-4"
-TF_MODE="scheduled"   # "scheduled" or "on"
+TF_MODE="on"   # "scheduled" or "on"
 
 # ---------- parse CLI ----------
 while [[ $# -gt 0 ]]; do
@@ -76,7 +76,6 @@ fi
 IFS=',' read -ra GPUS <<< "$GPU_IDS"
 
 # ---------- configs: "suffix:decoder:layers:hidden_dim:embed_dim:dropout" ----------
-# 1024-dim runs get batch_size halved automatically in launch_run
 CONFIGS=(
     "gru_2l_512:gru:2:512:512:0.3"
     "gru_1l_1024:gru:1:1024:1024:0.0"
@@ -118,13 +117,7 @@ launch_run() {
     local RUN_NAME="${ENCODER}_${DECODER}_subword_${SUFFIX}_tf_${TF_MODE}"
     local RUN_LOG="${SWEEP_LOG_DIR}/${RUN_NAME}.log"
 
-    # halve batch size for wide models to avoid OOM
-    local BS="$BATCH_SIZE"
-    if (( HIDDEN_DIM >= 1024 )); then
-        BS=$(( BATCH_SIZE / 2 ))
-    fi
-
-    log "  Launching $RUN_NAME (decoder=$DECODER layers=$LAYERS dim=$HIDDEN_DIM dropout=$DROPOUT bs=$BS tf=$TF_MODE) on GPU $GPU_ID"
+    log "  Launching $RUN_NAME (decoder=$DECODER layers=$LAYERS dim=$HIDDEN_DIM dropout=$DROPOUT bs=$BATCH_SIZE tf=$TF_MODE) on GPU $GPU_ID"
 
     local WANDB_ARGS=()
     if $USE_WANDB; then
@@ -147,18 +140,18 @@ launch_run() {
         --dropout        "$DROPOUT" \
         --text_repr      "$TEXT_REPR" \
         --epochs         "$EPOCHS" \
-        --batch_size     "$BS" \
+        --batch_size     "$BATCH_SIZE" \
         --lr             "$LR" \
         --weight_decay   "$WEIGHT_DECAY" \
         --optimizer      "$OPTIMIZER" \
         "${TF_ARGS[@]}" \
         --lr_decay       0.5 \
         --lr_patience    5 \
-        --es_patience    20 \
-        --es_metric      val_loss \
+        --es_patience    50 \
+        --es_metric      meteor \
         --run_name       "$RUN_NAME" \
         --seed           42 \
-        --num_workers    4 \
+        --num_workers    8 \
         --data_root      "$DATA_ROOT" \
         --out_root       "$OUT_ROOT" \
         --device         cuda \
