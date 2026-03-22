@@ -16,8 +16,7 @@
 #
 # NOTE: 1024-dim runs use batch_size=32 to avoid OOM.
 #
-# Fixed: resnet50 + subword (max_len=50) + scheduled_tf
-#        + AdamW lr=1e-3 + weight_decay=1e-4
+# Fixed: resnet50 + subword + AdamW lr=1e-3 + weight_decay=1e-4
 #
 # Usage:
 #   bash run_phase3_architecture.sh [OPTIONS]
@@ -30,6 +29,7 @@
 #   --epochs N            (default: 50)
 #   --batch_size N        (default: 64, overridden to 32 for 1024-dim runs)
 #   --gpu_ids IDS         (default: 1,2,4,5,6,7)
+#   --tf_mode scheduled|on  (default: scheduled)
 #   --no_wandb
 # ============================================================
 set -euo pipefail
@@ -48,10 +48,10 @@ WANDB_SLEEP=10
 # ---------- fixed backbone ----------
 ENCODER="resnet50"
 TEXT_REPR="subword"
-MAX_LEN=50
 OPTIMIZER="adamw"
 LR="1e-3"
 WEIGHT_DECAY="1e-4"
+TF_MODE="scheduled"   # "scheduled" or "on"
 
 # ---------- parse CLI ----------
 while [[ $# -gt 0 ]]; do
@@ -63,10 +63,15 @@ while [[ $# -gt 0 ]]; do
         --epochs)        EPOCHS="$2";        shift 2 ;;
         --batch_size)    BATCH_SIZE="$2";    shift 2 ;;
         --gpu_ids)       GPU_IDS="$2";       shift 2 ;;
+        --tf_mode)       TF_MODE="$2";       shift 2 ;;
         --no_wandb)      USE_WANDB=false;    shift   ;;
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
 done
+
+if [[ "$TF_MODE" != "scheduled" && "$TF_MODE" != "on" ]]; then
+    echo "Error: --tf_mode must be 'scheduled' or 'on'"; exit 1
+fi
 
 IFS=',' read -ra GPUS <<< "$GPU_IDS"
 
@@ -93,8 +98,8 @@ log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$MASTER_LOG"; }
 
 log "========================================================"
 log "Phase 3 — Decoder Architecture sweep"
-log "  backbone : $ENCODER | ${TEXT_REPR} max_len=${MAX_LEN}"
-log "  tf       : scheduled"
+log "  backbone : $ENCODER | ${TEXT_REPR}"
+log "  tf       : $TF_MODE"
 log "  optimizer: $OPTIMIZER  lr=$LR  wd=$WEIGHT_DECAY"
 log "  epochs   : $EPOCHS"
 log "  GPUs     : ${GPUS[*]}"
@@ -110,7 +115,7 @@ launch_run() {
     local EMBED_DIM="$5"
     local DROPOUT="$6"
     local GPU_ID="$7"
-    local RUN_NAME="${ENCODER}_${DECODER}_subword_${SUFFIX}"
+    local RUN_NAME="${ENCODER}_${DECODER}_subword_${SUFFIX}_tf_${TF_MODE}"
     local RUN_LOG="${SWEEP_LOG_DIR}/${RUN_NAME}.log"
 
     # halve batch size for wide models to avoid OOM
@@ -119,11 +124,18 @@ launch_run() {
         BS=$(( BATCH_SIZE / 2 ))
     fi
 
-    log "  Launching $RUN_NAME (decoder=$DECODER layers=$LAYERS dim=$HIDDEN_DIM dropout=$DROPOUT bs=$BS) on GPU $GPU_ID"
+    log "  Launching $RUN_NAME (decoder=$DECODER layers=$LAYERS dim=$HIDDEN_DIM dropout=$DROPOUT bs=$BS tf=$TF_MODE) on GPU $GPU_ID"
 
     local WANDB_ARGS=()
     if $USE_WANDB; then
         WANDB_ARGS=(--wandb --wandb_entity "$WANDB_ENTITY" --wandb_project "$WANDB_PROJECT")
+    fi
+
+    local TF_ARGS=()
+    if [[ "$TF_MODE" == "scheduled" ]]; then
+        TF_ARGS=(--scheduled_tf)
+    else
+        TF_ARGS=(--teacher_forcing)
     fi
 
     CUDA_VISIBLE_DEVICES="$GPU_ID" python train.py \
@@ -134,13 +146,12 @@ launch_run() {
         --embed_dim      "$EMBED_DIM" \
         --dropout        "$DROPOUT" \
         --text_repr      "$TEXT_REPR" \
-        --max_len        "$MAX_LEN" \
         --epochs         "$EPOCHS" \
         --batch_size     "$BS" \
         --lr             "$LR" \
         --weight_decay   "$WEIGHT_DECAY" \
         --optimizer      "$OPTIMIZER" \
-        --scheduled_tf \
+        "${TF_ARGS[@]}" \
         --lr_decay       0.5 \
         --lr_patience    5 \
         --es_patience    20 \
@@ -162,7 +173,7 @@ collect_result() {
     local HIDDEN_DIM="$4"
     local DROPOUT="$5"
     local EXIT_CODE="$6"
-    local RUN_NAME="${ENCODER}_${DECODER}_subword_${SUFFIX}"
+    local RUN_NAME="${ENCODER}_${DECODER}_subword_${SUFFIX}_tf_${TF_MODE}"
     local RESULTS_FILE="${OUT_ROOT}/${RUN_NAME}/test_results.json"
 
     if [[ $EXIT_CODE -eq 0 && -f "$RESULTS_FILE" ]]; then
