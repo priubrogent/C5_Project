@@ -1,0 +1,16 @@
+Device: cuda
+Building tokenizer (char)...
+Traceback (most recent call last):
+  File "/home/arnau-marcos-almansa/workspace/C5_Project/Week3/train.py", line 269, in <module>
+    main()
+  File "/home/arnau-marcos-almansa/workspace/C5_Project/Week3/train.py", line 138, in main
+    tokenizer = build_tokenizer(args.text_repr, train_ann, cache_dir, max_len=args.max_len)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/arnau-marcos-almansa/workspace/C5_Project/Week3/tokenizer.py", line 234, in build_tokenizer
+    os.makedirs(cache_dir, exist_ok=True)
+  File "<frozen os>", line 215, in makedirs
+  File "<frozen os>", line 215, in makedirs
+  File "<frozen os>", line 215, in makedirs
+  [Previous line repeated 2 more times]
+  File "<frozen os>", line 225, in makedirs
+PermissionError: [Errno 13] Permission denied: '/home/msiau'

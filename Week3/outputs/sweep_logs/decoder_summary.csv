@@ -1,0 +1,4 @@
+encoder,decoder,layers,dropout,test_loss,bleu1,bleu2,rougeL,meteor,status
+vgg16,gru,1,0.0,,,,,FAILED
+vgg16,lstm,1,0.0,,,,,FAILED
+vgg16,gru,2,0.3,,,,,FAILED

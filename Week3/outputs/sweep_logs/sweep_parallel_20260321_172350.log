@@ -1,0 +1,23 @@
+[2026-03-21 17:23:50] ========================================================
+[2026-03-21 17:23:50] Parallel encoder sweep started
+[2026-03-21 17:23:50]   encoders    : resnet18
+[2026-03-21 17:23:50]   epochs      : 50
+[2026-03-21 17:23:50]   batch_size  : 64
+[2026-03-21 17:23:50]   GPUs        : 0 1 2
+[2026-03-21 17:23:50]   data_root   : /media/arnau-marcos-almansa/Ubuntu Data/vizwiz_dataset
+[2026-03-21 17:23:50]   out_root    : /home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs
+[2026-03-21 17:23:50]   wandb       : true (entity=just-an-arbitrary-team-name, project=mcv-c5-image_captioning)
+[2026-03-21 17:23:50] ========================================================
+[2026-03-21 17:23:50] 
+[2026-03-21 17:23:50]   Launching baseline_resnet18 on GPU 0 -> /home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs/sweep_logs/baseline_resnet18.log
+[2026-03-21 17:23:50] Batch running: resnet18 (PIDs: 109602)
+[2026-03-21 17:23:50] Waiting for batch to finish...
+[2026-03-21 18:59:17]   resnet18 -> OK  |  0.8243,40.80,23.93,21.80,31.01,ok
+[2026-03-21 18:59:17] Batch done.
+[2026-03-21 18:59:17] 
+[2026-03-21 18:59:17] ========================================================
+[2026-03-21 18:59:17] Sweep complete. Summary:
+encoder   test_loss  bleu1  bleu2  rougeL  meteor  status
+resnet18  0.8243     40.80  23.93  21.80   31.01   ok
+[2026-03-21 18:59:17] Individual logs: /home/arnau-marcos-almansa/workspace/C5_Project/Week3/outputs/sweep_logs
+[2026-03-21 18:59:17] ========================================================
