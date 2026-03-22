@@ -1,0 +1,47 @@
+[2026-03-22 05:20:26] ========================================================
+[2026-03-22 05:20:26] Phase 1 remaining — word + subword TF sweep
+[2026-03-22 05:20:26]   backbone : resnet50 + gru x1 | dim=512
+[2026-03-22 05:20:26]   epochs   : 50  batch=64
+[2026-03-22 05:20:26]   GPUs     : 0 1 2 4 5 6
+[2026-03-22 05:20:26]   wandb    : true
+[2026-03-22 05:20:26] ========================================================
+[2026-03-22 05:20:26]   Launching resnet50_gru_word_tf_on on GPU 0
+[2026-03-22 05:20:26]   Sleeping 10s before next launch...
+[2026-03-22 05:20:36]   Sleeping 10s before next launch...
+[2026-03-22 05:20:36]   Launching resnet50_gru_word_tf_off on GPU 1
+[2026-03-22 05:20:46]   Sleeping 10s before next launch...
+[2026-03-22 05:20:46]   Launching resnet50_gru_word_tf_scheduled on GPU 2
+[2026-03-22 05:20:56]   Sleeping 10s before next launch...
+[2026-03-22 05:20:56]   Launching resnet50_gru_subword_tf_on on GPU 4
+[2026-03-22 05:21:06]   Launching resnet50_gru_subword_tf_off on GPU 5
+[2026-03-22 05:21:06]   Sleeping 10s before next launch...
+[2026-03-22 05:21:16]   Launching resnet50_gru_subword_tf_scheduled on GPU 6
+[2026-03-22 05:21:16] 
+[2026-03-22 05:21:16] All runs launched (PIDs: 49239 49399 49741 50084 50425 51281). Waiting...
+[2026-03-22 07:59:08]   resnet50_gru_word_tf_on -> OK  |  3.0300,56.24,38.25,28.44,35.30,ok
+[2026-03-22 07:59:08]   resnet50_gru_word_tf_off -> OK  |  4.5088,51.95,37.45,29.62,32.40,ok
+[2026-03-22 07:59:08]   resnet50_gru_word_tf_scheduled -> OK  |  3.1995,55.63,41.00,30.59,33.49,ok
+[2026-03-22 08:21:55]   resnet50_gru_subword_tf_on -> OK  |  3.0671,62.13,39.89,28.12,39.51,ok
+[2026-03-22 08:22:11]   resnet50_gru_subword_tf_off -> OK  |  4.8192,62.40,43.14,28.70,35.83,ok
+[2026-03-22 08:22:11]   resnet50_gru_subword_tf_scheduled -> OK  |  3.2902,67.95,46.92,29.68,38.76,ok
+[2026-03-22 08:22:11] 
+[2026-03-22 08:22:11] ========================================================
+[2026-03-22 08:22:11] Phase 1 remaining complete. Summary:
+run                                tokenizer  tf_mode    test_loss  bleu1  bleu2  rougeL  meteor  status
+resnet50_gru_word_tf_on            word       on         3.0300     56.24  38.25  28.44   35.30   ok
+resnet50_gru_word_tf_off           word       off        4.5088     51.95  37.45  29.62   32.40   ok
+resnet50_gru_word_tf_scheduled     word       scheduled  3.1995     55.63  41.00  30.59   33.49   ok
+resnet50_gru_subword_tf_on         subword    on         3.0671     62.13  39.89  28.12   39.51   ok
+resnet50_gru_subword_tf_off        subword    off        4.8192     62.40  43.14  28.70   35.83   ok
+resnet50_gru_subword_tf_scheduled  subword    scheduled  3.2902     67.95  46.92  29.68   38.76   ok
+[2026-03-22 08:22:11] 
+[2026-03-22 08:22:11] To compare all 9 Phase 1 runs (including char from run_phase1_tf.sh):
+[2026-03-22 08:22:11]   python - <<'EOF'
+[2026-03-22 08:22:11]   import json, glob
+[2026-03-22 08:22:11]   rows = []
+[2026-03-22 08:22:11]   for p in glob.glob('outputs/vgg16_gru_*/history.json'):
+[2026-03-22 08:22:11]       h = json.load(open(p)); best = min(h, key=lambda r: r['val_loss'])
+[2026-03-22 08:22:11]       rows.append((best['val_loss'], p, best['epoch']))
+[2026-03-22 08:22:11]   for v, p, e in sorted(rows): print(f'{v:.4f}  ep={e}  {p}')
+[2026-03-22 08:22:11]   EOF
+[2026-03-22 08:22:11] ========================================================

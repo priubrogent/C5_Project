@@ -1,0 +1,83 @@
+[nltk_data] Downloading package wordnet to /home/msiau/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt_tab to /home/msiau/nltk_data...
+[nltk_data]   Package punkt_tab is already up-to-date!
+[nltk_data] Downloading package omw-1.4 to /home/msiau/nltk_data...
+[nltk_data]   Package omw-1.4 is already up-to-date!
+wandb: Currently logged in as: arnaumarcosalmansa (just-an-arbitrary-team-name) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run oouz7is2
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in /home/msiau/workspace/C5_Project/Week3/wandb/run-20260321_204837-oouz7is2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vgg16_lstm_2l
+wandb: ⭐️ View project at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: 🚀 View run at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/oouz7is2
+Device: cuda
+Building tokenizer (char)...
+Loading datasets...
+  train: 21088, val: 2343, test: 7750
+  Model: vgg16 + lstmx2 | text=char | params=19.0M
+Early stopping: metric=meteor mode=max patience=10
+Epoch   1/50  train_loss=1.6783  val_loss=1.1925  BLEU-1=28.2%  BLEU-2=13.4%  ROUGE-L=14.1%  METEOR=19.2%  ES=0/10  [201s]
+Epoch   2/50  train_loss=1.1682  val_loss=1.0799  BLEU-1=9.0%  BLEU-2=3.1%  ROUGE-L=6.7%  METEOR=11.2%  ES=1/10  [209s]
+Epoch   3/50  train_loss=1.0938  val_loss=1.0078  BLEU-1=13.0%  BLEU-2=5.4%  ROUGE-L=9.4%  METEOR=15.2%  ES=2/10  [206s]
+Epoch   4/50  train_loss=1.0542  val_loss=0.9959  BLEU-1=11.6%  BLEU-2=4.0%  ROUGE-L=7.4%  METEOR=13.8%  ES=3/10  [207s]
+Epoch   5/50  train_loss=1.0268  val_loss=0.9581  BLEU-1=48.4%  BLEU-2=22.8%  ROUGE-L=19.4%  METEOR=28.1%  ES=0/10  [200s]
+Epoch   6/50  train_loss=1.0072  val_loss=0.9579  BLEU-1=30.4%  BLEU-2=14.3%  ROUGE-L=15.1%  METEOR=28.8%  ES=0/10  [207s]
+Epoch   7/50  train_loss=0.9955  val_loss=0.9528  BLEU-1=47.5%  BLEU-2=20.0%  ROUGE-L=19.3%  METEOR=28.1%  ES=1/10  [200s]
+Epoch   8/50  train_loss=0.9892  val_loss=0.9420  BLEU-1=58.5%  BLEU-2=26.3%  ROUGE-L=21.4%  METEOR=27.4%  ES=2/10  [198s]
+Epoch   9/50  train_loss=0.9785  val_loss=0.9277  BLEU-1=39.0%  BLEU-2=12.9%  ROUGE-L=14.1%  METEOR=16.3%  ES=3/10  [199s]
+Epoch  10/50  train_loss=0.9728  val_loss=0.9231  BLEU-1=29.7%  BLEU-2=9.1%  ROUGE-L=12.2%  METEOR=15.2%  ES=4/10  [199s]
+Epoch  11/50  train_loss=0.9652  val_loss=0.9216  BLEU-1=49.9%  BLEU-2=22.9%  ROUGE-L=20.3%  METEOR=24.9%  ES=5/10  [200s]
+Epoch  12/50  train_loss=0.9642  val_loss=0.9091  BLEU-1=10.9%  BLEU-2=3.8%  ROUGE-L=7.7%  METEOR=11.3%  ES=6/10  [207s]
+Epoch  13/50  train_loss=0.9573  val_loss=0.9092  BLEU-1=33.4%  BLEU-2=11.0%  ROUGE-L=14.8%  METEOR=22.2%  ES=7/10  [200s]
+Epoch  14/50  train_loss=0.9488  val_loss=0.9161  BLEU-1=56.3%  BLEU-2=23.6%  ROUGE-L=19.3%  METEOR=24.2%  ES=8/10  [198s]
+Epoch  15/50  train_loss=0.9472  val_loss=0.9127  BLEU-1=18.4%  BLEU-2=8.4%  ROUGE-L=11.6%  METEOR=17.4%  ES=9/10  [206s]
+Epoch  16/50  train_loss=0.9467  val_loss=0.9030  BLEU-1=35.5%  BLEU-2=15.2%  ROUGE-L=16.0%  METEOR=24.3%  ES=10/10  [200s]
+
+Early stopping triggered at epoch 16 (no improvement in meteor for 10 epochs).
+
+Running final test evaluation (best metric checkpoint)...
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+wandb: uploading history steps 16-16, summary, console lines 21-29
+wandb: 
+wandb: Run history:
+wandb:       bleu1 ▄▁▂▁▇▄▆█▅▄▇▁▄█▂▅
+wandb:       bleu2 ▄▁▂▁▇▄▆█▄▃▇▁▃▇▃▅
+wandb:       epoch ▁▁▂▂▃▃▄▄▅▅▆▆▇▇██
+wandb:      meteor ▄▁▃▂███▇▃▃▆▁▅▆▃▆
+wandb:      rougeL ▅▁▂▁▇▅▇█▅▄▇▁▅▇▃▅
+wandb:  test_bleu1 ▁
+wandb:  test_bleu2 ▁
+wandb: test_meteor ▁
+wandb: test_rougeL ▁
+wandb:      time_s ▃█▆▆▂▇▂▁▂▂▂▆▂▁▆▂
+wandb:          +2 ...
+wandb: 
+wandb: Run summary:
+wandb:       bleu1 35.49
+wandb:       bleu2 15.24
+wandb:       epoch 16
+wandb:      meteor 24.29
+wandb:      rougeL 16.02
+wandb:  test_bleu1 29.81677
+wandb:  test_bleu2 13.66996
+wandb: test_meteor 28.26421
+wandb: test_rougeL 14.18035
+wandb:      time_s 200
+wandb:          +2 ...
+wandb: 
+wandb: 🚀 View run vgg16_lstm_2l at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/oouz7is2
+wandb: ⭐️ View project at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260321_204837-oouz7is2/logs
+
+============================================================
+TEST RESULTS [vgg16_lstm_2l]
+  test_loss = 0.9625
+  BLEU-1    = 29.82%
+  BLEU-2    = 13.67%
+  ROUGE-L   = 14.18%
+  METEOR    = 28.26%
+============================================================

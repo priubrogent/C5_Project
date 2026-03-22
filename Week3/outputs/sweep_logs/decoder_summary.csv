@@ -1,0 +1,5 @@
+encoder,decoder,layers,dropout,test_loss,bleu1,bleu2,rougeL,meteor,status
+vgg16,gru,1,0.0,0.9062,56.50,36.83,25.56,40.80,ok
+vgg16,lstm,1,0.0,0.9101,46.76,23.09,19.07,28.12,ok
+vgg16,gru,2,0.3,0.9292,49.48,31.74,24.17,37.69,ok
+vgg16,lstm,2,0.3,0.9625,29.82,13.67,14.18,28.26,ok

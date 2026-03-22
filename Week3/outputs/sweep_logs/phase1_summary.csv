@@ -1,0 +1,7 @@
+run,tf_mode,test_loss,bleu1,bleu2,rougeL,meteor,status
+vgg16_gru_tf_on,on,0.8277,54.06,31.78,23.65,31.92,ok
+vgg16_gru_tf_off,off,2.6865,12.29,10.56,18.57,17.92,ok
+vgg16_gru_tf_scheduled,scheduled,0.9951,13.63,2.75,16.05,10.33,ok
+resnet50_gru_tf_on,on,0.8136,49.74,29.58,23.95,33.94,ok
+resnet50_gru_tf_off,off,2.6785,11.79,10.10,18.59,17.73,ok
+resnet50_gru_tf_scheduled,scheduled,0.9766,2.78,1.19,12.24,6.73,ok

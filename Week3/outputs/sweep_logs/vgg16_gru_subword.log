@@ -1,0 +1,84 @@
+
+
+
+[nltk_data] Downloading package wordnet to /home/msiau/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt_tab to /home/msiau/nltk_data...
+[nltk_data]   Package punkt_tab is already up-to-date!
+[nltk_data] Downloading package omw-1.4 to /home/msiau/nltk_data...
+[nltk_data]   Package omw-1.4 is already up-to-date!
+wandb: Currently logged in as: arnaumarcosalmansa (just-an-arbitrary-team-name) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run m2pdq7qe
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in /home/msiau/workspace/C5_Project/Week3/wandb/run-20260321_215137-m2pdq7qe
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vgg16_gru_subword
+wandb: ⭐️ View project at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: 🚀 View run at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/m2pdq7qe
+Device: cuda
+Building tokenizer (subword)...
+[SubwordTokenizer] vocab size: 4000
+Loading datasets...
+  train: 21088, val: 2343, test: 7750
+  Model: vgg16 + grux1 | text=subword | params=20.4M
+Early stopping: metric=meteor mode=max patience=10
+Epoch   1/50  train_loss=4.4017  val_loss=3.7867  BLEU-1=59.7%  BLEU-2=36.3%  ROUGE-L=26.2%  METEOR=34.6%  ES=0/10  [208s]
+Epoch   2/50  train_loss=3.6484  val_loss=3.5637  BLEU-1=54.6%  BLEU-2=31.7%  ROUGE-L=24.9%  METEOR=34.2%  ES=1/10  [204s]
+Epoch   3/50  train_loss=3.4570  val_loss=3.4301  BLEU-1=60.6%  BLEU-2=35.5%  ROUGE-L=27.0%  METEOR=35.2%  ES=0/10  [205s]
+Epoch   4/50  train_loss=3.3520  val_loss=3.3748  BLEU-1=57.8%  BLEU-2=33.7%  ROUGE-L=25.5%  METEOR=33.3%  ES=1/10  [208s]
+Epoch   5/50  train_loss=3.2939  val_loss=3.3333  BLEU-1=60.1%  BLEU-2=36.1%  ROUGE-L=26.3%  METEOR=34.3%  ES=2/10  [207s]
+Epoch   6/50  train_loss=3.2468  val_loss=3.3212  BLEU-1=55.5%  BLEU-2=32.8%  ROUGE-L=25.5%  METEOR=32.9%  ES=3/10  [210s]
+Epoch   7/50  train_loss=3.2328  val_loss=3.2832  BLEU-1=56.8%  BLEU-2=32.3%  ROUGE-L=25.6%  METEOR=32.3%  ES=4/10  [209s]
+Epoch   8/50  train_loss=3.2176  val_loss=3.2741  BLEU-1=58.1%  BLEU-2=34.2%  ROUGE-L=25.9%  METEOR=34.8%  ES=5/10  [209s]
+Epoch   9/50  train_loss=3.1857  val_loss=3.2324  BLEU-1=57.4%  BLEU-2=32.4%  ROUGE-L=25.4%  METEOR=34.0%  ES=6/10  [209s]
+Epoch  10/50  train_loss=3.1598  val_loss=3.2456  BLEU-1=59.7%  BLEU-2=34.2%  ROUGE-L=25.9%  METEOR=34.1%  ES=7/10  [207s]
+Epoch  11/50  train_loss=3.1639  val_loss=3.2728  BLEU-1=56.6%  BLEU-2=32.6%  ROUGE-L=26.2%  METEOR=33.6%  ES=8/10  [208s]
+Epoch  12/50  train_loss=3.1641  val_loss=3.2513  BLEU-1=57.2%  BLEU-2=30.4%  ROUGE-L=24.2%  METEOR=30.7%  ES=9/10  [211s]
+Epoch  13/50  train_loss=3.1417  val_loss=3.2260  BLEU-1=55.0%  BLEU-2=28.9%  ROUGE-L=23.6%  METEOR=30.3%  ES=10/10  [208s]
+
+Early stopping triggered at epoch 13 (no improvement in meteor for 10 epochs).
+
+Running final test evaluation (best metric checkpoint)...
+wandb: updating run metadata
+wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml; uploading history steps 13-13, summary, console lines 18-26
+wandb: uploading data
+wandb: 
+wandb: Run history:
+wandb:       bleu1 ▇▁█▅▇▂▄▅▄▇▃▄▂
+wandb:       bleu2 █▄▇▆█▅▄▆▄▆▄▂▁
+wandb:       epoch ▁▂▂▃▃▄▅▅▆▆▇▇█
+wandb:      meteor ▇▇█▅▇▅▄▇▆▇▆▂▁
+wandb:      rougeL ▆▄█▅▇▅▅▆▅▆▆▂▁
+wandb:  test_bleu1 ▁
+wandb:  test_bleu2 ▁
+wandb: test_meteor ▁
+wandb: test_rougeL ▁
+wandb:      time_s ▄▁▂▅▄▇▆▅▆▃▄█▅
+wandb:          +2 ...
+wandb: 
+wandb: Run summary:
+wandb:       bleu1 55.02
+wandb:       bleu2 28.9
+wandb:       epoch 13
+wandb:      meteor 30.3
+wandb:      rougeL 23.57
+wandb:  test_bleu1 60.65403
+wandb:  test_bleu2 35.6604
+wandb: test_meteor 35.2539
+wandb: test_rougeL 26.13594
+wandb:      time_s 207.8
+wandb:          +2 ...
+wandb: 
+wandb: 🚀 View run vgg16_gru_subword at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/m2pdq7qe
+wandb: ⭐️ View project at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260321_215137-m2pdq7qe/logs
+
+============================================================
+TEST RESULTS [vgg16_gru_subword]
+  test_loss = 3.4707
+  BLEU-1    = 60.65%
+  BLEU-2    = 35.66%
+  ROUGE-L   = 26.14%
+  METEOR    = 35.25%
+============================================================

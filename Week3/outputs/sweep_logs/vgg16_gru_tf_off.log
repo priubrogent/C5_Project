@@ -1,0 +1,93 @@
+[nltk_data] Downloading package wordnet to /home/msiau/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt_tab to /home/msiau/nltk_data...
+[nltk_data]   Package punkt_tab is already up-to-date!
+[nltk_data] Downloading package omw-1.4 to /home/msiau/nltk_data...
+[nltk_data]   Package omw-1.4 is already up-to-date!
+wandb: Currently logged in as: arnaumarcosalmansa (just-an-arbitrary-team-name) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run dsxcjq9y
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in /home/msiau/workspace/C5_Project/Week3/wandb/run-20260321_233730-dsxcjq9y
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vgg16_gru_tf_off
+wandb: ⭐️ View project at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: 🚀 View run at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/dsxcjq9y
+Device: cuda
+Building tokenizer (char)...
+Loading datasets...
+  train: 21088, val: 2343, test: 7750
+  Model: vgg16 + grux1 | text=char | params=16.4M
+Qualitative eval: 100 train, 100 val examples
+Early stopping: metric=val_loss mode=min patience=20
+Teacher forcing: off
+Epoch   1/50  tf=0.00  train_loss=3.1958  val_loss=2.8677  BLEU-1=6.9%  BLEU-2=3.8%  ROUGE-L=13.0%  METEOR=8.7%  ES=0/20  [203s]
+Epoch   2/50  tf=0.00  train_loss=2.8868  val_loss=2.7694  BLEU-1=7.7%  BLEU-2=5.7%  ROUGE-L=16.2%  METEOR=12.5%  ES=0/20  [202s]
+Epoch   3/50  tf=0.00  train_loss=2.8257  val_loss=2.7214  BLEU-1=6.6%  BLEU-2=5.2%  ROUGE-L=17.1%  METEOR=13.0%  ES=0/20  [201s]
+Epoch   4/50  tf=0.00  train_loss=2.8310  val_loss=2.9199  BLEU-1=4.3%  BLEU-2=2.0%  ROUGE-L=13.9%  METEOR=7.8%  ES=1/20  [202s]
+Epoch   5/50  tf=0.00  train_loss=2.8287  val_loss=2.6825  BLEU-1=11.5%  BLEU-2=9.6%  ROUGE-L=18.3%  METEOR=16.9%  ES=0/20  [206s]
+Epoch   6/50  tf=0.00  train_loss=2.8190  val_loss=2.7261  BLEU-1=7.0%  BLEU-2=5.4%  ROUGE-L=16.5%  METEOR=12.5%  ES=1/20  [203s]
+Epoch   7/50  tf=0.00  train_loss=2.8276  val_loss=2.7127  BLEU-1=15.2%  BLEU-2=11.9%  ROUGE-L=18.0%  METEOR=16.3%  ES=2/20  [201s]
+Epoch   8/50  tf=0.00  train_loss=2.8236  val_loss=2.7219  BLEU-1=13.9%  BLEU-2=11.2%  ROUGE-L=17.8%  METEOR=16.2%  ES=3/20  [203s]
+Epoch   9/50  tf=0.00  train_loss=2.8105  val_loss=2.7077  BLEU-1=21.0%  BLEU-2=17.5%  ROUGE-L=19.1%  METEOR=20.8%  ES=4/20  [206s]
+Epoch  10/50  tf=0.00  train_loss=2.8149  val_loss=2.7190  BLEU-1=12.8%  BLEU-2=10.3%  ROUGE-L=17.9%  METEOR=16.1%  ES=5/20  [201s]
+Epoch  11/50  tf=0.00  train_loss=2.7966  val_loss=2.7354  BLEU-1=11.9%  BLEU-2=9.8%  ROUGE-L=18.8%  METEOR=16.9%  ES=6/20  [207s]
+Epoch  12/50  tf=0.00  train_loss=2.7846  val_loss=2.7449  BLEU-1=35.4%  BLEU-2=25.4%  ROUGE-L=18.0%  METEOR=24.8%  ES=7/20  [204s]
+Epoch  13/50  tf=0.00  train_loss=2.7749  val_loss=2.7408  BLEU-1=27.5%  BLEU-2=20.9%  ROUGE-L=18.7%  METEOR=21.8%  ES=8/20  [204s]
+Epoch  14/50  tf=0.00  train_loss=2.7728  val_loss=2.7619  BLEU-1=33.3%  BLEU-2=24.2%  ROUGE-L=18.9%  METEOR=23.7%  ES=9/20  [208s]
+Epoch  15/50  tf=0.00  train_loss=2.7761  val_loss=2.7522  BLEU-1=28.7%  BLEU-2=19.9%  ROUGE-L=20.2%  METEOR=20.8%  ES=10/20  [203s]
+Epoch  16/50  tf=0.00  train_loss=2.7794  val_loss=2.7492  BLEU-1=29.8%  BLEU-2=21.2%  ROUGE-L=18.6%  METEOR=21.1%  ES=11/20  [202s]
+Epoch  17/50  tf=0.00  train_loss=2.7753  val_loss=2.7578  BLEU-1=23.2%  BLEU-2=17.4%  ROUGE-L=18.8%  METEOR=19.4%  ES=12/20  [203s]
+Epoch  18/50  tf=0.00  train_loss=2.7742  val_loss=2.7438  BLEU-1=27.7%  BLEU-2=20.4%  ROUGE-L=19.2%  METEOR=21.2%  ES=13/20  [201s]
+Epoch  19/50  tf=0.00  train_loss=2.7678  val_loss=2.7671  BLEU-1=30.8%  BLEU-2=22.6%  ROUGE-L=18.7%  METEOR=22.0%  ES=14/20  [204s]
+Epoch  20/50  tf=0.00  train_loss=2.7666  val_loss=2.7727  BLEU-1=31.0%  BLEU-2=21.9%  ROUGE-L=18.9%  METEOR=21.6%  ES=15/20  [204s]
+Epoch  21/50  tf=0.00  train_loss=2.7702  val_loss=2.7560  BLEU-1=29.6%  BLEU-2=22.0%  ROUGE-L=19.2%  METEOR=22.2%  ES=16/20  [208s]
+Epoch  22/50  tf=0.00  train_loss=2.7690  val_loss=2.7548  BLEU-1=39.3%  BLEU-2=29.1%  ROUGE-L=19.3%  METEOR=27.2%  ES=17/20  [204s]
+Epoch  23/50  tf=0.00  train_loss=2.7662  val_loss=2.7576  BLEU-1=23.9%  BLEU-2=18.0%  ROUGE-L=18.6%  METEOR=19.8%  ES=18/20  [205s]
+Epoch  24/50  tf=0.00  train_loss=2.7624  val_loss=2.7551  BLEU-1=31.5%  BLEU-2=22.7%  ROUGE-L=18.7%  METEOR=22.4%  ES=19/20  [203s]
+Epoch  25/50  tf=0.00  train_loss=2.7649  val_loss=2.7616  BLEU-1=31.6%  BLEU-2=23.7%  ROUGE-L=19.4%  METEOR=23.7%  ES=20/20  [205s]
+
+Early stopping triggered at epoch 25 (no improvement in val_loss for 20 epochs).
+
+Running final test evaluation (best metric checkpoint)...
+wandb: updating run metadata
+wandb: uploading config.yaml
+wandb: 
+wandb: Run history:
+wandb:       bleu1 ▂▂▁▁▂▂▃▃▄▃▃▇▆▇▆▆▅▆▆▆▆█▅▆▆
+wandb:       bleu2 ▁▂▂▁▃▂▄▃▅▃▃▇▆▇▆▆▅▆▆▆▆█▅▆▇
+wandb:       epoch ▁▁▂▂▂▂▃▃▃▄▄▄▅▅▅▅▆▆▆▇▇▇▇██
+wandb:      meteor ▁▃▃▁▄▃▄▄▆▄▄▇▆▇▆▆▅▆▆▆▆█▅▆▇
+wandb:      rougeL ▁▄▅▂▆▄▆▆▇▆▇▆▇▇█▆▇▇▇▇▇▇▆▇▇
+wandb:  test_bleu1 ▁
+wandb:  test_bleu2 ▁
+wandb: test_meteor ▁
+wandb: test_rougeL ▁
+wandb:     tf_prob ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:          +3 ...
+wandb: 
+wandb: Run summary:
+wandb:       bleu1 31.62
+wandb:       bleu2 23.75
+wandb:       epoch 25
+wandb:      meteor 23.73
+wandb:      rougeL 19.39
+wandb:  test_bleu1 12.29368
+wandb:  test_bleu2 10.56348
+wandb: test_meteor 17.91683
+wandb: test_rougeL 18.57409
+wandb:     tf_prob 0
+wandb:          +3 ...
+wandb: 
+wandb: 🚀 View run vgg16_gru_tf_off at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/dsxcjq9y
+wandb: ⭐️ View project at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: Synced 5 W&B file(s), 500 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260321_233730-dsxcjq9y/logs
+
+============================================================
+TEST RESULTS [vgg16_gru_tf_off]
+  test_loss = 2.6865
+  BLEU-1    = 12.29%
+  BLEU-2    = 10.56%
+  ROUGE-L   = 18.57%
+  METEOR    = 17.92%
+============================================================

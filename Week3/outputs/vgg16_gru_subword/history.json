@@ -1,0 +1,132 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 4.4017,
+    "val_loss": 3.7867,
+    "bleu1": 59.72,
+    "bleu2": 36.28,
+    "rougeL": 26.24,
+    "meteor": 34.61,
+    "time_s": 207.7
+  },
+  {
+    "epoch": 2,
+    "train_loss": 3.6484,
+    "val_loss": 3.5637,
+    "bleu1": 54.58,
+    "bleu2": 31.67,
+    "rougeL": 24.89,
+    "meteor": 34.16,
+    "time_s": 204.5
+  },
+  {
+    "epoch": 3,
+    "train_loss": 3.457,
+    "val_loss": 3.4301,
+    "bleu1": 60.63,
+    "bleu2": 35.5,
+    "rougeL": 27.0,
+    "meteor": 35.15,
+    "time_s": 205.3
+  },
+  {
+    "epoch": 4,
+    "train_loss": 3.352,
+    "val_loss": 3.3748,
+    "bleu1": 57.83,
+    "bleu2": 33.72,
+    "rougeL": 25.48,
+    "meteor": 33.34,
+    "time_s": 207.9
+  },
+  {
+    "epoch": 5,
+    "train_loss": 3.2939,
+    "val_loss": 3.3333,
+    "bleu1": 60.09,
+    "bleu2": 36.12,
+    "rougeL": 26.34,
+    "meteor": 34.29,
+    "time_s": 207.4
+  },
+  {
+    "epoch": 6,
+    "train_loss": 3.2468,
+    "val_loss": 3.3212,
+    "bleu1": 55.49,
+    "bleu2": 32.84,
+    "rougeL": 25.52,
+    "meteor": 32.92,
+    "time_s": 209.7
+  },
+  {
+    "epoch": 7,
+    "train_loss": 3.2328,
+    "val_loss": 3.2832,
+    "bleu1": 56.8,
+    "bleu2": 32.25,
+    "rougeL": 25.61,
+    "meteor": 32.33,
+    "time_s": 209.5
+  },
+  {
+    "epoch": 8,
+    "train_loss": 3.2176,
+    "val_loss": 3.2741,
+    "bleu1": 58.06,
+    "bleu2": 34.25,
+    "rougeL": 25.92,
+    "meteor": 34.75,
+    "time_s": 208.6
+  },
+  {
+    "epoch": 9,
+    "train_loss": 3.1857,
+    "val_loss": 3.2324,
+    "bleu1": 57.39,
+    "bleu2": 32.43,
+    "rougeL": 25.37,
+    "meteor": 33.97,
+    "time_s": 209.0
+  },
+  {
+    "epoch": 10,
+    "train_loss": 3.1598,
+    "val_loss": 3.2456,
+    "bleu1": 59.68,
+    "bleu2": 34.18,
+    "rougeL": 25.89,
+    "meteor": 34.12,
+    "time_s": 206.8
+  },
+  {
+    "epoch": 11,
+    "train_loss": 3.1639,
+    "val_loss": 3.2728,
+    "bleu1": 56.62,
+    "bleu2": 32.56,
+    "rougeL": 26.18,
+    "meteor": 33.58,
+    "time_s": 207.6
+  },
+  {
+    "epoch": 12,
+    "train_loss": 3.1641,
+    "val_loss": 3.2513,
+    "bleu1": 57.22,
+    "bleu2": 30.4,
+    "rougeL": 24.19,
+    "meteor": 30.74,
+    "time_s": 211.1
+  },
+  {
+    "epoch": 13,
+    "train_loss": 3.1417,
+    "val_loss": 3.226,
+    "bleu1": 55.02,
+    "bleu2": 28.9,
+    "rougeL": 23.57,
+    "meteor": 30.3,
+    "time_s": 207.8
+  }
+]

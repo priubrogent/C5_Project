@@ -1,0 +1,36 @@
+[2026-03-21 23:40:07] ========================================================
+[2026-03-21 23:40:07] Phase 1 — Teacher Forcing sweep
+[2026-03-21 23:40:07]   backbone : resnet50 + gru x1 | char | dim=512
+[2026-03-21 23:40:07]   epochs   : 50  batch=64
+[2026-03-21 23:40:07]   GPUs     : 4 5 6
+[2026-03-21 23:40:07]   wandb    : true
+[2026-03-21 23:40:07] ========================================================
+[2026-03-21 23:40:07]   Sleeping 10s before next launch...
+[2026-03-21 23:40:07]   Launching resnet50_gru_tf_on (tf=on) on GPU 4
+[2026-03-21 23:40:17]   Launching resnet50_gru_tf_off (tf=off) on GPU 5
+[2026-03-21 23:40:17]   Sleeping 10s before next launch...
+[2026-03-21 23:40:27] 
+[2026-03-21 23:40:27]   Launching resnet50_gru_tf_scheduled (tf=scheduled) on GPU 6
+[2026-03-21 23:40:27] All runs launched (PIDs: 38543 38703 39061). Waiting...
+[2026-03-22 02:41:16]   resnet50_gru_tf_on -> OK  |  0.8136,49.74,29.58,23.95,33.94,ok
+[2026-03-22 02:41:16]   resnet50_gru_tf_off -> OK  |  2.6785,11.79,10.10,18.59,17.73,ok
+[2026-03-22 02:41:16]   resnet50_gru_tf_scheduled -> OK  |  0.9766,2.78,1.19,12.24,6.73,ok
+[2026-03-22 02:41:16] 
+[2026-03-22 02:41:16] ========================================================
+[2026-03-22 02:41:16] Phase 1 complete. Summary (pick winner by best val_loss):
+run                        tf_mode    test_loss  bleu1  bleu2  rougeL  meteor  status
+vgg16_gru_tf_on            on         0.8277     54.06  31.78  23.65   31.92   ok
+vgg16_gru_tf_off           off        2.6865     12.29  10.56  18.57   17.92   ok
+vgg16_gru_tf_scheduled     scheduled  0.9951     13.63  2.75   16.05   10.33   ok
+resnet50_gru_tf_on         on         0.8136     49.74  29.58  23.95   33.94   ok
+resnet50_gru_tf_off        off        2.6785     11.79  10.10  18.59   17.73   ok
+resnet50_gru_tf_scheduled  scheduled  0.9766     2.78   1.19   12.24   6.73    ok
+[2026-03-22 02:41:16] 
+[2026-03-22 02:41:16] To find the winner:
+[2026-03-22 02:41:16]   python - <<'EOF'
+[2026-03-22 02:41:16]   import json, glob
+[2026-03-22 02:41:16]   for p in glob.glob('outputs/vgg16_gru_tf_*/history.json'):
+[2026-03-22 02:41:16]       h = json.load(open(p)); best = min(h, key=lambda r: r['val_loss'])
+[2026-03-22 02:41:16]       print(p, '-> best val_loss:', best['val_loss'], 'epoch:', best['epoch'])
+[2026-03-22 02:41:16]   EOF
+[2026-03-22 02:41:16] ========================================================

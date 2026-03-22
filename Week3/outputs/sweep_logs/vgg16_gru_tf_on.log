@@ -1,0 +1,117 @@
+[nltk_data] Downloading package wordnet to /home/msiau/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+[nltk_data] Downloading package punkt_tab to /home/msiau/nltk_data...
+[nltk_data]   Package punkt_tab is already up-to-date!
+[nltk_data] Downloading package omw-1.4 to /home/msiau/nltk_data...
+[nltk_data]   Package omw-1.4 is already up-to-date!
+wandb: Currently logged in as: arnaumarcosalmansa (just-an-arbitrary-team-name) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run vi93ljjj
+wandb: Tracking run with wandb version 0.23.1
+wandb: Run data is saved locally in /home/msiau/workspace/C5_Project/Week3/wandb/run-20260321_233720-vi93ljjj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run vgg16_gru_tf_on
+wandb: ⭐️ View project at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: 🚀 View run at https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/vi93ljjj
+Device: cuda
+Building tokenizer (char)...
+Loading datasets...
+  train: 21088, val: 2343, test: 7750
+  Model: vgg16 + grux1 | text=char | params=16.4M
+Qualitative eval: 100 train, 100 val examples
+Early stopping: metric=val_loss mode=min patience=20
+Teacher forcing: on
+Epoch   1/50  tf=1.00  train_loss=1.6870  val_loss=1.1080  BLEU-1=43.2%  BLEU-2=24.9%  ROUGE-L=21.7%  METEOR=28.7%  ES=0/20  [206s]
+Epoch   2/50  tf=1.00  train_loss=1.0607  val_loss=1.0086  BLEU-1=53.3%  BLEU-2=34.0%  ROUGE-L=27.4%  METEOR=36.7%  ES=0/20  [207s]
+Epoch   3/50  tf=1.00  train_loss=0.9898  val_loss=0.9767  BLEU-1=43.7%  BLEU-2=24.7%  ROUGE-L=21.6%  METEOR=29.9%  ES=0/20  [209s]
+Epoch   4/50  tf=1.00  train_loss=0.9581  val_loss=0.9507  BLEU-1=60.1%  BLEU-2=34.4%  ROUGE-L=26.3%  METEOR=33.8%  ES=0/20  [205s]
+Epoch   5/50  tf=1.00  train_loss=0.9382  val_loss=0.9259  BLEU-1=25.6%  BLEU-2=15.1%  ROUGE-L=19.1%  METEOR=29.8%  ES=0/20  [211s]
+Epoch   6/50  tf=1.00  train_loss=0.9229  val_loss=0.9143  BLEU-1=24.1%  BLEU-2=14.9%  ROUGE-L=18.0%  METEOR=28.3%  ES=0/20  [214s]
+Epoch   7/50  tf=1.00  train_loss=0.9203  val_loss=0.9151  BLEU-1=38.5%  BLEU-2=21.9%  ROUGE-L=21.2%  METEOR=30.0%  ES=1/20  [210s]
+Epoch   8/50  tf=1.00  train_loss=0.9129  val_loss=0.9131  BLEU-1=50.3%  BLEU-2=32.0%  ROUGE-L=25.1%  METEOR=37.3%  ES=0/20  [207s]
+Epoch   9/50  tf=1.00  train_loss=0.9051  val_loss=0.9042  BLEU-1=56.9%  BLEU-2=35.9%  ROUGE-L=26.5%  METEOR=39.8%  ES=0/20  [207s]
+Epoch  10/50  tf=1.00  train_loss=0.8954  val_loss=0.8898  BLEU-1=50.3%  BLEU-2=29.1%  ROUGE-L=24.2%  METEOR=35.5%  ES=0/20  [204s]
+Epoch  11/50  tf=1.00  train_loss=0.8901  val_loss=0.8897  BLEU-1=50.5%  BLEU-2=27.3%  ROUGE-L=24.0%  METEOR=33.7%  ES=0/20  [211s]
+Epoch  12/50  tf=1.00  train_loss=0.8862  val_loss=0.9018  BLEU-1=56.4%  BLEU-2=31.4%  ROUGE-L=25.2%  METEOR=33.9%  ES=1/20  [209s]
+Epoch  13/50  tf=1.00  train_loss=0.8808  val_loss=0.8898  BLEU-1=53.9%  BLEU-2=32.1%  ROUGE-L=25.8%  METEOR=33.5%  ES=2/20  [205s]
+Epoch  14/50  tf=1.00  train_loss=0.8756  val_loss=0.8866  BLEU-1=37.5%  BLEU-2=18.8%  ROUGE-L=19.3%  METEOR=24.4%  ES=0/20  [209s]
+Epoch  15/50  tf=1.00  train_loss=0.8751  val_loss=0.8704  BLEU-1=56.5%  BLEU-2=33.2%  ROUGE-L=25.8%  METEOR=33.4%  ES=0/20  [207s]
+Epoch  16/50  tf=1.00  train_loss=0.8709  val_loss=0.8764  BLEU-1=49.5%  BLEU-2=26.0%  ROUGE-L=23.7%  METEOR=31.7%  ES=1/20  [208s]
+Epoch  17/50  tf=1.00  train_loss=0.8680  val_loss=0.8866  BLEU-1=44.5%  BLEU-2=27.9%  ROUGE-L=22.7%  METEOR=31.0%  ES=2/20  [207s]
+Epoch  18/50  tf=1.00  train_loss=0.8678  val_loss=0.8644  BLEU-1=31.0%  BLEU-2=15.1%  ROUGE-L=17.8%  METEOR=28.0%  ES=0/20  [211s]
+Epoch  19/50  tf=1.00  train_loss=0.8627  val_loss=0.8954  BLEU-1=44.6%  BLEU-2=26.0%  ROUGE-L=23.3%  METEOR=37.1%  ES=1/20  [209s]
+Epoch  20/50  tf=1.00  train_loss=0.8587  val_loss=0.8737  BLEU-1=58.0%  BLEU-2=32.9%  ROUGE-L=25.8%  METEOR=30.8%  ES=2/20  [208s]
+Epoch  21/50  tf=1.00  train_loss=0.8579  val_loss=0.8656  BLEU-1=55.9%  BLEU-2=30.7%  ROUGE-L=24.0%  METEOR=31.7%  ES=3/20  [207s]
+Epoch  22/50  tf=1.00  train_loss=0.8592  val_loss=0.8575  BLEU-1=56.2%  BLEU-2=29.2%  ROUGE-L=25.0%  METEOR=33.1%  ES=0/20  [207s]
+Epoch  23/50  tf=1.00  train_loss=0.8541  val_loss=0.8585  BLEU-1=42.4%  BLEU-2=23.4%  ROUGE-L=22.4%  METEOR=31.2%  ES=1/20  [207s]
+Epoch  24/50  tf=1.00  train_loss=0.8522  val_loss=0.8600  BLEU-1=53.4%  BLEU-2=30.3%  ROUGE-L=25.7%  METEOR=32.6%  ES=2/20  [209s]
+Epoch  25/50  tf=1.00  train_loss=0.8498  val_loss=0.8721  BLEU-1=55.2%  BLEU-2=28.9%  ROUGE-L=23.2%  METEOR=30.2%  ES=3/20  [207s]
+Epoch  26/50  tf=1.00  train_loss=0.8486  val_loss=0.8639  BLEU-1=54.5%  BLEU-2=28.5%  ROUGE-L=23.8%  METEOR=30.7%  ES=4/20  [203s]
+Epoch  27/50  tf=1.00  train_loss=0.8440  val_loss=0.8553  BLEU-1=55.7%  BLEU-2=30.4%  ROUGE-L=24.3%  METEOR=33.7%  ES=0/20  [207s]
+Epoch  28/50  tf=1.00  train_loss=0.8434  val_loss=0.8540  BLEU-1=29.6%  BLEU-2=11.1%  ROUGE-L=14.4%  METEOR=20.1%  ES=0/20  [207s]
+Epoch  29/50  tf=1.00  train_loss=0.8427  val_loss=0.8602  BLEU-1=52.6%  BLEU-2=30.1%  ROUGE-L=24.0%  METEOR=33.2%  ES=1/20  [205s]
+Epoch  30/50  tf=1.00  train_loss=0.8413  val_loss=0.8569  BLEU-1=47.3%  BLEU-2=28.3%  ROUGE-L=23.9%  METEOR=35.3%  ES=2/20  [206s]
+Epoch  31/50  tf=1.00  train_loss=0.8453  val_loss=0.8520  BLEU-1=51.8%  BLEU-2=27.0%  ROUGE-L=23.6%  METEOR=30.3%  ES=0/20  [205s]
+Epoch  32/50  tf=1.00  train_loss=0.8411  val_loss=0.8552  BLEU-1=49.1%  BLEU-2=25.8%  ROUGE-L=22.3%  METEOR=32.0%  ES=1/20  [204s]
+Epoch  33/50  tf=1.00  train_loss=0.8359  val_loss=0.8468  BLEU-1=32.9%  BLEU-2=18.6%  ROUGE-L=21.1%  METEOR=29.0%  ES=0/20  [206s]
+Epoch  34/50  tf=1.00  train_loss=0.8399  val_loss=0.8451  BLEU-1=57.0%  BLEU-2=31.9%  ROUGE-L=25.0%  METEOR=32.5%  ES=0/20  [206s]
+Epoch  35/50  tf=1.00  train_loss=0.8322  val_loss=0.8608  BLEU-1=25.5%  BLEU-2=14.2%  ROUGE-L=19.4%  METEOR=26.8%  ES=1/20  [205s]
+Epoch  36/50  tf=1.00  train_loss=0.8313  val_loss=0.8531  BLEU-1=23.8%  BLEU-2=12.7%  ROUGE-L=15.6%  METEOR=23.3%  ES=2/20  [206s]
+Epoch  37/50  tf=1.00  train_loss=0.8332  val_loss=0.8503  BLEU-1=35.6%  BLEU-2=19.6%  ROUGE-L=19.0%  METEOR=26.7%  ES=3/20  [205s]
+Epoch  38/50  tf=1.00  train_loss=0.8325  val_loss=0.8511  BLEU-1=49.5%  BLEU-2=26.6%  ROUGE-L=22.7%  METEOR=30.9%  ES=4/20  [200s]
+Epoch  39/50  tf=1.00  train_loss=0.8310  val_loss=0.8595  BLEU-1=56.3%  BLEU-2=36.2%  ROUGE-L=26.3%  METEOR=36.8%  ES=5/20  [204s]
+Epoch  40/50  tf=1.00  train_loss=0.8289  val_loss=0.8416  BLEU-1=24.7%  BLEU-2=12.6%  ROUGE-L=16.7%  METEOR=22.1%  ES=0/20  [207s]
+Epoch  41/50  tf=1.00  train_loss=0.8294  val_loss=0.8430  BLEU-1=41.4%  BLEU-2=21.1%  ROUGE-L=20.4%  METEOR=26.6%  ES=1/20  [205s]
+Epoch  42/50  tf=1.00  train_loss=0.8252  val_loss=0.8464  BLEU-1=55.5%  BLEU-2=32.6%  ROUGE-L=25.5%  METEOR=35.0%  ES=2/20  [203s]
+Epoch  43/50  tf=1.00  train_loss=0.8263  val_loss=0.8417  BLEU-1=42.2%  BLEU-2=22.6%  ROUGE-L=21.2%  METEOR=28.3%  ES=3/20  [207s]
+Epoch  44/50  tf=1.00  train_loss=0.8258  val_loss=0.8457  BLEU-1=50.3%  BLEU-2=27.5%  ROUGE-L=23.3%  METEOR=31.1%  ES=4/20  [201s]
+Epoch  45/50  tf=1.00  train_loss=0.8223  val_loss=0.8418  BLEU-1=50.2%  BLEU-2=26.9%  ROUGE-L=23.0%  METEOR=28.6%  ES=5/20  [206s]
+Epoch  46/50  tf=1.00  train_loss=0.8240  val_loss=0.8440  BLEU-1=61.5%  BLEU-2=32.2%  ROUGE-L=24.1%  METEOR=30.0%  ES=6/20  [198s]
+Epoch  47/50  tf=1.00  train_loss=0.8012  val_loss=0.8262  BLEU-1=46.7%  BLEU-2=23.3%  ROUGE-L=21.6%  METEOR=29.0%  ES=0/20  [200s]
+Epoch  48/50  tf=1.00  train_loss=0.7996  val_loss=0.8198  BLEU-1=38.0%  BLEU-2=18.1%  ROUGE-L=19.9%  METEOR=26.0%  ES=0/20  [202s]
+Epoch  49/50  tf=1.00  train_loss=0.7983  val_loss=0.8260  BLEU-1=52.2%  BLEU-2=30.7%  ROUGE-L=25.6%  METEOR=34.7%  ES=1/20  [201s]
+Epoch  50/50  tf=1.00  train_loss=0.8003  val_loss=0.8145  BLEU-1=53.1%  BLEU-2=30.5%  ROUGE-L=23.9%  METEOR=31.1%  ES=0/20  [201s]
+
+Running final test evaluation (best metric checkpoint)...
+wandb: updating run metadata
+wandb: uploading config.yaml
+wandb: uploading history steps 50-50, summary, console lines 55-63
+wandb: 
+wandb: Run history:
+wandb:       bleu1 ▆▅█▁▁▆▇▆▆▇▄▇▅▂▅▇▇▄▇▇▇▂▆▅▆▃▇▁▁▃▇▁▄▇▄▆█▅▄▆
+wandb:       bleu2 ▅▇▅█▂▄▇█▆▆▇▃▇▅▆▅▇▆▆▄▆▆▆▁▆▅▃▂▁▃█▁▄▇▄▅▇▄▃▆
+wandb:       epoch ▁▁▁▁▂▂▂▂▂▂▃▃▃▃▄▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇▇███
+wandb:      meteor ▄▇▄▆▄▄▇█▆▆▃▆▅▅▄▅▅▆▅▅▅▁▆▆▅▄▅▃▂▃▇▂▃▆▄▄▄▄▃▅
+wandb:      rougeL ▅█▅▇▄▅▇█▆▆▇▄▇▆▅▆▇▆▇▅▆▆▆▁▆▆▅▇▄▂▅▇▂▄▇▆▆▅▄▆
+wandb:  test_bleu1 ▁
+wandb:  test_bleu2 ▁
+wandb: test_meteor ▁
+wandb: test_rougeL ▁
+wandb:     tf_prob ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:          +3 ...
+wandb: 
+wandb: Run summary:
+wandb:       bleu1 53.13
+wandb:       bleu2 30.53
+wandb:       epoch 50
+wandb:      meteor 31.07
+wandb:      rougeL 23.89
+wandb:  test_bleu1 54.05628
+wandb:  test_bleu2 31.78417
+wandb: test_meteor 31.92182
+wandb: test_rougeL 23.64774
+wandb:     tf_prob 1
+wandb:          +3 ...
+wandb: 
+wandb: 🚀 View run vgg16_gru_tf_on at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning/runs/vi93ljjj
+wandb: ⭐️ View project at: https://wandb.ai/just-an-arbitrary-team-name/mcv-c5-image_captioning
+wandb: Synced 5 W&B file(s), 1000 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260321_233720-vi93ljjj/logs
+
+============================================================
+TEST RESULTS [vgg16_gru_tf_on]
+  test_loss = 0.8277
+  BLEU-1    = 54.06%
+  BLEU-2    = 31.78%
+  ROUGE-L   = 23.65%
+  METEOR    = 31.92%
+============================================================
