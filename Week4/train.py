@@ -145,7 +145,7 @@ def parse_args():
     p.add_argument('--max_len', type=int, default=None)
     p.add_argument('--decoder_model_name', type=str, default=None,
                    help='Hugging Face model name for transformer decoders (gpt2, t5, smollm)')
-    p.add_argument('--epochs', type=int, default=20)
+    p.add_argument('--epochs', type=int, default=12)
     p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--weight_decay', type=float, default=1e-4)
@@ -168,6 +168,10 @@ def parse_args():
     p.add_argument('--data_root', default=_DEFAULT_DATA_ROOT)
     p.add_argument('--out_root', default=_DEFAULT_OUT_ROOT)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
+    p.add_argument('--freeze_encoder', action='store_true', default=False,
+               help='Freeze encoder weights (no gradient updates)')
+    p.add_argument('--freeze_decoder', action='store_true', default=False,
+                help='Freeze decoder weights (no gradient updates)')
     return p.parse_args()
 
 
@@ -218,22 +222,25 @@ def main():
         decoder_model_name=args.decoder_model_name,
     ).to(device)
 
-    n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    # Freeze encoder if requested
+    if args.freeze_encoder:
+        print("Freezing encoder weights")
+        for p in model.encoder.parameters():
+            p.requires_grad = False
+
+    # Freeze decoder if requested
+    if args.freeze_decoder:
+        print("Freezing decoder weights")
+        for name, p in model.named_parameters():
+            # Everything that is NOT encoder is considered decoder side
+            if not name.startswith("encoder"):
+                p.requires_grad = False
+
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    n_trainable = sum(p.numel() for p in trainable_params)
+
     print(f"  Model: {args.encoder} + {args.decoder}x{args.decoder_layers} | "
-          f"text={args.text_repr} | params={n_params/1e6:.1f}M")
-
-    if args.optimizer == 'adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    elif args.optimizer == 'adamw':
-        optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    else:
-        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
-                                    momentum=0.9, weight_decay=args.weight_decay)
-
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=args.lr_decay, patience=args.lr_patience)
-    criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_idx)
-    bleu, rouge, meteor = load_metrics()
+        f"text={args.text_repr} | params={n_trainable/1e6:.1f}M")
 
     wandb_module = None
     if args.wandb:
@@ -241,10 +248,69 @@ def main():
         wandb_module.init(project=args.wandb_project, entity=args.wandb_entity,
                           name=args.run_name, config=vars(args))
 
+    criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_idx)
+    bleu, rouge, meteor = load_metrics()
+
     # Fixed indices for qualitative evaluation — same every epoch for tracking
     train_qual_indices = get_fixed_examples(ds_train, n=100, seed=args.seed)
     val_qual_indices   = get_fixed_examples(ds_val,   n=100, seed=args.seed)
     print(f"Qualitative eval: {len(train_qual_indices)} train, {len(val_qual_indices)} val examples")
+
+    # Inference Mode
+    if len(trainable_params) == 0:
+        print("\n⚠️  No trainable parameters — running in inference-only mode.\n")
+
+        # Evaluate on validation set
+        t0 = time.time()
+        val_loss, val_metrics = eval_epoch(model, criterion, dl_val, tokenizer, device,
+                                           bleu, rouge, meteor)
+        elapsed = time.time() - t0
+        
+        epoch = 1
+
+        row = {'epoch': epoch,
+               **{k: round(v, 2) for k, v in val_metrics.items()},
+               'time_inferene_s': round(elapsed, 1)}
+        
+        if wandb_module is not None:
+            wandb_module.log(row)
+
+        # Evaluate on test set
+        test_loss, test_metrics = eval_epoch(
+            model, nn.CrossEntropyLoss(ignore_index=tokenizer.pad_idx),
+            dl_test, tokenizer, device, bleu, rouge, meteor
+        )
+
+        if wandb_module is not None:
+            wandb_module.log({'test_' + k: v for k, v in test_metrics.items()})
+            wandb_module.finish()
+
+        print(f"\n{'='*60}")
+        print(f"TEST RESULTS [{args.run_name}] (FROZEN MODEL)")
+        print(f"  test_loss = {test_loss:.4f}")
+        print(f"  BLEU-1    = {test_metrics.get('bleu1', 0):.2f}%")
+        print(f"  BLEU-2    = {test_metrics.get('bleu2', 0):.2f}%")
+        print(f"  ROUGE-L   = {test_metrics.get('rougeL', 0):.2f}%")
+        print(f"  METEOR    = {test_metrics.get('meteor', 0):.2f}%")
+        print(f"{'='*60}")
+
+        log_qualitative_examples(model, ds_val, val_qual_indices, tokenizer, device,
+                                 epoch, 'val', out_dir / 'val_samples.json', wandb_module)
+
+        return
+
+
+    if args.optimizer == 'adam':
+        optimizer = torch.optim.Adam(trainable_params, lr=args.lr, weight_decay=args.weight_decay)
+    elif args.optimizer == 'adamw':
+        optimizer = torch.optim.AdamW(trainable_params, lr=args.lr, weight_decay=args.weight_decay)
+    else:
+        optimizer = torch.optim.SGD(trainable_params, lr=args.lr,
+                                    momentum=0.9, weight_decay=args.weight_decay)
+
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=args.lr_decay, patience=args.lr_patience)
+    
 
     # Early stopping: auto-detect direction from metric name
     es_mode = 'min' if args.es_metric == 'val_loss' else 'max'
