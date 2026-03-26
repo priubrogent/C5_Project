@@ -28,7 +28,7 @@ SEED = 42
 DATASET_PATH = "/ghome/mcv/datasets/C5/KITTI-MOTS/training/image_02"
 ANNOTATION_FILE = "kitti_mots_to_coco_gt.json"
 OUTPUT_DIR = "./DeTR/Results_DETR/task_e/"
-FILE_NAME = "ablation_3_4_4_1"  # Update this for each ablation run
+FILE_NAME = "ablation_3_4_6_1"  # Update this for each ablation run
 LORA_ADAPTER_DIR = "./DeTR/Results_DETR/task_e/ablation_3_4_6_1_lora_adapter"
 
 # --- Hyperparameters ---
@@ -42,7 +42,7 @@ OPTIMIZER = "rmsprop"
 BACKBONE_ABLATION = {
     1: 3, # 3 in total
     2: 4, # 4 in total
-    3: 4, # 6 in total
+    3: 6, # 6 in total
     4: 1  # 3 in total
 }
 
@@ -137,6 +137,7 @@ def ablation():
     
     # Do the structured pruning based on the provided ablation configuration
     prune_resnet_backbone(model, BACKBONE_ABLATION)
+    model.print_trainable_parameters()
     
     """# "Safe" augmentations for KITTI-MOTS
     train_transforms = A.Compose([

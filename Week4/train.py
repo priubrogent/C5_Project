@@ -8,6 +8,8 @@ import random
 import time
 from pathlib import Path
 
+from peft import LoraConfig, get_peft_model, PeftModel
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -23,8 +25,8 @@ from tokenizer import build_tokenizer
 IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
 IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
-_DEFAULT_DATA_ROOT = '/data/113-2/users/gasbert/master/C5/vizwiz_dataset'
-_DEFAULT_OUT_ROOT  = '/home-local/gasbert/master/C5/C5_Project/Week4/outputs'
+_DEFAULT_DATA_ROOT = '../datasets/vizwiz'
+_DEFAULT_OUT_ROOT  = './outputs'
 
 
 def load_metrics():
@@ -172,6 +174,13 @@ def parse_args():
                help='Freeze encoder weights (no gradient updates)')
     p.add_argument('--freeze_decoder', action='store_true', default=False,
                 help='Freeze decoder weights (no gradient updates)')
+    p.add_argument('--use_lora_encoder', action='store_true', default=False,
+                   help='Apply LoRA to the vision encoder (CLIP, ViT)')
+    p.add_argument('--use_lora_decoder', action='store_true', default=False,
+                   help='Apply LoRA to the transformer decoder')
+    p.add_argument('--lora_r', type=int, default=8, help='LoRA rank')
+    p.add_argument('--lora_alpha', type=int, default=16, help='LoRA alpha')
+    p.add_argument('--lora_dropout', type=float, default=0.1, help='LoRA dropout')
     return p.parse_args()
 
 
@@ -221,6 +230,66 @@ def main():
         dropout=args.dropout,
         decoder_model_name=args.decoder_model_name,
     ).to(device)
+    
+    # LORA INTEGRATION
+    if args.use_lora_encoder and args.encoder in ['clip', 'vit-b-16', 'vit-b-32']:
+        print(f"Applying LoRA (r={args.lora_r}, alpha={args.lora_alpha}) to encoder ({args.encoder})...")
+        
+        # "q_proj" and "v_proj" catch CLIP layers
+        # "query" and "value" catch standard Hugging Face ViT layers
+        # "in_proj_weight" catches torchvision ViT implementations
+        target_modules_enc = ["q_proj", "v_proj", "query", "value", "in_proj_weight"]
+
+        config_enc = LoraConfig(
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            target_modules=target_modules_enc,
+            lora_dropout=args.lora_dropout,
+            bias="none"
+        )
+        
+        # Apply PEFT to the underlying model inside the encoder wrapper
+        # (Based on models.py, CLIP/ViT is stored in self.model inside the wrapper)
+        if hasattr(model.encoder, 'model'):
+            model.encoder.model = get_peft_model(model.encoder.model, config_enc)
+        else:
+            model.encoder = get_peft_model(model.encoder, config_enc)
+            
+        print("Encoder LoRA applied successfully!")
+    elif args.use_lora_encoder:
+        print(f"⚠️ Warning: LoRA is not implemented for CNN encoders like {args.encoder}. Skipping Encoder LoRA.")
+    
+    if args.use_lora_decoder and args.decoder in ['gpt2', 't5', 'smollm']:
+        print(f"Applying LoRA (r={args.lora_r}, alpha={args.lora_alpha}) to {args.decoder}...")
+        
+        # Define target modules based on the specific transformer architecture
+        if args.decoder == 'gpt2':
+            target_modules = ["c_attn", "c_proj"]
+        elif args.decoder == 't5':
+            target_modules = ["q", "v"]
+        elif args.decoder == 'smollm':
+            target_modules = ["q_proj", "v_proj"]
+
+        config = LoraConfig(
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            target_modules=target_modules,
+            lora_dropout=args.lora_dropout,
+            bias="none",
+            task_type="CAUSAL_LM" if args.decoder != 't5' else "SEQ_2_SEQ_LM"
+        )
+        
+        # Apply PEFT specifically to the Hugging Face model inside your custom wrapper
+        if args.decoder == 'gpt2':
+            model.decoder.gpt2 = get_peft_model(model.decoder.gpt2, config)
+        elif args.decoder == 't5':
+            model.decoder.t5 = get_peft_model(model.decoder.t5, config)
+        elif args.decoder == 'smollm':
+            model.decoder.smollm = get_peft_model(model.decoder.smollm, config)
+            
+        print("LoRA applied successfully!")
+    elif args.use_lora:
+        print("Warning: LoRA is only implemented for transformer decoders (gpt2, t5, smollm). Skipping LoRA.")
 
     # Freeze encoder if requested
     if args.freeze_encoder:
