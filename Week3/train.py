@@ -1,6 +1,9 @@
 import argparse
 import json
 import os
+
+os.environ["CUDA_VISIBLE_DEVICES"]='2'
+
 import random
 import time
 from pathlib import Path

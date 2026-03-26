@@ -13,6 +13,7 @@ from transformers import (
     AutoModelForCausalLM,
 )
 import torchvision.models as tv_models
+from transformers.modeling_outputs import BaseModelOutput
 
 
 class ResNetEncoder(nn.Module):
@@ -82,7 +83,7 @@ class ViTEncoder(nn.Module):
 
     HF_NAMES = {
         'vit-b-16': 'google/vit-base-patch16-224',
-        'vit-b-32': 'google/vit-base-patch32-224',
+        'vit-b-32': 'google/vit-base-patch32-224-in21k',
     }
     OUT_DIMS = {'vit-b-16': 768, 'vit-b-32': 768}
 
@@ -96,7 +97,8 @@ class ViTEncoder(nn.Module):
 
     def forward(self, x):
         outputs = self.model(x)
-        feat = outputs.pooler_output  # (B, 768)
+        #feat = outputs.pooler_output  # (B, 768)
+        feat = outputs.last_hidden_state 
         return self.proj(feat)
 
 
@@ -214,11 +216,13 @@ class T5Decoder(nn.Module):
         
         # Create encoder hidden state
         # T5 expects encoder_last_hidden_state: (B, seq_len, d_model)
-        encoder_hidden_state = proj_output.unsqueeze(1)  # (B, 1, d_model)
-        
-        if decoder_input_ids is not None:
+        #encoder_hidden_state = proj_output.unsqueeze(1)  # (B, 1, d_model)
+        encoder_hidden_state = proj_output
+
+        if decoder_input_ids is not None:          
+            encoder_outputs = BaseModelOutput(last_hidden_state=encoder_hidden_state)
             outputs = self.t5(
-                encoder_outputs=[encoder_hidden_state],
+                encoder_outputs=encoder_outputs,
                 decoder_input_ids=decoder_input_ids,
                 attention_mask=attention_mask,
             )
@@ -229,8 +233,9 @@ class T5Decoder(nn.Module):
     def generate(self, encoder_output, max_length=50, eos_token_id=None, sos_token_id=None):
         """Generate captions using T5"""
         device = encoder_output.device
-        proj_output = self.embed_proj(encoder_output).unsqueeze(1)  # (B, 1, d_model)
-        
+        #proj_output = self.embed_proj(encoder_output).unsqueeze(1)  # (B, 1, d_model)
+        proj_output = self.embed_proj(encoder_output)
+
         batch_size = encoder_output.shape[0]
         if sos_token_id is not None:
             decoder_input_ids = torch.full((batch_size, 1), sos_token_id, dtype=torch.long, device=device)
@@ -239,8 +244,9 @@ class T5Decoder(nn.Module):
         
         generated = []
         for _ in range(max_length):
+            encoder_outputs = BaseModelOutput(last_hidden_state=proj_output)
             outputs = self.t5(
-                encoder_outputs=[proj_output],
+                encoder_outputs=encoder_outputs,
                 decoder_input_ids=decoder_input_ids,
             )
             next_token_logits = outputs.logits[:, -1, :]
@@ -275,12 +281,12 @@ class SmolLMDecoder(nn.Module):
         encoder_output: (B, hidden_dim) from encoder
         input_ids: (B, seq_len) token ids
         """
-        proj_output = self.embed_proj(encoder_output)  # (B, smollm_hidden)
+        proj_output = self.embed_proj(encoder_output).to(self.smollm.dtype)  # (B, smollm_hidden)
         
         if input_ids is not None:
             # Get SmolLM embeddings
             smollm_embeds = self.smollm.model.embed_tokens(input_ids)  # (B, seq_len, hidden)
-            
+            smollm_embeds = smollm_embeds.to(self.smollm.dtype)
             # Concatenate projected encoder output as prefix
             combined_embeds = torch.cat([proj_output.unsqueeze(1), smollm_embeds], dim=1)
             
@@ -301,7 +307,7 @@ class SmolLMDecoder(nn.Module):
         device = encoder_output.device
         batch_size = encoder_output.shape[0]
         
-        proj_output = self.embed_proj(encoder_output).unsqueeze(1)  # (B, 1, hidden)
+        proj_output = self.embed_proj(encoder_output).to(self.smollm.dtype).unsqueeze(1)  # (B, 1, hidden)
         
         # Start with SOS token if provided
         if sos_token_id is not None:
