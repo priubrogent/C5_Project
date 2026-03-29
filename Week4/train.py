@@ -2,7 +2,8 @@ import argparse
 import json
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"]='7'
+#os.environ["CUDA_VISIBLE_DEVICES"]='7'
+#os.environ["CUDA_VISIBLE_DEVICES"]='0'
 
 import random
 import time
@@ -138,7 +139,7 @@ def parse_args():
                    choices=['resnet18', 'resnet34', 'resnet50', 'vgg16', 'vgg19', 
                            'vit-b-16', 'vit-b-32', 'clip'])
     p.add_argument('--decoder', default='gru', 
-                   choices=['gru', 'lstm', 'gru_attn', 'gpt2', 't5', 'smollm'])
+                   choices=['gru', 'lstm', 'gru_attn', 'gpt2', 't5', 'smollm', 'qwen'])
     p.add_argument('--decoder_layers', type=int, default=1)
     p.add_argument('--hidden_dim', type=int, default=512)
     p.add_argument('--embed_dim', type=int, default=512)
@@ -257,7 +258,7 @@ def main():
             
         print("Encoder LoRA applied successfully!")
     elif args.use_lora_encoder:
-        print(f"⚠️ Warning: LoRA is not implemented for CNN encoders like {args.encoder}. Skipping Encoder LoRA.")
+        print(f"Warning: LoRA is not implemented for CNN encoders like {args.encoder}. Skipping Encoder LoRA.")
     
     if args.use_lora_decoder and args.decoder in ['gpt2', 't5', 'smollm']:
         print(f"Applying LoRA (r={args.lora_r}, alpha={args.lora_alpha}) to {args.decoder}...")
@@ -267,7 +268,7 @@ def main():
             target_modules = ["c_attn", "c_proj"]
         elif args.decoder == 't5':
             target_modules = ["q", "v"]
-        elif args.decoder == 'smollm':
+        elif args.decoder in ['smollm', 'qwen']:
             target_modules = ["q_proj", "v_proj"]
 
         config = LoraConfig(
@@ -286,6 +287,8 @@ def main():
             model.decoder.t5 = get_peft_model(model.decoder.t5, config)
         elif args.decoder == 'smollm':
             model.decoder.smollm = get_peft_model(model.decoder.smollm, config)
+        elif args.decoder == 'qwen':
+            model.decoder.qwen = get_peft_model(model.decoder.qwen, config)
             
         print("LoRA applied successfully!")
     elif args.use_lora:
@@ -327,7 +330,7 @@ def main():
 
     # Inference Mode
     if len(trainable_params) == 0:
-        print("\n⚠️  No trainable parameters — running in inference-only mode.\n")
+        print("\nNo trainable parameters — running in inference-only mode.\n")
 
         # Evaluate on validation set
         t0 = time.time()

@@ -1,0 +1,122 @@
+[
+    {
+        "image_id": 456,
+        "file_name": "VizWiz_train_00004732.jpg",
+        "prediction": "A close-up of a blue fabric with a subtle texture and faint, diagonal lines.",
+        "references": [
+            "wrinkled Royal Blue Sheet Fabric Close up on Steam",
+            "Blue looks good on cotton fabric like this.",
+            "some sort of blue fabric that is gently cleaned",
+            "A blue item of clothing has a seam.",
+            "A large puffy blue material with a line running through"
+        ]
+    },
+    {
+        "image_id": 102,
+        "file_name": "VizWiz_train_00001046.jpg",
+        "prediction": "A hand holding a bag of almonds.",
+        "references": [
+            "A yellow plastic bag of a nut mix that says Almond Energy.",
+            "A hand holding a yellow bag of Almonds",
+            "Quality issues are too severe to recognize visual content.",
+            "Quality issues are too severe to recognize visual content.",
+            "A person holding a bag of some sort of almond snack."
+        ]
+    },
+    {
+        "image_id": 1126,
+        "file_name": "VizWiz_train_00011613.jpg",
+        "prediction": "A black cat is sitting on a toilet seat, and a hand is petting it.",
+        "references": [
+            "A hand touches a black cat who sits on a closed toilet.",
+            "A hand petting an animal that is sitting on top of a toilet.",
+            "A person is rubbing a medium size black cat.",
+            "A black cat sitting on top of a white toilet.",
+            "Someone holding something furry, probably a black cat, the furry object is sitting on a closed toilet seat."
+        ]
+    },
+    {
+        "image_id": 1003,
+        "file_name": "VizWiz_train_00010484.jpg",
+        "prediction": "A close-up of a white appliance with a green light labeled \"CLEAN\" illuminated, and a button below it marked \".",
+        "references": [
+            "A washer panel displays that items are clean.",
+            "Quality issues are too severe to recognize visual content.",
+            "A white appliance is turned on to clean.",
+            "a panel for a kitchen appliance that contains buttons to operate",
+            "The green light for clean is lit on a control panel."
+        ]
+    },
+    {
+        "image_id": 914,
+        "file_name": "VizWiz_train_00009623.jpg",
+        "prediction": "A hand is reaching for a can of Sno-Tip Wild Alaska Chum Salmon on a granite countertop.",
+        "references": [
+            "a hand on top of a can of salmon that is on a marble kitchen counter",
+            "A tin can of Sno-Tip brand Wild Alaska chum salmon with someone's hand on top of it.",
+            "A can of Snow tip wild Alaska chum salmon.",
+            "A person has a can of fish on the counter.",
+            "Aluminum can with salmon placed on granite countertop."
+        ]
+    },
+    {
+        "image_id": 571,
+        "file_name": "VizWiz_train_00005985.jpg",
+        "prediction": "A box of Lean Cuisine Chicken Marsala, featuring a picture of the dish on the front.",
+        "references": [
+            "a white paper labelled with cuisine chicken marsala",
+            "A box of Lean Cuisine Chicken Marsala on a counter.",
+            "a paper box pack of lean cuisine culinary collection",
+            "Package of frozen food lying flat on a horizontal surface.",
+            "A Lean Cuisine Chicken Marsala is laying on a counter top."
+        ]
+    },
+    {
+        "image_id": 419,
+        "file_name": "VizWiz_train_00004246.jpg",
+        "prediction": "A person is holding a package of sausage in their hand.",
+        "references": [
+            "a person holding a plastic package of meat in their hands",
+            "a person holding a sausage log that is showing the nutrition facts",
+            "A person's hand holding a tube of sausage.",
+            "A hand holding a tube of a meat product",
+            "Someone holding a package of some meat, nutritional information or list of ingredients showing."
+        ]
+    },
+    {
+        "image_id": 2233,
+        "file_name": "VizWiz_train_00022288.jpg",
+        "prediction": "A close-up of a couch with a vase of flowers on a table behind it.",
+        "references": [
+            "A clear decorative vase sitting on a stand with a white lacy curtain behind.",
+            "A glass bowl with a plant in it on a table behind a couch.",
+            "A crystal vase with stems in it in front of a lace curtain next to a sofa.",
+            "The vase is sitting directly behind the sofa and in front of the lacy curtain.",
+            "a glass container holding some sort of flower that's green"
+        ]
+    },
+    {
+        "image_id": 356,
+        "file_name": "VizWiz_train_00003544.jpg",
+        "prediction": "A silver Nokia cell phone is sitting on a white and gold marble surface.",
+        "references": [
+            "Appears to  be a picture of a cell phone",
+            "A small Nokia brand cellular phone, the screen is off.",
+            "A silver colored cell phone is laying on a white, gold streaked counter.",
+            "A small old school cell phone on a counter top",
+            "Small Nokia phone facing right side up on a counter top"
+        ]
+    },
+    {
+        "image_id": 1728,
+        "file_name": "VizWiz_train_00017388.jpg",
+        "prediction": "2 gold buttons with white strings on a blue and white blanket.",
+        "references": [
+            "A pair of marbles with strings coming out of them laying on a blanket.",
+            "Two gold medallions handing from string laying on a blue fabric surface.",
+            "Two small, yellow, marble-like balls with white cords coming out of them.",
+            "two strings with a gold bead on the end of each.",
+            "Two yellow balls connected to a white string."
+        ]
+    }
+]

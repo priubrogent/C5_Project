@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -n 8            # Number of cores
-#SBATCH --mem 20000     # 16GB asked
+#SBATCH --mem 24000     # 16GB asked
 #SBATCH -p mhigh        # Choose mlow to submit to master low prioriy queue
 #SBATCH -q masterhigh   # Requeue other users mlow jobs
 #SBATCH --gres gpu:1    # To ask Pascales MAX 8
@@ -8,5 +8,5 @@
 #SBATCH -e logs/err.log # File to which STDERR will be written
 
 
-python train.py --encoder clip --decoder gpt2 --run_name baseline_clip_gpt2_lora --use_lora_decoder --use_lora_encoder
-#python formatting.py
+#python -u train.py --encoder clip --decoder gpt2 --run_name baseline_clip_gpt2_lora --use_lora_decoder --use_lora_encoder --device cuda --epochs 20
+python -u evaluate_qwen.py

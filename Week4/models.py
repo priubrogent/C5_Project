@@ -107,7 +107,7 @@ class CLIPEncoder(nn.Module):
 
     def __init__(self, model_name: str = 'openai/clip-vit-base-patch32', output_dim: int = 512):
         super().__init__()
-        self.model = CLIPVisionModel.from_pretrained(model_name)
+        self.model = CLIPVisionModel.from_pretrained(model_name, use_safetensors=True)
         # CLIP vision models output 768-dim features
         feat_dim = self.model.config.hidden_size
         self.proj = nn.Linear(feat_dim, output_dim) if feat_dim != output_dim else nn.Identity()
@@ -123,7 +123,7 @@ class GPT2Decoder(nn.Module):
 
     def __init__(self, input_dim: int, vocab_size: int = None, model_name: str = 'gpt2'):
         super().__init__()
-        self.gpt2 = GPT2LMHeadModel.from_pretrained(model_name)
+        self.gpt2 = GPT2LMHeadModel.from_pretrained(model_name, use_safetensors=True)
         self.gpt2_config = self.gpt2.config
         
         # Projection from encoder output to GPT2 embedding dimension
@@ -197,7 +197,7 @@ class T5Decoder(nn.Module):
 
     def __init__(self, input_dim: int, vocab_size: int = None, model_name: str = 't5-base'):
         super().__init__()
-        self.t5 = T5ForConditionalGeneration.from_pretrained(model_name)
+        self.t5 = T5ForConditionalGeneration.from_pretrained(model_name, use_safetensors=True)
         self.t5_config = self.t5.config
         
         # Projection from encoder output to T5 embedding dimension
@@ -266,7 +266,7 @@ class SmolLMDecoder(nn.Module):
 
     def __init__(self, input_dim: int, vocab_size: int = None, model_name: str = 'HuggingFaceTB/SmolLM-135M'):
         super().__init__()
-        self.smollm = AutoModelForCausalLM.from_pretrained(model_name)
+        self.smollm = AutoModelForCausalLM.from_pretrained(model_name, use_safetensors=True)
         self.smollm_config = self.smollm.config
         
         # Projection from encoder output to SmolLM embedding dimension
@@ -322,6 +322,64 @@ class SmolLMDecoder(nn.Module):
             combined_embeds = torch.cat([proj_output, smollm_embeds], dim=1)
             
             outputs = self.smollm(inputs_embeds=combined_embeds)
+            next_token_logits = outputs.logits[:, -1, :]
+            next_token = next_token_logits.argmax(dim=-1, keepdim=True)
+            
+            input_ids = torch.cat([input_ids, next_token], dim=1)
+            generated.append(next_token)
+            
+            if eos_token_id is not None and (next_token == eos_token_id).all():
+                break
+        
+        return torch.cat(generated, dim=1)
+    
+class QwenDecoder(nn.Module):
+    """Qwen3.5-based autoregressive decoder for image captioning"""
+
+    def __init__(self, input_dim: int, vocab_size: int = None, model_name: str = 'Qwen/Qwen3.5-0.8B'):
+        super().__init__()
+        self.qwen = AutoModelForCausalLM.from_pretrained(model_name, use_safetensors=True)
+        self.qwen_config = self.qwen.config
+        
+        # Projection from encoder output to Qwen embedding dimension
+        self.embed_proj = nn.Linear(input_dim, self.qwen_config.hidden_size)
+        
+        if vocab_size is not None and vocab_size != self.qwen_config.vocab_size:
+            self.qwen.resize_token_embeddings(vocab_size)
+
+    def forward(self, encoder_output, input_ids=None, attention_mask=None):
+        proj_output = self.embed_proj(encoder_output).to(self.qwen.dtype)  
+        
+        if input_ids is not None:
+            qwen_embeds = self.qwen.model.embed_tokens(input_ids).to(self.qwen.dtype)
+            combined_embeds = torch.cat([proj_output.unsqueeze(1), qwen_embeds], dim=1)
+            
+            if attention_mask is not None:
+                attention_mask = torch.cat([
+                    torch.ones(encoder_output.shape[0], 1, device=encoder_output.device),
+                    attention_mask
+                ], dim=1)
+            
+            outputs = self.qwen(inputs_embeds=combined_embeds, attention_mask=attention_mask)
+            return outputs.logits
+        else:
+            return proj_output
+
+    def generate(self, encoder_output, max_length=50, eos_token_id=None, sos_token_id=None):
+        device = encoder_output.device
+        batch_size = encoder_output.shape[0]
+        
+        proj_output = self.embed_proj(encoder_output).to(self.qwen.dtype).unsqueeze(1) 
+        
+        bos_id = sos_token_id if sos_token_id is not None else getattr(self.qwen_config, 'bos_token_id', 0)
+        input_ids = torch.full((batch_size, 1), bos_id, dtype=torch.long, device=device)
+        
+        generated = []
+        for _ in range(max_length):
+            qwen_embeds = self.qwen.model.embed_tokens(input_ids)
+            combined_embeds = torch.cat([proj_output, qwen_embeds], dim=1)
+            
+            outputs = self.qwen(inputs_embeds=combined_embeds)
             next_token_logits = outputs.logits[:, -1, :]
             next_token = next_token_logits.argmax(dim=-1, keepdim=True)
             
@@ -400,6 +458,9 @@ class CaptioningModel(nn.Module):
         elif decoder_type == 'smollm':
             model_name = decoder_model_name or 'HuggingFaceTB/SmolLM-135M'
             self.decoder = SmolLMDecoder(hidden_dim, vocab_size=vocab_size, model_name=model_name)
+        elif decoder_type == 'qwen':
+            model_name = decoder_model_name or 'Qwen/Qwen3.5-0.8B'
+            self.decoder = QwenDecoder(hidden_dim, vocab_size=vocab_size, model_name=model_name)
         else:
             # CNN-RNN based decoders
             self.embed = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
@@ -437,7 +498,7 @@ class CaptioningModel(nn.Module):
     def forward(self, img, captions, teacher_forcing=True):
         
         # Transformer-based decoder forward pass
-        if self.decoder_type in ['gpt2', 'smollm']:
+        if self.decoder_type in ['gpt2', 'smollm', 'qwen']:
             encoder_output = self.encoder(img)  # (B, hidden_dim)
             if teacher_forcing and captions is not None:
                 # Create attention mask (all ones since we're processing full sequence)
@@ -537,7 +598,7 @@ class CaptioningModel(nn.Module):
         device = img.device
 
         # Transformer-based decoder generation
-        if self.decoder_type in ['gpt2', 'smollm']:
+        if self.decoder_type in ['gpt2', 'smollm', 'qwen']:
             encoder_output = self.encoder(img)  # (B, hidden_dim)
             gen = self.decoder.generate(encoder_output, max_length=max_len, 
                                        sos_token_id=sos_idx, eos_token_id=eos_idx)
