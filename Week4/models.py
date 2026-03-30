@@ -276,31 +276,36 @@ class SmolLMDecoder(nn.Module):
         if vocab_size is not None and vocab_size != self.smollm_config.vocab_size:
             self.smollm.resize_token_embeddings(vocab_size)
 
-    def forward(self, encoder_output, input_ids=None, attention_mask=None):
-        """
-        encoder_output: (B, hidden_dim) from encoder
-        input_ids: (B, seq_len) token ids
-        """
-        proj_output = self.embed_proj(encoder_output).to(self.smollm.dtype)  # (B, smollm_hidden)
-        
-        if input_ids is not None:
-            # Get SmolLM embeddings
-            smollm_embeds = self.smollm.model.embed_tokens(input_ids)  # (B, seq_len, hidden)
-            smollm_embeds = smollm_embeds.to(self.smollm.dtype)
-            # Concatenate projected encoder output as prefix
-            combined_embeds = torch.cat([proj_output.unsqueeze(1), smollm_embeds], dim=1)
-            
-            # Create attention mask if provided
-            if attention_mask is not None:
-                attention_mask = torch.cat([
-                    torch.ones(encoder_output.shape[0], 1, device=encoder_output.device),
-                    attention_mask
-                ], dim=1)
-            
-            outputs = self.smollm(inputs_embeds=combined_embeds, attention_mask=attention_mask)
-            return outputs.logits
-        else:
-            return proj_output
+    def forward(self, encoder_output, input_ids, attention_mask=None):
+
+        model_dtype = self.smollm.dtype
+
+        # Get embeddings safely (model-agnostic)
+        smollm_embeds = self.smollm.get_input_embeddings()(input_ids)
+
+        # Project encoder output
+        projected_encoder = self.embed_proj(encoder_output)
+        projected_encoder = projected_encoder.to(model_dtype).unsqueeze(1)
+
+        # Concatenate
+        combined_embeds = torch.cat([projected_encoder, smollm_embeds], dim=1)
+
+        # Fix attention mask (IMPORTANT)
+        if attention_mask is not None:
+            prefix_mask = torch.ones(
+                (attention_mask.shape[0], 1),
+                device=attention_mask.device
+            )
+            attention_mask = torch.cat([prefix_mask, attention_mask], dim=1)
+
+        # Forward through model
+        outputs = self.smollm(
+            inputs_embeds=combined_embeds,
+            attention_mask=attention_mask,
+            return_dict=True
+        )
+
+        return outputs.logits  # (B, seq_len, vocab_size)
 
     def generate(self, encoder_output, max_length=50, eos_token_id=None, sos_token_id=None):
         """Generate captions using SmolLM"""
@@ -318,7 +323,7 @@ class SmolLMDecoder(nn.Module):
         
         generated = []
         for _ in range(max_length):
-            smollm_embeds = self.smollm.model.embed_tokens(input_ids)
+            smollm_embeds = self.smollm.get_input_embeddings()(input_ids)
             combined_embeds = torch.cat([proj_output, smollm_embeds], dim=1)
             
             outputs = self.smollm(inputs_embeds=combined_embeds)
@@ -332,6 +337,18 @@ class SmolLMDecoder(nn.Module):
                 break
         
         return torch.cat(generated, dim=1)
+
+    def _get_base_model(self):
+        base = self.smollm
+
+        # Unwrap LoRA
+        if hasattr(base, "base_model"):
+            base = base.base_model
+
+        # Recursively unwrap `.model` until we find embed_tokens
+        while hasattr(base, "model") and not hasattr(base, "embed_tokens"):
+            base = base.model
+        return base
 
 
 def build_encoder(name: str, output_dim: int, use_attention=False) -> nn.Module:
