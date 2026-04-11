@@ -1,0 +1,13 @@
+[
+  {
+    "epoch": 1,
+    "tf_prob": 1.0,
+    "train_loss": 2.9001,
+    "val_loss": 2.7025,
+    "bleu1": 16.59,
+    "bleu2": 8.71,
+    "rougeL": 11.61,
+    "meteor": 23.87,
+    "time_s": 2414.0
+  }
+]

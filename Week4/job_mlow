@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH -n 8            # Number of cores
+#SBATCH --mem 24000     # 16GB asked
+#SBATCH -p mlow        # Choose mlow to submit to master low prioriy queue
+#SBATCH -q masterhigh   # Requeue other users mlow jobs
+#SBATCH --gres gpu:1    # To ask Pascales MAX 8
+#SBATCH -o logs/out.log # File to which STDOUT will be written
+#SBATCH -e logs/err.log # File to which STDERR will be written
+
+
+#python -u train.py --encoder clip --decoder qwen --decoder_model_name Qwen/Qwen3.5-0.8B-Base --run_name clip_qwen_0.8B --use_lora_decoder --freeze_encoder --device cuda --epochs 20 --text_repr subword --hidden_dim 768 --pretrained_weights ./weights/best_metric_model.pt --batch_size 16
+#python -u evaluate_qwen.py
+#python -u train.py --encoder clip --decoder qwen --decoder_model_name Qwen/Qwen3.5-0.8B-Base --filtered_annotations --run_name clip_qwen_0.8B --pretrained_weights ./weights/best_metric_model.pt --optimizer adamw --use_lora_decoder --freeze_encoder --device cuda --epochs 20 --text_repr subword --hidden_dim 768 --batch_size 32
+python -u parameter_counter.py

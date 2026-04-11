@@ -5,3 +5,4 @@ Miniconda*
 logs/
 Week1/DeTR/Results_DETR*
 runs/*
+*.pt

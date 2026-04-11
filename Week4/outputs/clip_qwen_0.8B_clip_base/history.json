@@ -1,0 +1,222 @@
+[
+  {
+    "epoch": 1,
+    "tf_prob": 1.0,
+    "train_loss": 4.9295,
+    "val_loss": 4.5011,
+    "bleu1": 22.31,
+    "bleu2": 14.08,
+    "rougeL": 20.93,
+    "meteor": 30.34,
+    "time_s": 2449.2
+  },
+  {
+    "epoch": 2,
+    "tf_prob": 1.0,
+    "train_loss": 4.3868,
+    "val_loss": 4.281,
+    "bleu1": 51.69,
+    "bleu2": 32.92,
+    "rougeL": 27.05,
+    "meteor": 36.75,
+    "time_s": 2348.8
+  },
+  {
+    "epoch": 3,
+    "tf_prob": 1.0,
+    "train_loss": 4.2002,
+    "val_loss": 4.1212,
+    "bleu1": 53.35,
+    "bleu2": 36.0,
+    "rougeL": 28.42,
+    "meteor": 39.66,
+    "time_s": 2333.5
+  },
+  {
+    "epoch": 4,
+    "tf_prob": 1.0,
+    "train_loss": 4.0821,
+    "val_loss": 4.0504,
+    "bleu1": 61.27,
+    "bleu2": 39.86,
+    "rougeL": 28.65,
+    "meteor": 38.64,
+    "time_s": 2351.4
+  },
+  {
+    "epoch": 5,
+    "tf_prob": 1.0,
+    "train_loss": 4.0184,
+    "val_loss": 4.0377,
+    "bleu1": 53.65,
+    "bleu2": 36.51,
+    "rougeL": 29.54,
+    "meteor": 41.27,
+    "time_s": 2334.0
+  },
+  {
+    "epoch": 6,
+    "tf_prob": 1.0,
+    "train_loss": 3.9419,
+    "val_loss": 3.9411,
+    "bleu1": 60.22,
+    "bleu2": 43.16,
+    "rougeL": 31.54,
+    "meteor": 45.02,
+    "time_s": 2360.0
+  },
+  {
+    "epoch": 7,
+    "tf_prob": 1.0,
+    "train_loss": 3.908,
+    "val_loss": 3.9065,
+    "bleu1": 30.98,
+    "bleu2": 20.7,
+    "rougeL": 27.05,
+    "meteor": 36.66,
+    "time_s": 2344.0
+  },
+  {
+    "epoch": 8,
+    "tf_prob": 1.0,
+    "train_loss": 3.8582,
+    "val_loss": 3.9382,
+    "bleu1": 59.97,
+    "bleu2": 40.76,
+    "rougeL": 30.56,
+    "meteor": 42.34,
+    "time_s": 2351.0
+  },
+  {
+    "epoch": 9,
+    "tf_prob": 1.0,
+    "train_loss": 3.8353,
+    "val_loss": 3.8528,
+    "bleu1": 60.53,
+    "bleu2": 40.92,
+    "rougeL": 30.53,
+    "meteor": 41.03,
+    "time_s": 2336.4
+  },
+  {
+    "epoch": 10,
+    "tf_prob": 1.0,
+    "train_loss": 3.8016,
+    "val_loss": 3.8144,
+    "bleu1": 65.56,
+    "bleu2": 45.68,
+    "rougeL": 31.54,
+    "meteor": 45.35,
+    "time_s": 2316.4
+  },
+  {
+    "epoch": 11,
+    "tf_prob": 1.0,
+    "train_loss": 3.7816,
+    "val_loss": 3.8337,
+    "bleu1": 61.81,
+    "bleu2": 42.81,
+    "rougeL": 31.71,
+    "meteor": 43.74,
+    "time_s": 2313.5
+  },
+  {
+    "epoch": 12,
+    "tf_prob": 1.0,
+    "train_loss": 3.7413,
+    "val_loss": 3.7951,
+    "bleu1": 58.84,
+    "bleu2": 38.76,
+    "rougeL": 29.79,
+    "meteor": 39.28,
+    "time_s": 2312.7
+  },
+  {
+    "epoch": 13,
+    "tf_prob": 1.0,
+    "train_loss": 3.7499,
+    "val_loss": 3.7947,
+    "bleu1": 62.39,
+    "bleu2": 44.15,
+    "rougeL": 31.41,
+    "meteor": 45.26,
+    "time_s": 2328.2
+  },
+  {
+    "epoch": 14,
+    "tf_prob": 1.0,
+    "train_loss": 3.725,
+    "val_loss": 3.7583,
+    "bleu1": 61.23,
+    "bleu2": 40.83,
+    "rougeL": 29.68,
+    "meteor": 39.31,
+    "time_s": 2320.6
+  },
+  {
+    "epoch": 15,
+    "tf_prob": 1.0,
+    "train_loss": 3.7007,
+    "val_loss": 3.7868,
+    "bleu1": 62.63,
+    "bleu2": 43.0,
+    "rougeL": 31.42,
+    "meteor": 42.75,
+    "time_s": 2332.7
+  },
+  {
+    "epoch": 16,
+    "tf_prob": 1.0,
+    "train_loss": 3.6889,
+    "val_loss": 3.8244,
+    "bleu1": 60.88,
+    "bleu2": 39.92,
+    "rougeL": 29.52,
+    "meteor": 40.02,
+    "time_s": 2310.6
+  },
+  {
+    "epoch": 17,
+    "tf_prob": 1.0,
+    "train_loss": 3.6611,
+    "val_loss": 3.7338,
+    "bleu1": 61.03,
+    "bleu2": 41.16,
+    "rougeL": 30.28,
+    "meteor": 39.78,
+    "time_s": 2389.5
+  },
+  {
+    "epoch": 18,
+    "tf_prob": 1.0,
+    "train_loss": 3.66,
+    "val_loss": 3.7527,
+    "bleu1": 60.95,
+    "bleu2": 40.64,
+    "rougeL": 30.56,
+    "meteor": 41.74,
+    "time_s": 2352.9
+  },
+  {
+    "epoch": 19,
+    "tf_prob": 1.0,
+    "train_loss": 3.6499,
+    "val_loss": 3.7553,
+    "bleu1": 63.62,
+    "bleu2": 43.23,
+    "rougeL": 31.42,
+    "meteor": 41.65,
+    "time_s": 2305.2
+  },
+  {
+    "epoch": 20,
+    "tf_prob": 1.0,
+    "train_loss": 3.6335,
+    "val_loss": 3.8283,
+    "bleu1": 60.14,
+    "bleu2": 42.12,
+    "rougeL": 31.56,
+    "meteor": 44.22,
+    "time_s": 2409.3
+  }
+]

@@ -39,13 +39,13 @@ def evaluate_qwen_multimodal(args):
     # Setup paths matching train.py
     train_img_dir = os.path.join(args.data_root, 'train')
     val_img_dir   = os.path.join(args.data_root, 'val')
-    train_ann     = os.path.join(args.data_root, 'annotations', 'train.json')
-    val_ann       = os.path.join(args.data_root, 'annotations', 'val.json')
+    train_ann     = os.path.join(args.data_root, 'annotations', 'train_filtered.json')
+    val_ann       = os.path.join(args.data_root, 'annotations', 'val_filtered.json')
     cache_dir     = os.path.join(args.data_root, 'tokenizer_cache')
 
     # Instantiate tokenizer and datasets using VizWizDataset
     print("Loading datasets via VizWiz class...")
-    tokenizer = build_tokenizer('char', train_ann, cache_dir)
+    tokenizer = build_tokenizer('subword', train_ann, cache_dir)
     
     ds_val = VizWizDataset(train_img_dir, train_ann, tokenizer,
                            split='val', val_fraction=args.val_fraction, seed=args.seed)
@@ -72,7 +72,7 @@ def evaluate_qwen_multimodal(args):
             text_prompt = (
                 "<|vision_start|><|image_pad|><|vision_end|>\n"
                 "Domain: Everyday casual photography.\n"
-                "Style: Simple, brief visual description. It is important not to output technical specifications or numbers..\n"
+                "Style: Simple, brief visual description. It is important not to output technical specifications or numbers.\n"
                 "Image caption: "
             )
             
@@ -98,7 +98,7 @@ def evaluate_qwen_multimodal(args):
                 "references": gt_captions
             })
             
-    qualitative_path = os.path.join(args.out_dir, "qwen_qualitative_samples.json")
+    qualitative_path = os.path.join(args.out_dir, "qwen_qualitative_samples_filtered.json")
     with open(qualitative_path, "w") as f:
         json.dump(qualitative_results, f, indent=4)
     print(f"Saved Qualitative results to: {qualitative_path}")
@@ -124,7 +124,7 @@ def evaluate_qwen_multimodal(args):
                 text_prompt = (
                     "<|vision_start|><|image_pad|><|vision_end|>\n"
                     "Domain: Everyday casual photography.\n"
-                    "Style: Simple, brief visual description. It is important not to output technical specifications or numbers..\n"
+                    "Style: Simple, brief visual description. It is important not to output technical specifications or numbers.\n"
                     "Image caption: "
                 )
                 texts.append(text_prompt)
@@ -168,7 +168,7 @@ def evaluate_qwen_multimodal(args):
     print(results_str.strip())
     print("="*50)
     
-    metrics_path = os.path.join(args.out_dir, "qwen_metrics.txt")
+    metrics_path = os.path.join(args.out_dir, "qwen_metrics_filtered.txt")
     with open(metrics_path, "w") as f:
         f.write(results_str)
 

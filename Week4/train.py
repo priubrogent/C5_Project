@@ -15,6 +15,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision.transforms.functional import to_pil_image
+from transformers import get_cosine_schedule_with_warmup
 
 import evaluate as hf_evaluate
 
@@ -29,6 +30,7 @@ IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 _DEFAULT_DATA_ROOT = '../datasets/vizwiz'
 _DEFAULT_OUT_ROOT  = './outputs'
 
+from transformers import AutoTokenizer
 
 def load_metrics():
     bleu = hf_evaluate.load('bleu')
@@ -92,7 +94,7 @@ def log_qualitative_examples(model, dataset, indices, tokenizer, device, epoch, 
         wandb_module.log({f"{split}_qualitative": wandb_images}, step=epoch)
 
 
-def train_one_epoch(model, optimizer, criterion, dataloader, device, tf_prob):
+def train_one_epoch(model, optimizer, criterion, dataloader, device, tf_prob, args=None, scheduler=None):
     model.train()
     total_loss, n = 0.0, 0
     for imgs, captions, _ in dataloader:
@@ -104,6 +106,10 @@ def train_one_epoch(model, optimizer, criterion, dataloader, device, tf_prob):
         loss.backward()
         nn.utils.clip_grad_norm_(model.parameters(), 5.0)
         optimizer.step()
+        
+        if scheduler is not None and args.decoder == 'qwen':
+            scheduler.step()
+        
         total_loss += loss.item() * imgs.shape[0]
         n += imgs.shape[0]
     return total_loss / n
@@ -182,6 +188,9 @@ def parse_args():
     p.add_argument('--lora_r', type=int, default=8, help='LoRA rank')
     p.add_argument('--lora_alpha', type=int, default=16, help='LoRA alpha')
     p.add_argument('--lora_dropout', type=float, default=0.1, help='LoRA dropout')
+    p.add_argument('--pretrained_weights', type=str, default=None,
+                   help='Path to a .pt file to load partial weights (e.g., just the encoder)')
+    p.add_argument('--filtered_annotations', action='store_true', default=False)
     return p.parse_args()
 
 
@@ -192,8 +201,13 @@ def main():
 
     train_img_dir = os.path.join(args.data_root, 'train')
     val_img_dir   = os.path.join(args.data_root, 'val')
-    train_ann     = os.path.join(args.data_root, 'annotations', 'train.json')
-    val_ann       = os.path.join(args.data_root, 'annotations', 'val.json')
+    if args.filtered_annotations:
+        train_ann = os.path.join(args.data_root, 'annotations', 'train_filtered.json')
+        val_ann   = os.path.join(args.data_root, 'annotations', 'val_filtered.json')
+        print("Using filtered annotations!!")
+    else:
+        train_ann = os.path.join(args.data_root, 'annotations', 'train.json')
+        val_ann   = os.path.join(args.data_root, 'annotations', 'val.json')
     cache_dir     = os.path.join(args.data_root, 'tokenizer_cache')
 
     out_dir = Path(args.out_root) / args.run_name
@@ -204,7 +218,7 @@ def main():
     device = torch.device(args.device)
     print(f"Device: {device}")
 
-    print(f"Building tokenizer ({args.text_repr})...")
+    print(f"Building custom tokenizer ({args.text_repr})...")
     tokenizer = build_tokenizer(args.text_repr, train_ann, cache_dir, max_len=args.max_len)
 
     print("Loading datasets...")
@@ -231,6 +245,32 @@ def main():
         dropout=args.dropout,
         decoder_model_name=args.decoder_model_name,
     ).to(device)
+    
+    # --- WEIGHT TRANSFER ---
+    if args.pretrained_weights:
+        print(f"\nExtracting weights from {args.pretrained_weights}...")
+        state_dict = torch.load(args.pretrained_weights, map_location=device)
+        
+        filtered_dict = {}
+        for k, v in state_dict.items():
+            if k.startswith('encoder.') and not k.startswith('encoder.proj'):
+                # 1. Strip the PEFT LoRA wrapper
+                clean_key = k.replace('base_model.model.', '')
+                
+                # 2. Revert LoRA 'base_layer' naming back to standard PyTorch naming
+                clean_key = clean_key.replace('.base_layer.weight', '.weight')
+                clean_key = clean_key.replace('.base_layer.bias', '.bias')
+                
+                # 3. Discard the actual LoRA matrices since your new encoder is frozen
+                if 'lora_' not in clean_key:
+                    filtered_dict[clean_key] = v
+        
+        # Load with strict=False
+        missing, unexpected = model.load_state_dict(filtered_dict, strict=False)
+        print(f"Successfully transferred {len(filtered_dict)} vision encoder tensors.")
+        print(f"Unexpected keys loaded: {len(unexpected)}")
+        print(f"Missing keys ignored: {len(missing)}\n")
+    # --------------------------------
     
     # LORA INTEGRATION
     if args.use_lora_encoder and args.encoder in ['clip', 'vit-b-16', 'vit-b-32']:
@@ -260,7 +300,7 @@ def main():
     elif args.use_lora_encoder:
         print(f"Warning: LoRA is not implemented for CNN encoders like {args.encoder}. Skipping Encoder LoRA.")
     
-    if args.use_lora_decoder and args.decoder in ['gpt2', 't5', 'smollm']:
+    if args.use_lora_decoder and args.decoder in ['gpt2', 't5', 'smollm', 'qwen']:
         print(f"Applying LoRA (r={args.lora_r}, alpha={args.lora_alpha}) to {args.decoder}...")
         
         # Define target modules based on the specific transformer architecture
@@ -269,7 +309,10 @@ def main():
         elif args.decoder == 't5':
             target_modules = ["q", "v"]
         elif args.decoder in ['smollm', 'qwen']:
-            target_modules = ["q_proj", "v_proj"]
+            target_modules = [
+                "q_proj", "k_proj", "v_proj", "o_proj",
+                "gate_proj", "up_proj", "down_proj" 
+            ]
 
         config = LoraConfig(
             r=args.lora_r,
@@ -291,7 +334,7 @@ def main():
             model.decoder.qwen = get_peft_model(model.decoder.qwen, config)
             
         print("LoRA applied successfully!")
-    elif args.use_lora:
+    elif args.use_lora_decoder:
         print("Warning: LoRA is only implemented for transformer decoders (gpt2, t5, smollm). Skipping LoRA.")
 
     # Freeze encoder if requested
@@ -379,9 +422,20 @@ def main():
     else:
         optimizer = torch.optim.SGD(trainable_params, lr=args.lr,
                                     momentum=0.9, weight_decay=args.weight_decay)
-
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode='min', factor=args.lr_decay, patience=args.lr_patience)
+        
+    # Training with warmup and cosine decay for Qwen
+    if args.decoder == 'qwen':  
+        total_steps = len(dl_train) * args.epochs
+        warmup_steps = int(total_steps * 0.1) 
+        
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer, 
+            num_warmup_steps=warmup_steps, 
+            num_training_steps=total_steps
+        )
+    else:
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode='min', factor=args.lr_decay, patience=args.lr_patience)
     
 
     # Early stopping: auto-detect direction from metric name
@@ -404,11 +458,12 @@ def main():
             tf_prob = 0.0
 
         t0 = time.time()
-        train_loss = train_one_epoch(model, optimizer, criterion, dl_train, device, tf_prob)
+        train_loss = train_one_epoch(model, optimizer, criterion, dl_train, device, tf_prob, args, scheduler)
         val_loss, val_metrics = eval_epoch(model, criterion, dl_val, tokenizer, device,
                                            bleu, rouge, meteor)
         elapsed = time.time() - t0
-        scheduler.step(val_loss)
+        if args.decoder != 'qwen':
+            scheduler.step(val_loss)
 
         row = {'epoch': epoch, 'tf_prob': round(tf_prob, 3),
                'train_loss': round(train_loss, 4),
@@ -476,6 +531,7 @@ def main():
     if wandb_module is not None:
         wandb_module.log({'test_' + k: v for k, v in test_metrics.items()})
         wandb_module.finish()
+
 
 
 if __name__ == '__main__':

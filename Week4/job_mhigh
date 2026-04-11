@@ -8,5 +8,5 @@
 #SBATCH -e logs/err.log # File to which STDERR will be written
 
 
-#python -u train.py --encoder clip --decoder gpt2 --run_name baseline_clip_gpt2_lora --use_lora_decoder --use_lora_encoder --device cuda --epochs 20
-python -u evaluate_qwen.py
+python -u train.py --encoder clip --decoder qwen --decoder_model_name Qwen/Qwen3.5-4B-Base --run_name clip_qwen_4B_clip --pretrained_weights ./weights/best_metric_model.pt --optimizer adamw --use_lora_decoder --freeze_encoder --device cuda --epochs 20 --text_repr subword --hidden_dim 768 --batch_size 8
+#python -u evaluate_qwen.py

@@ -336,7 +336,7 @@ class SmolLMDecoder(nn.Module):
 class QwenDecoder(nn.Module):
     """Qwen3.5-based autoregressive decoder for image captioning"""
 
-    def __init__(self, input_dim: int, vocab_size: int = None, model_name: str = 'Qwen/Qwen3.5-0.8B'):
+    def __init__(self, input_dim: int, vocab_size: int = None, model_name: str = 'Qwen/Qwen3.5-0.8B-Base'):
         super().__init__()
         self.qwen = AutoModelForCausalLM.from_pretrained(model_name, use_safetensors=True)
         self.qwen_config = self.qwen.config
@@ -351,7 +351,7 @@ class QwenDecoder(nn.Module):
         proj_output = self.embed_proj(encoder_output).to(self.qwen.dtype)  
         
         if input_ids is not None:
-            qwen_embeds = self.qwen.model.embed_tokens(input_ids).to(self.qwen.dtype)
+            qwen_embeds = self.qwen.get_input_embeddings()(input_ids).to(self.qwen.dtype)
             combined_embeds = torch.cat([proj_output.unsqueeze(1), qwen_embeds], dim=1)
             
             if attention_mask is not None:
@@ -376,7 +376,7 @@ class QwenDecoder(nn.Module):
         
         generated = []
         for _ in range(max_length):
-            qwen_embeds = self.qwen.model.embed_tokens(input_ids)
+            qwen_embeds = self.qwen.get_input_embeddings()(input_ids)
             combined_embeds = torch.cat([proj_output, qwen_embeds], dim=1)
             
             outputs = self.qwen(inputs_embeds=combined_embeds)

@@ -1,0 +1,35 @@
+[
+  {
+    "epoch": 1,
+    "tf_prob": 1.0,
+    "train_loss": 5.2359,
+    "val_loss": 4.3565,
+    "bleu1": 21.98,
+    "bleu2": 12.08,
+    "rougeL": 18.5,
+    "meteor": 25.3,
+    "time_s": 2473.6
+  },
+  {
+    "epoch": 2,
+    "tf_prob": 1.0,
+    "train_loss": 4.1926,
+    "val_loss": 4.0924,
+    "bleu1": 32.23,
+    "bleu2": 19.65,
+    "rougeL": 22.49,
+    "meteor": 30.22,
+    "time_s": 1953.7
+  },
+  {
+    "epoch": 3,
+    "tf_prob": 1.0,
+    "train_loss": 4.0125,
+    "val_loss": 3.9154,
+    "bleu1": 44.62,
+    "bleu2": 28.41,
+    "rougeL": 26.8,
+    "meteor": 36.87,
+    "time_s": 1936.7
+  }
+]
