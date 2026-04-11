@@ -27,8 +27,8 @@ from tokenizer import build_tokenizer
 IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
 IMAGENET_STD = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
 
-_DEFAULT_DATA_ROOT = '../datasets/vizwiz'
-_DEFAULT_OUT_ROOT  = './outputs'
+_DEFAULT_DATA_ROOT = '/data/113-2/users/gasbert/master/C5/vizwiz_dataset'
+_DEFAULT_OUT_ROOT  = '/data/113-2/users/gasbert/master/C5/Week4_outputs'
 
 from transformers import AutoTokenizer
 
@@ -154,7 +154,7 @@ def parse_args():
     p.add_argument('--max_len', type=int, default=None)
     p.add_argument('--decoder_model_name', type=str, default=None,
                    help='Hugging Face model name for transformer decoders (gpt2, t5, smollm)')
-    p.add_argument('--epochs', type=int, default=12)
+    p.add_argument('--epochs', type=int, default=20)
     p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--lr', type=float, default=1e-3)
     p.add_argument('--weight_decay', type=float, default=1e-4)
@@ -361,7 +361,7 @@ def main():
     if args.wandb:
         import wandb as wandb_module
         wandb_module.init(project=args.wandb_project, entity=args.wandb_entity,
-                          name=args.run_name, config=vars(args))
+                          name=args.run_name, config=vars(args), mode="online")
 
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_idx)
     bleu, rouge, meteor = load_metrics()
