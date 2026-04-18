@@ -2,8 +2,6 @@
 
 This repository contains a complete Vision-Language pipeline designed to train, augment, and evaluate image captioning models on the VizWiz dataset. The project specifically tackles challenges inherent to photographs taken by visually impaired users, addressing issues like label imbalance (prior shift) and long-tail object distribution.
 
-The architecture supports coupling frozen vision encoders (e.g., CLIP, ViT, ResNet) with autoregressive decoders (e.g., Qwen 0.8B, SmolLM, GPT-2) using Parameter-Efficient Fine-Tuning (LoRA).
-
 ## 📂 Repository Structure
 
 ### 🧠 Core Architecture & Training
@@ -41,3 +39,45 @@ python transform_images.py
 
 # 3. Merge with the official VizWiz dataset
 python merge_datasets.py
+```
+
+### 2. Training
+
+To train a Qwen 0.8B decoder with a frozen CLIP encoder using the augmented dataset:
+
+```bash
+python train.py \
+    --encoder clip \
+    --decoder qwen \
+    --decoder_model_name Qwen/Qwen3.5-0.8B-Base \
+    --augmented_annotations \
+    --use_lora_decoder \
+    --freeze_encoder \
+    --epochs 20 \
+    --batch_size 32 \
+    --run_name clip_qwen_0.8B_augmented
+```
+
+### 3. Analysis and evaluation
+
+To analyze if your model is overfitting to the "unanswerable" boilerplate text:
+```bash
+python analyze_boilerplate.py
+```
+
+To evaluate how well your model performs on rare (tail) objects vs. common (head) objects:
+```bash
+python evaluate_imbalance.py --model_weights ./outputs/your_run/best_metric_model.pt
+```
+
+To extract the worst-performing predictions for your qualitative report:
+```bash
+python worst_performance.py
+```
+
+## Supported Metrics
+
+During evaluation and early stopping, the pipeline computes standard NLP matching metrics using the Hugging Face evaluate library:
+- BLEU (1 & 2): N-gram precision.
+- ROUGE-L: Longest common subsequence for sentence structure.
+- METEOR: Includes stemming and synonym matching, robust for descriptive captions.
