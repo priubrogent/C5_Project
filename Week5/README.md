@@ -11,11 +11,18 @@ This repository contains a complete Vision-Language pipeline designed to train, 
 * **`tokenizer.py`**: Custom tokenization factory supporting `char`, `word`, and Hugging Face `subword` (BPE) text representations.
 
 ### 🛠️ Data Augmentation & Synthesis
-* **`transform_images.py`**: Simulates typical VizWiz camera artifacts. Downscales high-quality images and applies algorithmic degradations (directional motion blur, JPEG compression artifacts, and overexposure) to create "moderate" and "severe" image variants.
-* **`generate_sample.py`**: A lightweight utility to generate and save local samples of the original, moderate, and severe augmentations for quick visual inspection before running bulk processing.
-* **`caption_generation.py`**: Uses the zero-shot capabilities of `Qwen/Qwen3.5-9B-Base` to auto-generate ground-truth captions for synthetic images, forcing the model to include specific objects (from `image_metadata.json`) in the very first sentence.
-* **`merge_datasets.py`**: Safely merges the newly generated synthetic images and their COCO-formatted JSON annotations into the original VizWiz training dataset, including strict deduplication checks.
-* **`image_metadata.json`**: A dictionary containing the target objects and prompt contexts used to guide the synthetic caption generation for 1,000 baseline images.
+
+#### Generative Synthesis with Stable Diffusion
+* **`image_generation/stable_diffusion_base.py`**: Baseline exploration script for evaluating different Stable Diffusion model variants (SD 2.1, SDXL, SD Turbo). Tests multiple prompt templates designed to capture first-person perspectives and typical VizWiz characteristics (low lighting, occlusions, awkward angles). Tracks inference times and generates samples across all model variants to determine the best baseline model for synthetic image generation.
+* **`image_generation/stable_diffusion_exploration.py`**: Hyperparameter exploration and configuration tuning script for the selected Stable Diffusion model. Systematically tests different schedulers (DDIM, DDPM), negative prompts, classifier-free guidance (CFG) scales, and inference steps. Integrates with Weights & Biases (W&B) for tracking experiments and comparing results across hyperparameter combinations.
+* **`image_generation/stable_diffusion_final_generation.py`**: Production script for generating the complete 1,000 synthetic images used for data augmentation. Uses the optimal model configuration determined through exploration (e.g., SDXL with DDIM scheduler, CFG 7.5, and 30 inference steps). Generates diverse first-person perspectives depicting common household objects in indoor settings.
+* **`image_metadata.json`**: A dictionary containing the target objects and prompt contexts used to guide synthetic image generation for 1,000 baseline images.
+
+#### Visual Degradation of Generated Images
+* **`transform_images.py`**: Applies typical VizWiz camera artifacts to the generated synthetic images to create realistic degradation. Applies algorithmic degradations including directional motion blur, JPEG compression artifacts, and overexposure to create "moderate" and "severe" quality variants that the model learns to caption despite quality issues.
+* **`generate_sample.py`**: A lightweight utility to generate and save local samples of the original, moderate, and severe image variants for quick visual inspection before running bulk processing on all 1,000 generated images.
+* **`caption_generation.py`**: Uses the zero-shot capabilities of `Qwen/Qwen3.5-9B-Base` to auto-generate ground-truth captions for the degraded synthetic images, forcing the model to include specific target objects (from `image_metadata.json`) in the very first sentence.
+* **`merge_datasets.py`**: Safely merges the newly generated and degraded synthetic images along with their COCO-formatted JSON annotations into the original VizWiz training dataset, including strict deduplication checks.
 
 ### 📊 Evaluation & Bias Analysis
 * **`analyze_imbalance.py`**: Uses `spaCy` to extract nouns from captions and plots the long-tail distribution of objects in the VizWiz dataset. It also tracks linguistic biases, such as the frequency of hedge phrases (e.g., "too blurry").
@@ -29,15 +36,29 @@ This repository contains a complete Vision-Language pipeline designed to train, 
 ## 🚀 Usage Guide
 
 ### 1. Data Augmentation
-To simulate camera artifacts on your clean dataset and generate COCO-style captions:
-```bash
-# 1. Generate synthetic captions using Qwen 9B
-python caption_generation.py
+The complete augmentation pipeline involves generating synthetic images, degrading them to simulate real-world VizWiz conditions, captioning them, and finally merging into the training dataset:
 
-# 2. Apply visual degradations (blur, overexposure)
+#### Step 1: Generate Synthetic Images (Stable Diffusion)
+```bash
+# 1a. (Optional) Test different model variants and prompt templates
+python image_generation/stable_diffusion_base.py
+
+# 1b. (Optional) Explore hyperparameter configurations with W&B tracking
+python image_generation/stable_diffusion_exploration.py
+
+# 1c. Generate the final 1,000 synthetic images using optimal configuration
+python image_generation/stable_diffusion_final_generation.py
+```
+
+#### Step 2: Degrade Generated Images and Caption Them
+```bash
+# 2a. Apply visual degradations (blur, overexposure, etc.) to generated images
 python transform_images.py
 
-# 3. Merge with the official VizWiz dataset
+# 2b. Generate synthetic captions using Qwen 9B
+python caption_generation.py
+
+# 2c. Merge the augmented images and captions with the official VizWiz dataset
 python merge_datasets.py
 ```
 
