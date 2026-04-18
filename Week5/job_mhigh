@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH -n 8            # Number of cores
+#SBATCH --mem 24000     # 16GB asked
+#SBATCH -p mhigh        # Choose mlow to submit to master low prioriy queue
+#SBATCH -q masterhigh   # Requeue other users mlow jobs
+#SBATCH --gres gpu:1    # To ask Pascales MAX 8
+#SBATCH -o logs/out.log # File to which STDOUT will be written
+#SBATCH -e logs/err.log # File to which STDERR will be written
+
+
+#python -u train.py --encoder clip --decoder qwen --augmented_annotations --decoder_model_name Qwen/Qwen3.5-0.8B-Base --run_name clip_qwen_0.8B_data_augmentation --pretrained_weights ./clip_qwen_0.8B/best_metric_model.pt --optimizer adamw --use_lora_decoder --freeze_encoder --device cuda --epochs 20 --text_repr subword --hidden_dim 768 --batch_size 32
+python -u analyze_boilerplate.py
+: <<'END'
+python evaluate_imbalance.py \
+    --model_weights ./clip_qwen_0.8B_clip_/best_metric_model.pt \
+    --head_words_file head_objects.txt \
+    --tail_words_file rare_objects_sample_gemini_filtered.txt \
+    --text_repr subword \
+    --use_lora_decoder
+END
+#python evaluate_imbalance.py --save_tail_preds --fast_tail_eval --tail_words_file rare_objects_sample_gemini_filtered.txt --output_file tail_analysis_fast.txt
+#python worst_performance.py --model_weights ./clip_qwen_0.8B/best_metric_model.pt --text_repr subword --use_lora_decoder 

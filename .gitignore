@@ -6,3 +6,10 @@ logs/
 Week1/DeTR/Results_DETR*
 runs/*
 *.pt
+generated_images/
+final_images/
+clip_qwen_0.8B/
+clip_qwen_0.8B_filtered/
+augmented_data/
+outputs/
+txt_files/
